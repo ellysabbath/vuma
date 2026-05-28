@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+  <title>VUMA Tanzania | Youth Innovation & Climate Action</title>
+  <!-- Google Fonts & Font Awesome -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- AOS Library for scroll animations -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f9fbf7;
+      color: #1e2f2c;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    /* ========== STICKY NAVBAR ========== */
+    .navbar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1000;
+      padding: 1rem 1.5rem;
+      transition: all 0.3s ease;
+      background: transparent;
+    }
+    .navbar.scrolled {
+      background: #0B3B2F;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      padding: 0.7rem 1.5rem;
+    }
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .logo {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: white;
+      letter-spacing: -0.5px;
+      text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .logo span { color: #F9C74F; }
+    .nav-links { display: flex; gap: 1.2rem; list-style: none; align-items: center; }
+    .nav-links a { color: white; text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: 0.2s; }
+    .nav-links a:hover { color: #F9C74F; }
+    .login-nav-btn {
+      background: linear-gradient(135deg, #F9C74F, #f6b83e);
+      padding: 0.4rem 1.2rem;
+      border-radius: 40px;
+      color: #1a3a2a !important;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .mobile-menu-icon { display: none; font-size: 1.8rem; color: white; cursor: pointer; }
+
+    /* Mega Menu for mobile fallback */
+    .mega-dropdown { position: relative; }
+    .mega-content {
+      position: absolute; top: 2.5rem; left: -140px; width: 500px;
+      background: rgba(255,255,255,0.98); border-radius: 28px; padding: 1.5rem;
+      display: flex; gap: 1.5rem; box-shadow: 0 20px 35px rgba(0,0,0,0.2);
+      opacity: 0; visibility: hidden; transition: 0.25s ease; z-index: 1001;
+    }
+    .mega-dropdown:hover .mega-content { opacity: 1; visibility: visible; top: 2.8rem; }
+    .mega-col h4 { color: #0B3B2F; margin-bottom: 0.6rem; font-size: 0.9rem; }
+    .mega-col a { font-size: 0.85rem; display: block; color: #2c5a42; padding: 0.2rem 0; }
+
+    /* HERO */
+    .hero {
+      position: relative;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: white;
+      background: linear-gradient(135deg, rgba(0,0,0,0.6), rgba(0,40,30,0.75)), url('https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?q=80&w=2069&auto=format'); 
+      background-size: cover;
+      background-position: center 30%;
+      background-attachment: fixed;
+    }
+    .hero-overlay {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: radial-gradient(circle at 20% 40%, rgba(0,0,0,0.4), rgba(0,20,10,0.6));
+    }
+    .hero-content { max-width: 900px; padding: 2rem; z-index: 2; }
+    .hero-content h1 {
+      font-size: 3.2rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #FFF9E6, #F9C74F);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .hero-content p { font-size: 1.2rem; margin-bottom: 2rem; }
+    .btn-cta {
+      background: #F9C74F;
+      border: none;
+      padding: 0.8rem 2rem;
+      border-radius: 60px;
+      font-weight: 700;
+      margin: 0 0.5rem;
+      cursor: pointer;
+    }
+    .btn-outline-light { background: transparent; border: 2px solid #F9C74F; color: white; }
+
+    /* Impact Section */
+    .impact-section {
+      background: linear-gradient(120deg, #0a3b2e, #0c4d3a);
+      padding: 3rem 1.5rem;
+    }
+    .counter-grid {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 1.2rem;
+      max-width: 1200px; margin: auto;
+    }
+    .counter-item {
+      flex: 1; min-width: 160px; background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(4px); border-radius: 32px; padding: 1.2rem;
+      text-align: center;
+    }
+    .counter-number { font-size: 2.5rem; font-weight: 800; color: #F9C74F; }
+    .counter-label { font-size: 0.9rem; }
+
+    /* section titles */
+    .section-title {
+      text-align: center; font-size: 2rem; font-weight: 800;
+      margin: 2rem 0 1rem;
+      background: linear-gradient(135deg, #0B3B2F, #2b7a5c);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .filter-buttons { display: flex; justify-content: center; gap: 0.8rem; margin-bottom: 2rem; flex-wrap: wrap; }
+    .filter-btn {
+      background: #eef2f0; border: none; padding: 0.5rem 1.2rem; border-radius: 40px;
+      font-weight: 600; cursor: pointer;
+    }
+    .filter-btn.active { background: #0B3B2F; color: white; }
+
+    .masonry-grid { display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center; padding: 0 1rem; }
+    .project-card {
+      width: 280px; background: white; border-radius: 28px; overflow: hidden;
+      box-shadow: 0 12px 25px rgba(0,0,0,0.05); transition: 0.3s;
+    }
+    .project-card:hover { transform: translateY(-6px); }
+
+    /* Event + Countdown */
+    .event-highlight {
+      background: linear-gradient(125deg, #123e30, #0e553f);
+      margin: 2rem 1rem; border-radius: 40px; padding: 1.5rem;
+      color: white; display: flex; flex-wrap: wrap; justify-content: space-between;
+      align-items: center; gap: 1rem;
+    }
+    .countdown { font-size: 1.6rem; font-weight: 800; background: rgba(0,0,0,0.4); padding: 0.4rem 1.2rem; border-radius: 50px; }
+
+    .timeline-list { max-width: 700px; margin: 1.5rem auto; padding: 0 1rem; }
+    .timeline-item {
+      display: flex; gap: 1rem; padding: 1rem; background: white;
+      margin: 0.8rem 0; border-radius: 24px; border-left: 6px solid #F9C74F;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+
+    /* Testimonial carousel */
+    .testimonial-section { background: #f1f6ea; padding: 3rem 1rem; }
+    .carousel { max-width: 700px; margin: auto; overflow: hidden; position: relative; }
+    .carousel-track { display: flex; transition: transform 0.5s ease; }
+    .testimonial-card { min-width: 100%; padding: 1.5rem; background: white; border-radius: 32px; text-align: center; }
+    .carousel-btn {
+      position: absolute; top: 50%; background: #0B3B2F; border: none; color: white;
+      padding: 0.4rem 0.9rem; border-radius: 40px; cursor: pointer;
+    }
+    .prev { left: 5px; } .next { right: 5px; }
+
+    /* Forms */
+    .forms-grid { display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center; padding: 1rem; }
+    .form-card {
+      background: white; border-radius: 32px; padding: 1.5rem;
+      width: 100%; max-width: 400px; box-shadow: 0 12px 25px rgba(0,0,0,0.05);
+    }
+    .form-card input, .form-card select, .form-card textarea {
+      width: 100%; padding: 0.8rem; margin: 0.5rem 0; border-radius: 50px; border: 1px solid #ddd;
+    }
+    .form-card button { background: #0B3B2F; color: white; width: 100%; padding: 0.8rem; border-radius: 50px; font-weight: bold; }
+
+    /* Blog */
+    .blog-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5rem; padding: 1rem; }
+    .blog-card { width: 280px; background: white; border-radius: 28px; overflow: hidden; }
+
+    /* Leaders */
+    .leaders { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5rem; margin: 1.5rem; }
+    .leader-card {
+      background: white; text-align: center; padding: 1.2rem; border-radius: 32px;
+      width: 180px; box-shadow: 0 8px 18px rgba(0,0,0,0.05);
+    }
+    .leader-card img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid #F9C74F; }
+
+    /* Footer */
+    .footer-social { background: #07261e; color: white; padding: 2rem 1rem; text-align: center; }
+    .social-grid { display: flex; justify-content: center; gap: 1.5rem; margin: 1rem 0; font-size: 1.6rem; }
+    .social-grid a { color: white; transition: 0.2s; }
+    .social-grid a:hover { color: #F9C74F; }
+
+    /* LOGIN MODAL */
+    .login-modal {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px);
+      z-index: 2000; justify-content: center; align-items: center;
+    }
+    .login-modal.active { display: flex; animation: fadeIn 0.3s; }
+    .login-card {
+      background: white; border-radius: 40px; padding: 2rem; width: 90%; max-width: 380px;
+      text-align: center; position: relative;
+    }
+    .close-modal { position: absolute; right: 1rem; top: 0.8rem; font-size: 1.8rem; cursor: pointer; }
+    .login-card input { width: 100%; padding: 0.8rem; margin: 0.6rem 0; border-radius: 50px; border: 1px solid #ccc; }
+    .login-card button { background: #0B3B2F; width: 100%; padding: 0.8rem; border-radius: 50px; color: white; font-weight: bold; }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .nav-links { display: none; position: absolute; top: 70px; left: 0; width: 100%; background: #0B3B2F; flex-direction: column; padding: 1rem; gap: 1rem; text-align: center; }
+      .nav-links.show { display: flex; }
+      .mobile-menu-icon { display: block; }
+      .hero-content h1 { font-size: 2rem; }
+      .hero-content p { font-size: 1rem; }
+      .counter-number { font-size: 1.8rem; }
+      .event-highlight { flex-direction: column; text-align: center; }
+      .countdown { font-size: 1.2rem; }
+      .mega-content { display: none; }
+    }
+    [data-aos] { transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+  </style>
+</head>
+<body>
+
+<nav class="navbar" id="navbar">
+  <div class="nav-container">
+    <div class="logo">VUMA <span>TANZANIA</span></div>
+    <div class="mobile-menu-icon" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></div>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#">Home</a></li>
+      <li class="mega-dropdown">
+        <a href="#">Programs <i class="fas fa-chevron-down"></i></a>
+        <div class="mega-content">
+          <div class="mega-col"><h4>Competition Tracks</h4><a href="#">Innovation Leadership</a><a href="#">Environmental Innovation</a></div>
+          <div class="mega-col"><h4>Success Stories</h4><a href="#">Young Changemakers</a><a href="#">Green Startups</a></div>
+          <div class="mega-col"><h4>Resource Hub</h4><a href="#">Toolkits</a><a href="#">Mentorship</a></div>
+        </div>
+      </li>
+      <li><a href="#">News</a></li>
+      <li><a href="#">Contact</a></li>
+      <li><a href="#" class="login-nav-btn" id="navLoginBtn"><i class="fas fa-user"></i> Login</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO with login trigger -->
+<div class="hero">
+  <div class="hero-overlay"></div>
+  <div class="hero-content" data-aos="fade-up" data-aos-duration="1000">
+    <h1>Empowering Youth. Igniting Innovation. Protecting Our Planet.</h1>
+    <p>Turning sustainable student ideas into community-scale solutions.</p>
+    <div>
+      <button class="btn-cta" onclick="document.getElementById('volunteer').scrollIntoView({behavior:'smooth'})">Join Movement →</button>
+      <button class="btn-cta btn-outline-light" id="heroLoginBtn"><i class="fas fa-sign-in-alt"></i> Login</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN MODAL -->
+<div id="loginModal" class="login-modal">
+  <div class="login-card">
+    <span class="close-modal" id="closeModalBtn">&times;</span>
+    <h2><i class="fas fa-leaf"></i> Welcome Back</h2>
+    <input type="email" placeholder="Email Address" id="loginEmail">
+    <input type="password" placeholder="Password" id="loginPassword">
+    <button id="doLoginBtn">Access Dashboard</button>
+    <p style="margin-top: 1rem; font-size: 0.8rem;">New? <a href="#" onclick="alert('Contact VUMA for registration');">Create account</a></p>
+  </div>
+</div>
+
+<!-- IMPACT COUNTERS -->
+<div class="impact-section" data-aos="fade-up">
+  <div class="counter-grid">
+    <div class="counter-item"><div class="counter-number" data-target="12480">0</div><div class="counter-label">YOUTH REACHED</div></div>
+    <div class="counter-item"><div class="counter-number" data-target="18750">0</div><div class="counter-label">TREES PLANTED</div></div>
+    <div class="counter-item"><div class="counter-number" data-target="742">0</div><div class="counter-label">IDEAS GENERATED</div></div>
+    <div class="counter-item"><div class="counter-number" data-target="435">0</div><div class="counter-label">ACTIVE VOLUNTEERS</div></div>
+  </div>
+</div>
+
+<!-- INNOVATION SHOWCASE -->
+<div style="padding: 2rem 0;" data-aos="fade-up" data-aos-delay="100">
+  <h2 class="section-title">Innovation Showcase</h2>
+  <div class="filter-buttons">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="leadership">Leadership</button>
+    <button class="filter-btn" data-filter="environment">Environmental</button>
+  </div>
+  <div class="masonry-grid" id="projectGrid"></div>
+</div>
+
+<!-- EVENT + COUNTDOWN -->
+<div class="event-highlight" data-aos="zoom-in">
+  <div><h2>🌍 VUMA Climate Innovation Summit</h2><p>Dodoma | June 15-17, 2026</p></div>
+  <div class="countdown" id="countdownTimer">Loading...</div>
+</div>
+
+<!-- TIMELINE -->
+<div data-aos="fade-right">
+  <h3 class="section-title" style="font-size: 1.6rem;">Upcoming Events</h3>
+  <div class="timeline-list">
+    <div class="timeline-item"><i class="fas fa-chalkboard-user" style="font-size: 1.4rem; color:#0B3B2F;"></i><div><strong>May 30, 2026:</strong> Youth Leadership Bootcamp (Online)</div></div>
+    <div class="timeline-item"><i class="fas fa-leaf" style="font-size: 1.4rem; color:#0B3B2F;"></i><div><strong>June 5, 2026:</strong> World Environment Day – Tree Planting Drive</div></div>
+    <div class="timeline-item"><i class="fas fa-microphone-alt" style="font-size: 1.4rem; color:#0B3B2F;"></i><div><strong>June 12, 2026:</strong> Climate Policy Webinar with Experts</div></div>
+  </div>
+</div>
+
+<!-- TESTIMONIALS -->
+<div class="testimonial-section" data-aos="fade-left">
+  <h2 class="section-title">What They Say</h2>
+  <div class="carousel">
+    <div class="carousel-track" id="testimonialTrack">
+      <div class="testimonial-card"><i class="fas fa-quote-left" style="font-size: 1.8rem; color:#F9C74F;"></i><p>“VUMA turned my green startup idea into a funded project. Most impactful youth hub in Tanzania.”</p><h4>— Neema J., Innovator</h4></div>
+      <div class="testimonial-card"><i class="fas fa-quote-left" style="font-size: 1.8rem; color:#F9C74F;"></i><p>“The leadership workshops gave me tools to mobilize 100+ students for climate action.”</p><h4>— David M., Volunteer</h4></div>
+      <div class="testimonial-card"><i class="fas fa-quote-left" style="font-size: 1.8rem; color:#F9C74F;"></i><p>“Partnering with VUMA aligns with the Vice President’s Office goal of youth empowerment.”</p><h4>— Government Rep.</h4></div>
+    </div>
+    <button class="carousel-btn prev" onclick="prevTestimonial()">❮</button>
+    <button class="carousel-btn next" onclick="nextTestimonial()">❯</button>
+  </div>
+</div>
+
+<!-- FORMS -->
+<div class="forms-grid" id="volunteer" data-aos="flip-up">
+  <div class="form-card">
+    <h3>✋ Volunteer Registration</h3>
+    <input type="text" placeholder="Full Name" id="volName">
+    <select><option>Leadership & Advocacy</option><option>Environment & Conservation</option></select>
+    <select><option>Innovation Leadership</option><option>Environmental Innovation</option></select>
+    <input type="text" placeholder="Location">
+    <button onclick="alert('Thank you ' + (document.getElementById('volName').value || 'volunteer') + '! We will contact you.')">Register Now</button>
+  </div>
+  <div class="form-card">
+    <h3>🤝 Partnership Inquiry</h3>
+    <input type="text" placeholder="Organization Name">
+    <input type="text" placeholder="Contact Person">
+    <select><option>Funding Partner</option><option>Technical Partner</option><option>Media Partner</option></select>
+    <textarea rows="2" placeholder="Message"></textarea>
+    <button onclick="alert('Partnership request sent! VUMA team will respond.')">Send Inquiry</button>
+  </div>
+</div>
+
+<!-- BLOG -->
+<h2 class="section-title">News & Stories</h2>
+<div class="blog-grid" data-aos="fade-up">
+  <div class="blog-card"><div style="height: 150px; background: url('https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400&h=200&fit=crop'); background-size: cover;"></div><div style="padding: 1rem;"><span>📅 May 20, 2026 • 4 min read</span><h4>VUMA Launches Green Innovation Fund</h4></div></div>
+  <div class="blog-card"><div style="height: 150px; background: url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=400&h=200&fit=crop'); background-size: cover;"></div><div style="padding: 1rem;"><span>📅 May 15, 2026 • 6 min read</span><h4>Leadership Summit 2026 Recap</h4></div></div>
+  <div class="blog-card"><div style="height: 150px; background: url('https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=400&h=200&fit=crop'); background-size: cover;"></div><div style="padding: 1rem;"><span>📅 May 10, 2026 • 3 min read</span><h4>Partnering with UNDP for Climate Action</h4></div></div>
+</div>
+
+<!-- LEADERSHIP -->
+<h2 class="section-title">Our Leadership</h2>
+<div class="leaders" data-aos="zoom-in">
+  <div class="leader-card"><img src="https://randomuser.me/api/portraits/women/68.jpg"><h4>Dr. Esther M.</h4><p>Executive Director</p><div><a href="#"><i class="fab fa-linkedin"></i></a> <a href="#"><i class="fab fa-x-twitter"></i></a></div></div>
+  <div class="leader-card"><img src="https://randomuser.me/api/portraits/men/32.jpg"><h4>James Omondi</h4><p>Head of Innovation</p><div><a href="#"><i class="fab fa-linkedin"></i></a> <a href="#"><i class="fab fa-x-twitter"></i></a></div></div>
+  <div class="leader-card"><img src="https://randomuser.me/api/portraits/women/45.jpg"><h4>Grace Kimathi</h4><p>Environment Lead</p><div><a href="#"><i class="fab fa-linkedin"></i></a> <a href="#"><i class="fab fa-x-twitter"></i></a></div></div>
+</div>
+
+<!-- FOOTER SOCIAL -->
+<div class="footer-social">
+  <div class="social-grid">
+    <a href="#"><i class="fab fa-instagram"></i></a>
+    <a href="#"><i class="fab fa-twitter"></i></a>
+    <a href="#"><i class="fab fa-facebook-f"></i></a>
+    <a href="#"><i class="fab fa-youtube"></i></a>
+  </div>
+  <div>📸 Live feed: #VUMAYouth | Real-time community engagement</div>
+  <div class="copyright">VUMA Tanzania | Vijana Uongozi Ubunifu na Mazingira © 2026 — Innovation | Leadership | Environment</div>
+</div>
+
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+  // Initialize AOS for all scroll animations
+  AOS.init({ duration: 800, once: false, offset: 80, easing: 'ease-out-cubic' });
+
+  // Sticky navbar
+  window.addEventListener('scroll', () => {
+    const nav = document.getElementById('navbar');
+    if (window.scrollY > 50) nav.classList.add('scrolled');
+    else nav.classList.remove('scrolled');
+  });
+
+  // Animated counters (Intersection Observer)
+  const counters = document.querySelectorAll('.counter-number');
+  const startCounters = () => {
+    counters.forEach(counter => {
+      const target = parseInt(counter.getAttribute('data-target'));
+      let current = 0;
+      const increment = target / 60;
+      const update = () => {
+        current += increment;
+        if (current < target) {
+          counter.innerText = Math.floor(current).toLocaleString();
+          requestAnimationFrame(update);
+        } else counter.innerText = target.toLocaleString();
+      };
+      update();
+    });
+  };
+  const counterObserver = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) { startCounters(); counterObserver.disconnect(); }
+  }, { threshold: 0.5 });
+  counterObserver.observe(document.querySelector('.impact-section'));
+
+  // Projects data
+  const projects = [
+    { title: "Solar-Powered Water Pump", cat: "environment", img: "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=300&h=190&fit=crop" },
+    { title: "Youth Leadership Academy", cat: "leadership", img: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=300&h=190&fit=crop" },
+    { title: "Plastic Upcycling Hub", cat: "environment", img: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=300&h=190&fit=crop" },
+    { title: "Policy Innovators Fellowship", cat: "leadership", img: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=300&h=190&fit=crop" },
+    { title: "Urban Vertical Farming", cat: "environment", img: "https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?w=300&h=190&fit=crop" },
+    { title: "Climate Tech Bootcamp", cat: "leadership", img: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=300&h=190&fit=crop" }
+  ];
+  const grid = document.getElementById('projectGrid');
+  function renderProjects(filter) {
+    grid.innerHTML = '';
+    projects.filter(p => filter === 'all' || p.cat === filter).forEach(p => {
+      const card = document.createElement('div'); card.className = 'project-card';
+      card.innerHTML = `<div style="height:160px; background-image:url('${p.img}'); background-size:cover;"></div><div class="project-content" style="padding:1rem;"><span style="color:#F9C74F; font-weight:bold;">${p.cat === 'leadership' ? '🌟 Leadership' : '🌿 Environmental'}</span><h4 style="margin-top:6px;">${p.title}</h4></div>`;
+      grid.appendChild(card);
+    });
+  }
+  renderProjects('all');
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderProjects(btn.getAttribute('data-filter'));
+    });
+  });
+
+  // Countdown timer
+  function updateCountdown() {
+    const target = new Date(2026, 5, 15, 9, 0, 0);
+    const diff = target - new Date();
+    if (diff <= 0) { document.getElementById('countdownTimer').innerHTML = "Event Started!"; return; }
+    const days = Math.floor(diff / (1000*60*60*24));
+    const hours = Math.floor((diff % (86400000))/3600000);
+    const mins = Math.floor((diff % 3600000)/60000);
+    document.getElementById('countdownTimer').innerHTML = `${days}d ${hours}h ${mins}m`;
+  }
+  setInterval(updateCountdown, 1000); updateCountdown();
+
+  // Testimonial carousel
+  let currentIdx = 0;
+  const track = document.getElementById('testimonialTrack');
+  const totalCards = document.querySelectorAll('.testimonial-card').length;
+  function updateCarousel() { track.style.transform = `translateX(-${currentIdx * 100}%)`; }
+  window.prevTestimonial = () => { currentIdx = (currentIdx - 1 + totalCards) % totalCards; updateCarousel(); };
+  window.nextTestimonial = () => { currentIdx = (currentIdx + 1) % totalCards; updateCarousel(); };
+  setInterval(() => window.nextTestimonial(), 5000);
+
+  // Login Modal Logic
+  const modal = document.getElementById('loginModal');
+  const openNav = document.getElementById('navLoginBtn');
+  const openHero = document.getElementById('heroLoginBtn');
+  const closeBtn = document.getElementById('closeModalBtn');
+  const doLogin = document.getElementById('doLoginBtn');
+  function openModal() { modal.classList.add('active'); }
+  function closeModal() { modal.classList.remove('active'); }
+  openNav.addEventListener('click', (e) => { e.preventDefault(); openModal(); });
+  openHero.addEventListener('click', openModal);
+  closeBtn.addEventListener('click', closeModal);
+  window.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+  doLogin.addEventListener('click', () => {
+    const email = document.getElementById('loginEmail').value;
+    if (email.trim() === "") alert("Please enter email to continue");
+    else { alert(`Welcome back ${email}! Access granted to VUMA hub.`); closeModal(); }
+  });
+
+  // Mobile menu toggle
+  window.toggleMobileMenu = function() {
+    const nav = document.getElementById('navLinks');
+    nav.classList.toggle('show');
+  };
+</script>
+</body>
+</html>
