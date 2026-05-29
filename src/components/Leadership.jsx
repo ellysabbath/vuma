@@ -5,11 +5,12 @@ const Leadership = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [statsVisible, setStatsVisible] = useState(false);
   const [animatedCards, setAnimatedCards] = useState([]);
+  const [selectedLeader, setSelectedLeader] = useState(null);
+  const [showModal, setShowModal] = useState(false);
   const sectionRef = useRef(null);
   const statsRef = useRef(null);
   const cardRefs = useRef([]);
   
-  // Counter states
   const [counters, setCounters] = useState({
     experience: 0,
     projects: 0,
@@ -40,7 +41,6 @@ const Leadership = () => {
     };
   }, []);
 
-  // Animation for individual cards as they scroll into view
   useEffect(() => {
     const cardObserver = new IntersectionObserver(
       (entries) => {
@@ -65,7 +65,6 @@ const Leadership = () => {
     };
   }, []);
 
-  // Separate observer for stats section with counter animation
   useEffect(() => {
     const statsObserver = new IntersectionObserver(
       (entries) => {
@@ -117,16 +116,32 @@ const Leadership = () => {
     });
   };
 
-  // Extended leaders data with more details
+  const openModal = (leader) => {
+    setSelectedLeader(leader);
+    setShowModal(true);
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedLeader(null);
+    document.body.style.overflow = 'unset';
+  };
+
   const leadersWithDetails = leaders.map((leader, idx) => ({
     ...leader,
     id: idx,
     bio: `${leader.role} at VUMA Tanzania with over ${Math.floor(Math.random() * 15) + 5} years of experience in youth development and environmental advocacy.`,
+    fullBio: `${leader.name} is a dedicated professional with extensive experience in youth empowerment and sustainable development. As ${leader.role}, they have led numerous initiatives that have positively impacted communities across Tanzania.`,
     achievements: [
       'Led multiple successful youth programs',
       'Recognized for community impact',
       'Passionate about sustainable development'
-    ]
+    ],
+    contact: {
+      email: `${leader.name.toLowerCase().replace(/\s/g, '.')}@vuma.or.tz`,
+      phone: '+255 123 456 789'
+    }
   }));
 
   return (
@@ -138,7 +153,6 @@ const Leadership = () => {
         position: 'relative',
         overflow: 'hidden'
       }}>
-        {/* Animated Background Elements */}
         <div style={{
           position: 'absolute',
           top: '-20%',
@@ -161,20 +175,8 @@ const Leadership = () => {
           pointerEvents: 'none',
           animation: 'float 10s ease-in-out infinite reverse'
         }} />
-        <div style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          width: '300px',
-          height: '300px',
-          background: 'radial-gradient(circle, rgba(249,199,79,0.05) 0%, transparent 70%)',
-          borderRadius: '50%',
-          pointerEvents: 'none',
-          transform: 'translate(-50%, -50%)',
-          animation: 'pulse 6s ease-in-out infinite'
-        }} />
 
-        {/* Section Header with Animation */}
+        {/* Section Header */}
         <div style={{
           textAlign: 'center',
           marginBottom: '3rem',
@@ -187,8 +189,7 @@ const Leadership = () => {
             background: 'rgba(249,199,79,0.2)',
             padding: '0.3rem 1rem',
             borderRadius: '50px',
-            marginBottom: '1rem',
-            animation: isVisible ? 'fadeInUp 0.6s ease' : 'none'
+            marginBottom: '1rem'
           }}>
             <span style={{ color: '#0B3B2F', fontWeight: 600, fontSize: '0.85rem' }}>
               <i className="fas fa-users" style={{ marginRight: '0.5rem', color: '#F9C74F' }}></i>
@@ -202,8 +203,7 @@ const Leadership = () => {
             background: 'linear-gradient(135deg, #0B3B2F, #2b7a5c)',
             WebkitBackgroundClip: 'text',
             backgroundClip: 'text',
-            color: 'transparent',
-            animation: isVisible ? 'fadeInUp 0.6s ease 0.1s' : 'none'
+            color: 'transparent'
           }}>
             Our Leadership
           </h2>
@@ -211,14 +211,13 @@ const Leadership = () => {
             fontSize: 'clamp(0.9rem, 4vw, 1rem)',
             color: '#666',
             maxWidth: '600px',
-            margin: '0 auto',
-            animation: isVisible ? 'fadeInUp 0.6s ease 0.2s' : 'none'
+            margin: '0 auto'
           }}>
             Dedicated professionals driving youth innovation and climate action in Tanzania
           </p>
         </div>
 
-        {/* Leaders Grid with Scroll Animations */}
+        {/* Leaders Grid */}
         <div className="leaders" style={{
           display: 'flex',
           flexWrap: 'wrap',
@@ -259,8 +258,8 @@ const Leadership = () => {
                 }
                 e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.08)';
               }}
+              onClick={() => openModal(leader)}
             >
-              {/* Shine Effect */}
               <div style={{
                 position: 'absolute',
                 top: 0,
@@ -273,12 +272,10 @@ const Leadership = () => {
               }}
               className="shine-effect" />
 
-              {/* Profile Image Container with Animation */}
               <div style={{
                 position: 'relative',
                 display: 'inline-block',
-                marginBottom: '1.5rem',
-                animation: animatedCards.includes(idx.toString()) ? 'zoomIn 0.6s ease' : 'none'
+                marginBottom: '1.5rem'
               }}>
                 <div style={{
                   position: 'absolute',
@@ -288,8 +285,7 @@ const Leadership = () => {
                   bottom: '-5px',
                   background: 'linear-gradient(135deg, #F9C74F, #f6b83e)',
                   borderRadius: '50%',
-                  zIndex: 0,
-                  animation: animatedCards.includes(idx.toString()) ? 'pulse 2s ease-in-out infinite' : 'none'
+                  zIndex: 0
                 }} />
                 <img 
                   src={leader.img} 
@@ -306,34 +302,9 @@ const Leadership = () => {
                   }}
                   className="profile-image"
                 />
-                
-                {/* Social Icons Overlay on Hover */}
-                <div style={{
-                  position: 'absolute',
-                  bottom: '5px',
-                  right: '5px',
-                  background: '#F9C74F',
-                  borderRadius: '50%',
-                  width: '35px',
-                  height: '35px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  zIndex: 2,
-                  cursor: 'pointer',
-                  transition: 'transform 0.3s ease'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1) rotate(360deg)'}
-                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1) rotate(0deg)'}>
-                  <i className="fas fa-share-alt" style={{ color: '#0B3B2F', fontSize: '0.9rem' }}></i>
-                </div>
               </div>
 
-              {/* Name and Title with Stagger Animation */}
-              <div style={{
-                animation: animatedCards.includes(idx.toString()) ? 'fadeInUp 0.6s ease' : 'none',
-                animationDelay: `${idx * 0.1 + 0.1}s`
-              }}>
+              <div>
                 <h3 style={{
                   fontSize: '1.3rem',
                   color: '#0B3B2F',
@@ -352,198 +323,43 @@ const Leadership = () => {
                 </p>
               </div>
 
-              {/* Bio with Animation */}
               <p style={{
                 fontSize: '0.85rem',
                 color: '#666',
                 lineHeight: '1.5',
-                marginBottom: '1.2rem',
-                padding: '0 0.5rem',
-                animation: animatedCards.includes(idx.toString()) ? 'fadeInUp 0.6s ease' : 'none',
-                animationDelay: `${idx * 0.1 + 0.2}s`
+                marginBottom: '1rem',
+                padding: '0 0.5rem'
               }}>
                 {leader.bio}
               </p>
 
-              {/* Achievements */}
               <div style={{
-                background: '#f8f9fa',
-                borderRadius: '16px',
-                padding: '0.8rem',
-                marginBottom: '1.2rem',
-                animation: animatedCards.includes(idx.toString()) ? 'fadeInUp 0.6s ease' : 'none',
-                animationDelay: `${idx * 0.1 + 0.3}s`
-              }}>
-                {leader.achievements.map((achievement, i) => (
-                  <div key={i} style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    marginBottom: i < leader.achievements.length - 1 ? '0.5rem' : 0,
-                    fontSize: '0.75rem',
-                    color: '#555'
-                  }}>
-                    <i className="fas fa-check-circle" style={{ color: '#F9C74F', fontSize: '0.7rem' }}></i>
-                    <span>{achievement}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Social Links */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                gap: '1.2rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
                 marginTop: '0.5rem',
-                animation: animatedCards.includes(idx.toString()) ? 'fadeInUp 0.6s ease' : 'none',
-                animationDelay: `${idx * 0.1 + 0.4}s`
+                padding: '0.5rem 1rem',
+                borderRadius: '50px',
+                background: 'rgba(249,199,79,0.1)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#F9C74F';
+                e.currentTarget.style.transform = 'scale(1.05)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(249,199,79,0.1)';
+                e.currentTarget.style.transform = 'scale(1)';
               }}>
-                <a 
-                  href={leader.linkedin} 
-                  style={{ 
-                    color: '#0B3B2F',
-                    transition: 'all 0.3s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '50%',
-                    background: '#f0f0f0'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#0077b5';
-                    e.currentTarget.style.color = 'white';
-                    e.currentTarget.style.transform = 'translateY(-5px) rotate(360deg)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#f0f0f0';
-                    e.currentTarget.style.color = '#0B3B2F';
-                    e.currentTarget.style.transform = 'translateY(0) rotate(0deg)';
-                  }}
-                >
-                  <i className="fab fa-linkedin-in" style={{ fontSize: '1rem' }}></i>
-                </a>
-                <a 
-                  href={leader.twitter} 
-                  style={{ 
-                    color: '#0B3B2F',
-                    transition: 'all 0.3s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '50%',
-                    background: '#f0f0f0'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#1da1f2';
-                    e.currentTarget.style.color = 'white';
-                    e.currentTarget.style.transform = 'translateY(-5px) rotate(360deg)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#f0f0f0';
-                    e.currentTarget.style.color = '#0B3B2F';
-                    e.currentTarget.style.transform = 'translateY(0) rotate(0deg)';
-                  }}
-                >
-                  <i className="fab fa-twitter" style={{ fontSize: '1rem' }}></i>
-                </a>
-                <a 
-                  href="#" 
-                  style={{ 
-                    color: '#0B3B2F',
-                    transition: 'all 0.3s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '50%',
-                    background: '#f0f0f0'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#e4405f';
-                    e.currentTarget.style.color = 'white';
-                    e.currentTarget.style.transform = 'translateY(-5px) rotate(360deg)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#f0f0f0';
-                    e.currentTarget.style.color = '#0B3B2F';
-                    e.currentTarget.style.transform = 'translateY(0) rotate(0deg)';
-                  }}
-                >
-                  <i className="fab fa-instagram" style={{ fontSize: '1rem' }}></i>
-                </a>
-                <a 
-                  href="#" 
-                  style={{ 
-                    color: '#0B3B2F',
-                    transition: 'all 0.3s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '50%',
-                    background: '#f0f0f0'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#0B3B2F';
-                    e.currentTarget.style.color = '#F9C74F';
-                    e.currentTarget.style.transform = 'translateY(-5px) rotate(360deg)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#f0f0f0';
-                    e.currentTarget.style.color = '#0B3B2F';
-                    e.currentTarget.style.transform = 'translateY(0) rotate(0deg)';
-                  }}
-                >
-                  <i className="fas fa-envelope" style={{ fontSize: '1rem' }}></i>
-                </a>
+                <i className="fas fa-eye" style={{ color: '#F9C74F', fontSize: '0.8rem' }}></i>
+                <span style={{ color: '#0B3B2F', fontSize: '0.75rem', fontWeight: 600 }}>View Full Profile</span>
               </div>
-
-              {/* View Profile Button */}
-              <button
-                style={{
-                  marginTop: '1.5rem',
-                  background: 'transparent',
-                  border: '2px solid #F9C74F',
-                  padding: '0.6rem 1.2rem',
-                  borderRadius: '50px',
-                  color: '#0B3B2F',
-                  fontWeight: 600,
-                  fontSize: '0.85rem',
-                  cursor: 'pointer',
-                  width: '100%',
-                  transition: 'all 0.3s ease',
-                  animation: animatedCards.includes(idx.toString()) ? 'fadeInUp 0.6s ease' : 'none',
-                  animationDelay: `${idx * 0.1 + 0.5}s`
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#F9C74F';
-                  e.currentTarget.style.transform = 'scale(1.05)';
-                  e.currentTarget.style.boxShadow = '0 5px 15px rgba(249,199,79,0.3)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.transform = 'scale(1)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-                onClick={() => alert(`View ${leader.name}'s full profile`)}
-              >
-                View Full Profile
-                <i className="fas fa-arrow-right" style={{ marginLeft: '0.5rem', fontSize: '0.7rem', transition: 'transform 0.3s ease' }}
-                   onMouseEnter={(e) => e.currentTarget.style.transform = 'translateX(5px)'}
-                   onMouseLeave={(e) => e.currentTarget.style.transform = 'translateX(0)'} />
-              </button>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Stats Section with Scroll Animation */}
+      {/* Stats Section */}
       <div ref={statsRef} style={{
         margin: '2rem auto',
         padding: '3rem 2rem',
@@ -560,31 +376,6 @@ const Leadership = () => {
         position: 'relative',
         overflow: 'hidden'
       }}>
-        {/* Animated Decorative elements */}
-        <div style={{
-          position: 'absolute',
-          top: '-50%',
-          right: '-20%',
-          width: '300px',
-          height: '300px',
-          background: 'radial-gradient(circle, rgba(11,59,47,0.03) 0%, transparent 70%)',
-          borderRadius: '50%',
-          pointerEvents: 'none',
-          animation: 'float 12s ease-in-out infinite'
-        }} />
-        <div style={{
-          position: 'absolute',
-          bottom: '-50%',
-          left: '-20%',
-          width: '250px',
-          height: '250px',
-          background: 'radial-gradient(circle, rgba(249,199,79,0.05) 0%, transparent 70%)',
-          borderRadius: '50%',
-          pointerEvents: 'none',
-          animation: 'float 10s ease-in-out infinite reverse'
-        }} />
-
-        {/* Stats Items with Stagger Animation */}
         {[
           { id: 'experience', icon: 'fas fa-calendar-alt', label: 'Years Combined Experience', value: counters.experience, suffix: '+' },
           { id: 'projects', icon: 'fas fa-project-diagram', label: 'Projects Completed', value: counters.projects, suffix: '+' },
@@ -617,8 +408,7 @@ const Leadership = () => {
               fontSize: 'clamp(2rem, 5vw, 3rem)', 
               fontWeight: 800, 
               color: '#0B3B2F',
-              fontFamily: 'monospace',
-              animation: statsVisible ? 'countUp 0.5s ease' : 'none'
+              fontFamily: 'monospace'
             }}>
               {stat.value}{stat.suffix}
             </div>
@@ -640,65 +430,156 @@ const Leadership = () => {
         ))}
       </div>
 
-      {/* CSS Animations */}
+      {/* Leader Profile Modal */}
+      {showModal && selectedLeader && (
+        <div className="modal-overlay" onClick={closeModal} style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.85)',
+          backdropFilter: 'blur(8px)',
+          zIndex: 2000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '16px',
+          animation: 'fadeIn 0.3s ease'
+        }}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{
+            background: 'white',
+            borderRadius: '28px',
+            maxWidth: '600px',
+            width: '100%',
+            maxHeight: '85vh',
+            overflowY: 'auto',
+            position: 'relative',
+            animation: 'slideInUp 0.3s ease'
+          }}>
+            <button
+              onClick={closeModal}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: 'rgba(0,0,0,0.5)',
+                border: 'none',
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                cursor: 'pointer',
+                color: 'white',
+                fontSize: '1.2rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 10
+              }}
+            >
+              <i className="fas fa-times"></i>
+            </button>
+
+            <div style={{
+              background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)',
+              padding: '2rem',
+              textAlign: 'center'
+            }}>
+              <div style={{
+                width: '100px',
+                height: '100px',
+                margin: '0 auto',
+                borderRadius: '50%',
+                overflow: 'hidden',
+                border: '4px solid #F9C74F'
+              }}>
+                <img 
+                  src={selectedLeader.img} 
+                  alt={selectedLeader.name}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              </div>
+              <h2 style={{ color: 'white', marginTop: '1rem', marginBottom: '0.3rem' }}>{selectedLeader.name}</h2>
+              <p style={{ color: '#F9C74F', fontWeight: 600 }}>{selectedLeader.role}</p>
+            </div>
+
+            <div style={{ padding: '1.5rem' }}>
+              <div style={{ marginBottom: '1rem' }}>
+                <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem' }}>
+                  <i className="fas fa-user-circle" style={{ marginRight: '0.5rem', color: '#F9C74F' }}></i>
+                  Biography
+                </h3>
+                <p style={{ color: '#555', lineHeight: '1.6' }}>{selectedLeader.fullBio}</p>
+              </div>
+
+              <div style={{ marginBottom: '1rem' }}>
+                <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem' }}>
+                  <i className="fas fa-trophy" style={{ marginRight: '0.5rem', color: '#F9C74F' }}></i>
+                  Achievements
+                </h3>
+                <ul style={{ listStyle: 'none', padding: 0 }}>
+                  {selectedLeader.achievements.map((achievement, i) => (
+                    <li key={i} style={{ padding: '0.3rem 0', color: '#555', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <i className="fas fa-medal" style={{ color: '#F9C74F' }}></i>
+                      {achievement}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                <button
+                  onClick={closeModal}
+                  style={{
+                    flex: 1,
+                    background: 'transparent',
+                    border: '2px solid #ddd',
+                    padding: '0.7rem',
+                    borderRadius: '50px',
+                    color: '#666',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style>{`
         @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
         }
         
         @keyframes zoomIn {
-          from {
-            opacity: 0;
-            transform: scale(0.8);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
+          from { opacity: 0; transform: scale(0.8); }
+          to { opacity: 1; transform: scale(1); }
         }
         
         @keyframes float {
-          0%, 100% {
-            transform: translate(0, 0);
-          }
-          25% {
-            transform: translate(10px, -15px);
-          }
-          50% {
-            transform: translate(-10px, 20px);
-          }
-          75% {
-            transform: translate(15px, -10px);
-          }
+          0%, 100% { transform: translate(0, 0); }
+          25% { transform: translate(10px, -15px); }
+          50% { transform: translate(-10px, 20px); }
+          75% { transform: translate(15px, -10px); }
         }
         
         @keyframes pulse {
-          0%, 100% {
-            transform: scale(1);
-            opacity: 0.8;
-          }
-          50% {
-            transform: scale(1.05);
-            opacity: 1;
-          }
+          0%, 100% { transform: scale(1); opacity: 0.8; }
+          50% { transform: scale(1.05); opacity: 1; }
         }
         
-        @keyframes countUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        
+        @keyframes slideInUp {
+          from { opacity: 0; transform: translateY(50px); }
+          to { opacity: 1; transform: translateY(0); }
         }
         
         .leader-card:hover .shine-effect {
@@ -709,22 +590,32 @@ const Leadership = () => {
           transform: scale(1.05) rotate(5deg);
         }
         
+        .modal-content::-webkit-scrollbar {
+          width: 6px;
+        }
+        
+        .modal-content::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 3px;
+        }
+        
+        .modal-content::-webkit-scrollbar-thumb {
+          background: #F9C74F;
+          border-radius: 3px;
+        }
+        
         @media (max-width: 768px) {
           .leader-card {
             width: 100% !important;
             max-width: 350px !important;
             margin: 0 auto;
           }
-          
-          .leaders {
-            gap: 1.5rem !important;
-          }
+          .leaders { gap: 1.5rem !important; }
+          .modal-content { max-height: 90vh; }
         }
         
         @media (min-width: 1200px) {
-          .leader-card {
-            width: 320px !important;
-          }
+          .leader-card { width: 320px !important; }
         }
       `}</style>
     </>

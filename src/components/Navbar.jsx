@@ -1,14 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import logo from '../assets/vuma.png';
 
-const Navbar = ({ onLoginClick }) => {
+const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isServicesDropdownOpen, setIsServicesDropdownOpen] = useState(false);
+  const [isAboutDropdownOpen, setIsAboutDropdownOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const userMenuRef = useRef(null);
+  const servicesDropdownRef = useRef(null);
+  const aboutDropdownRef = useRef(null);
+  const aboutTimeoutRef = useRef(null);
+  const servicesTimeoutRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -18,11 +25,17 @@ const Navbar = ({ onLoginClick }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close user menu when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
         setIsUserMenuOpen(false);
+      }
+      if (servicesDropdownRef.current && !servicesDropdownRef.current.contains(e.target)) {
+        setIsServicesDropdownOpen(false);
+      }
+      if (aboutDropdownRef.current && !aboutDropdownRef.current.contains(e.target)) {
+        setIsAboutDropdownOpen(false);
       }
     };
     document.addEventListener('click', handleClickOutside);
@@ -76,13 +89,9 @@ const Navbar = ({ onLoginClick }) => {
     setIsUserMenuOpen(!isUserMenuOpen);
   };
 
-  const handleLoginClick = (e) => {
-    e.preventDefault();
+  const handleLoginClick = () => {
     setIsUserMenuOpen(false);
-    if (!isLoggedIn) {
-      onLoginClick();
-      setTimeout(() => setIsLoggedIn(true), 500);
-    }
+    navigate('/login');
   };
 
   const handleLogoutClick = (e) => {
@@ -90,24 +99,91 @@ const Navbar = ({ onLoginClick }) => {
     setIsUserMenuOpen(false);
     setIsLoggedIn(false);
     alert('You have been logged out successfully!');
+    navigate('/');
   };
 
-  const handleSettingsClick = (e) => {
-    e.preventDefault();
+  const handleSettingsClick = () => {
     setIsUserMenuOpen(false);
     navigate('/settings');
   };
 
-  const handleProfileClick = (e) => {
-    e.preventDefault();
+  const handleProfileClick = () => {
     setIsUserMenuOpen(false);
     navigate('/profile');
   };
 
-  const handleNavigation = (path) => {
-    navigate(path);
-    closeSidebar();
+  // Hover handlers for About dropdown with delay
+  const handleAboutMouseEnter = () => {
+    if (aboutTimeoutRef.current) {
+      clearTimeout(aboutTimeoutRef.current);
+    }
+    setIsAboutDropdownOpen(true);
   };
+
+  const handleAboutMouseLeave = () => {
+    aboutTimeoutRef.current = setTimeout(() => {
+      setIsAboutDropdownOpen(false);
+    }, 200);
+  };
+
+  const handleAboutMenuEnter = () => {
+    if (aboutTimeoutRef.current) {
+      clearTimeout(aboutTimeoutRef.current);
+    }
+  };
+
+  const handleAboutMenuLeave = () => {
+    aboutTimeoutRef.current = setTimeout(() => {
+      setIsAboutDropdownOpen(false);
+    }, 200);
+  };
+
+  // Hover handlers for Services dropdown with delay
+  const handleServicesMouseEnter = () => {
+    if (servicesTimeoutRef.current) {
+      clearTimeout(servicesTimeoutRef.current);
+    }
+    setIsServicesDropdownOpen(true);
+  };
+
+  const handleServicesMouseLeave = () => {
+    servicesTimeoutRef.current = setTimeout(() => {
+      setIsServicesDropdownOpen(false);
+    }, 200);
+  };
+
+  const handleServicesMenuEnter = () => {
+    if (servicesTimeoutRef.current) {
+      clearTimeout(servicesTimeoutRef.current);
+    }
+  };
+
+  const handleServicesMenuLeave = () => {
+    servicesTimeoutRef.current = setTimeout(() => {
+      setIsServicesDropdownOpen(false);
+    }, 200);
+  };
+
+  // Check if link is active
+  const isActive = (path) => {
+    return location.pathname === path;
+  };
+
+  // About Us dropdown items
+  const aboutItems = [
+    { id: 'leaders', label: 'Our Leaders', icon: 'fas fa-users', path: '/leadership' },
+    { id: 'mission', label: 'Our Mission', icon: 'fas fa-bullseye', path: '/about#mission' },
+    { id: 'events', label: 'Events', icon: 'fas fa-calendar-alt', path: '/events' },
+    { id: 'volunteers', label: 'Volunteers', icon: 'fas fa-hands-helping', path: '/volunteers' }
+  ];
+
+  // Services dropdown items
+  const servicesItems = [
+    { id: 'home', label: 'Home', icon: 'fas fa-home', path: '/' },
+    { id: 'programs', label: 'Programs', icon: 'fas fa-chalkboard-user', path: '/programs' },
+    { id: 'news', label: 'News & Stories', icon: 'fas fa-newspaper', path: '/news' },
+    { id: 'contact', label: 'Contact', icon: 'fas fa-envelope', path: '/contact' }
+  ];
 
   return (
     <>
@@ -121,9 +197,9 @@ const Navbar = ({ onLoginClick }) => {
         zIndex: 1000,
         padding: '0 1rem',
         transition: 'all 0.3s ease',
-        background: scrolled ? '#0B3B2F' : '#0B3B2F',
+        background: '#0B3B2F',
         backdropFilter: scrolled ? 'blur(12px)' : 'none',
-        boxShadow: scrolled ? '0 4px 20px rgba(4, 58, 21, 0.2)' : 'none',
+        boxShadow: scrolled ? '0 4px 20px rgba(4, 58, 21, 0.2)' : '0 2px 10px rgba(0,0,0,0.1)',
         display: 'flex',
         alignItems: 'center'
       }}>
@@ -191,7 +267,7 @@ const Navbar = ({ onLoginClick }) => {
             </div>
           </button>
 
-          {/* Logo with Image - Navigate to Home */}
+          {/* Logo */}
           <Link 
             to="/" 
             onClick={closeSidebar}
@@ -201,7 +277,6 @@ const Navbar = ({ onLoginClick }) => {
               justifyContent: 'center',
               gap: '8px',
               cursor: 'pointer',
-              flex: 1,
               textDecoration: 'none'
             }}
           >
@@ -226,7 +301,6 @@ const Navbar = ({ onLoginClick }) => {
                 }}
               />
             </div>
-            
             <div style={{ 
               fontSize: 'clamp(1rem, 4vw, 1.3rem)', 
               fontWeight: 800, 
@@ -238,42 +312,342 @@ const Navbar = ({ onLoginClick }) => {
             </div>
           </Link>
 
-          {/* User Profile Circle with Dropdown */}
-          <div style={{ position: 'relative' }} ref={userMenuRef}>
-            <button
-              onClick={toggleUserMenu}
+          {/* Desktop Navigation Buttons */}
+          <div className="desktop-nav-buttons" style={{
+            display: 'none',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            
+            {/* About Us Dropdown */}
+            <div 
+              style={{ position: 'relative' }} 
+              ref={aboutDropdownRef}
+              onMouseEnter={handleAboutMouseEnter}
+              onMouseLeave={handleAboutMouseLeave}
+            >
+              <button
+                style={{
+                  background: isActive('/about') ? 'rgba(249,199,79,0.1)' : 'none',
+                  border: 'none',
+                  color: isActive('/about') ? '#F9C74F' : 'white',
+                  fontSize: '0.9rem',
+                  fontWeight: 500,
+                  padding: '0.4rem 0.8rem',
+                  borderRadius: '8px',
+                  transition: 'all 0.3s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)';
+                  e.currentTarget.style.color = '#F9C74F';
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive('/about')) {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.color = 'white';
+                  }
+                }}
+              >
+                <i className="fas fa-info-circle" style={{ fontSize: '0.8rem' }}></i>
+                About Us
+                <i className={`fas fa-chevron-${isAboutDropdownOpen ? 'up' : 'down'}`} style={{ fontSize: '0.7rem', marginLeft: '4px', transition: 'transform 0.3s ease' }}></i>
+              </button>
+
+              {isAboutDropdownOpen && (
+                <div 
+                  className="dropdown-menu" 
+                  onMouseEnter={handleAboutMenuEnter}
+                  onMouseLeave={handleAboutMenuLeave}
+                  style={{
+                    position: 'absolute',
+                    top: 'calc(100% - 5px)',
+                    left: '0',
+                    minWidth: '220px',
+                    background: 'white',
+                    borderRadius: '12px',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+                    overflow: 'hidden',
+                    zIndex: 1001,
+                    marginTop: '5px',
+                    animation: 'fadeInUp 0.3s ease'
+                  }}
+                >
+                  {aboutItems.map((item) => (
+                    <Link
+                      key={item.id}
+                      to={item.path}
+                      onClick={() => setIsAboutDropdownOpen(false)}
+                      className="dropdown-item"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        padding: '0.8rem 1rem',
+                        color: '#333',
+                        textDecoration: 'none',
+                        transition: 'all 0.3s ease',
+                        borderBottom: '1px solid #f0f0f0'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                    >
+                      <i className={item.icon} style={{ width: '20px', color: '#F9C74F' }}></i>
+                      <span style={{ flex: 1 }}>{item.label}</span>
+                      <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5, transition: 'transform 0.3s ease' }}></i>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Our Services Dropdown */}
+            <div 
+              style={{ position: 'relative' }} 
+              ref={servicesDropdownRef}
+              onMouseEnter={handleServicesMouseEnter}
+              onMouseLeave={handleServicesMouseLeave}
+            >
+              <button
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'white',
+                  fontSize: '0.9rem',
+                  fontWeight: 500,
+                  padding: '0.4rem 0.8rem',
+                  borderRadius: '8px',
+                  transition: 'all 0.3s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)';
+                  e.currentTarget.style.color = '#F9C74F';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = 'white';
+                }}
+              >
+                <i className="fas fa-chalkboard-user" style={{ fontSize: '0.8rem' }}></i>
+                Our Services
+                <i className={`fas fa-chevron-${isServicesDropdownOpen ? 'up' : 'down'}`} style={{ fontSize: '0.7rem', marginLeft: '4px', transition: 'transform 0.3s ease' }}></i>
+              </button>
+
+              {isServicesDropdownOpen && (
+                <div 
+                  className="dropdown-menu" 
+                  onMouseEnter={handleServicesMenuEnter}
+                  onMouseLeave={handleServicesMenuLeave}
+                  style={{
+                    position: 'absolute',
+                    top: 'calc(100% - 5px)',
+                    left: '0',
+                    minWidth: '220px',
+                    background: 'white',
+                    borderRadius: '12px',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+                    overflow: 'hidden',
+                    zIndex: 1001,
+                    marginTop: '5px',
+                    animation: 'fadeInUp 0.3s ease'
+                  }}
+                >
+                  {servicesItems.map((item) => (
+                    <Link
+                      key={item.id}
+                      to={item.path}
+                      onClick={() => setIsServicesDropdownOpen(false)}
+                      className="dropdown-item"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        padding: '0.8rem 1rem',
+                        color: '#333',
+                        textDecoration: 'none',
+                        transition: 'all 0.3s ease',
+                        borderBottom: '1px solid #f0f0f0'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                    >
+                      <i className={item.icon} style={{ width: '20px', color: '#F9C74F' }}></i>
+                      <span style={{ flex: 1 }}>{item.label}</span>
+                      <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5, transition: 'transform 0.3s ease' }}></i>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Blog Button */}
+            <Link 
+              to="/news"
+              className="desktop-nav-link"
               style={{
-                background: isLoggedIn ? 'linear-gradient(135deg, #F9C74F, #f6b83e)' : 'rgba(255,255,255,0.2)',
-                border: '2px solid rgba(249,199,79,0.5)',
-                width: '40px',
-                height: '40px',
-                borderRadius: '50%',
-                cursor: 'pointer',
+                color: isActive('/news') ? '#F9C74F' : 'white',
+                textDecoration: 'none',
+                fontSize: '0.9rem',
+                fontWeight: 500,
+                padding: '0.4rem 0.8rem',
+                borderRadius: '8px',
+                transition: 'all 0.3s ease',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
+                gap: '6px',
+                background: isActive('/news') ? 'rgba(249,199,79,0.1)' : 'transparent'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)';
+                e.currentTarget.style.color = '#F9C74F';
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive('/news')) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = 'white';
+                }
+              }}
+            >
+              <i className="fas fa-blog" style={{ fontSize: '0.8rem' }}></i>
+              Blog
+            </Link>
+
+            {/* Contact Button */}
+            <Link 
+              to="/contact"
+              className="desktop-nav-link"
+              style={{
+                color: isActive('/contact') ? '#F9C74F' : 'white',
+                textDecoration: 'none',
+                fontSize: '0.9rem',
+                fontWeight: 500,
+                padding: '0.4rem 0.8rem',
+                borderRadius: '8px',
                 transition: 'all 0.3s ease',
-                color: isLoggedIn ? '#0B3B2F' : 'white',
-                fontSize: '1rem'
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: isActive('/contact') ? 'rgba(249,199,79,0.1)' : 'transparent'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)';
+                e.currentTarget.style.color = '#F9C74F';
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive('/contact')) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = 'white';
+                }
+              }}
+            >
+              <i className="fas fa-envelope" style={{ fontSize: '0.8rem' }}></i>
+              Contact
+            </Link>
+
+            {/* Donate Button */}
+            <Link 
+              to="/donate"
+              className="donate-btn"
+              style={{
+                background: 'linear-gradient(135deg, #F9C74F, #f6b83e)',
+                border: 'none',
+                color: '#0B3B2F',
+                fontSize: '0.9rem',
+                fontWeight: 700,
+                padding: '0.4rem 1.2rem',
+                borderRadius: '50px',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                textDecoration: 'none'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'scale(1.05)';
-                e.currentTarget.style.boxShadow = '0 3px 10px rgba(249,199,79,0.3)';
+                e.currentTarget.style.boxShadow = '0 5px 20px rgba(249,199,79,0.4)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'scale(1)';
                 e.currentTarget.style.boxShadow = 'none';
               }}
             >
-              {isLoggedIn ? (
-                <i className="fas fa-user-check"></i>
-              ) : (
-                <i className="fas fa-user"></i>
-              )}
-            </button>
+              <i className="fas fa-heart" style={{ fontSize: '0.8rem' }}></i>
+              Donate
+            </Link>
+          </div>
 
-            {/* Dropdown Menu */}
-            {isUserMenuOpen && (
+          {/* User Profile / Login Button */}
+          <div style={{ position: 'relative' }} ref={userMenuRef}>
+            {isLoggedIn ? (
+              <button
+                onClick={toggleUserMenu}
+                style={{
+                  background: 'linear-gradient(135deg, #F9C74F, #f6b83e)',
+                  border: '2px solid rgba(249,199,79,0.5)',
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.3s ease',
+                  color: '#0B3B2F',
+                  fontSize: '1rem'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                  e.currentTarget.style.boxShadow = '0 3px 10px rgba(249,199,79,0.3)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              >
+                <i className="fas fa-user-check"></i>
+              </button>
+            ) : (
+              <Link
+                to="/login"
+                style={{
+                  background: 'rgba(255,255,255,0.2)',
+                  border: '2px solid rgba(249,199,79,0.5)',
+                  padding: '0.4rem 1rem',
+                  borderRadius: '40px',
+                  color: 'white',
+                  fontWeight: 600,
+                  fontSize: '0.9rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  textDecoration: 'none'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.3)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.2)';
+                }}
+              >
+                <i className="fas fa-sign-in-alt"></i>
+                Login
+              </Link>
+            )}
+
+            {/* User Dropdown Menu */}
+            {isUserMenuOpen && isLoggedIn && (
               <div style={{
                 position: 'absolute',
                 top: '50px',
@@ -284,7 +658,7 @@ const Navbar = ({ onLoginClick }) => {
                 boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
                 overflow: 'hidden',
                 zIndex: 1001,
-                animation: 'slideDown 0.3s ease'
+                animation: 'fadeInUp 0.3s ease'
               }}>
                 <div style={{
                   padding: '1rem',
@@ -305,100 +679,77 @@ const Navbar = ({ onLoginClick }) => {
                   }}>
                     <i className="fas fa-leaf" style={{ color: '#0B3B2F' }}></i>
                   </div>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-                    {isLoggedIn ? 'Welcome Back!' : 'Guest User'}
-                  </div>
-                  {isLoggedIn && (
-                    <div style={{ fontSize: '0.7rem', opacity: 0.8 }}>user@vuma.or.tz</div>
-                  )}
+                  <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>Welcome Back!</div>
+                  <div style={{ fontSize: '0.7rem', opacity: 0.8 }}>user@vuma.or.tz</div>
                 </div>
 
-                {!isLoggedIn ? (
-                  <a
-                    href="#"
-                    onClick={handleLoginClick}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      padding: '0.8rem 1rem',
-                      color: '#333',
-                      textDecoration: 'none',
-                      transition: 'all 0.3s ease',
-                      borderBottom: '1px solid #f0f0f0'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
-                  >
-                    <i className="fas fa-sign-in-alt" style={{ width: '20px', color: '#F9C74F' }}></i>
-                    <span style={{ flex: 1 }}>Login</span>
-                    <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
-                  </a>
-                ) : (
-                  <>
-                    <Link
-                      to="/profile"
-                      onClick={() => setIsUserMenuOpen(false)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        padding: '0.8rem 1rem',
-                        color: '#333',
-                        textDecoration: 'none',
-                        transition: 'all 0.3s ease',
-                        borderBottom: '1px solid #f0f0f0'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
-                    >
-                      <i className="fas fa-user-circle" style={{ width: '20px', color: '#F9C74F' }}></i>
-                      <span style={{ flex: 1 }}>My Profile</span>
-                      <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
-                    </Link>
-                    
-                    <Link
-                      to="/settings"
-                      onClick={() => setIsUserMenuOpen(false)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        padding: '0.8rem 1rem',
-                        color: '#333',
-                        textDecoration: 'none',
-                        transition: 'all 0.3s ease',
-                        borderBottom: '1px solid #f0f0f0'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
-                    >
-                      <i className="fas fa-cog" style={{ width: '20px', color: '#F9C74F' }}></i>
-                      <span style={{ flex: 1 }}>Settings</span>
-                      <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
-                    </Link>
-                    
-                    <a
-                      href="#"
-                      onClick={handleLogoutClick}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        padding: '0.8rem 1rem',
-                        color: '#d32f2f',
-                        textDecoration: 'none',
-                        transition: 'all 0.3s ease'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ffebee'}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
-                    >
-                      <i className="fas fa-sign-out-alt" style={{ width: '20px', color: '#d32f2f' }}></i>
-                      <span style={{ flex: 1 }}>Logout</span>
-                      <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
-                    </a>
-                  </>
-                )}
+                <Link
+                  to="/profile"
+                  onClick={() => setIsUserMenuOpen(false)}
+                  className="dropdown-item"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '0.8rem 1rem',
+                    color: '#333',
+                    textDecoration: 'none',
+                    transition: 'all 0.3s ease',
+                    borderBottom: '1px solid #f0f0f0'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                >
+                  <i className="fas fa-user-circle" style={{ width: '20px', color: '#F9C74F' }}></i>
+                  <span style={{ flex: 1 }}>My Profile</span>
+                  <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
+                </Link>
+                
+                <Link
+                  to="/settings"
+                  onClick={() => setIsUserMenuOpen(false)}
+                  className="dropdown-item"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '0.8rem 1rem',
+                    color: '#333',
+                    textDecoration: 'none',
+                    transition: 'all 0.3s ease',
+                    borderBottom: '1px solid #f0f0f0'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                >
+                  <i className="fas fa-cog" style={{ width: '20px', color: '#F9C74F' }}></i>
+                  <span style={{ flex: 1 }}>Settings</span>
+                  <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
+                </Link>
+                
+                <button
+                  onClick={handleLogoutClick}
+                  className="dropdown-item"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '0.8rem 1rem',
+                    color: '#d32f2f',
+                    textDecoration: 'none',
+                    transition: 'all 0.3s ease',
+                    width: '100%',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ffebee'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                >
+                  <i className="fas fa-sign-out-alt" style={{ width: '20px', color: '#d32f2f' }}></i>
+                  <span style={{ flex: 1 }}>Logout</span>
+                  <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
+                </button>
               </div>
             )}
           </div>
@@ -444,7 +795,7 @@ const Navbar = ({ onLoginClick }) => {
           overflowX: 'hidden'
         }}
       >
-        {/* Sidebar Header with Logo Image */}
+        {/* Sidebar Header */}
         <Link
           to="/"
           onClick={closeSidebar}
@@ -483,116 +834,104 @@ const Navbar = ({ onLoginClick }) => {
           <p style={{ color: '#F9C74F', margin: '5px 0 0', fontSize: '0.7rem' }}>Youth Innovation Hub</p>
         </Link>
 
-        {/* Menu Items - Navigation Links */}
+        {/* Sidebar Menu Items */}
         <div style={{ flex: 1, padding: '0.5rem 0' }}>
-          {/* Main Menu Section */}
           <div>
-            <div style={{
-              padding: '0.75rem 1.5rem',
-              color: 'rgba(255,255,255,0.5)',
-              fontSize: '0.7rem',
-              letterSpacing: '1px',
-              fontWeight: 600
-            }}>
+            <div style={{ padding: '0.75rem 1.5rem', color: 'rgba(255,255,255,0.5)', fontSize: '0.7rem', letterSpacing: '1px', fontWeight: 600 }}>
               MAIN MENU
             </div>
             
-            <Link to="/" onClick={closeSidebar} style={{
-              display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
-              margin: '0 0.5rem', borderRadius: '12px', color: 'white', textDecoration: 'none',
-              transition: 'all 0.3s ease'
-            }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
-               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-              <i className="fas fa-home" style={{ width: '20px', color: '#F9C74F' }}></i>
-              <span>Home</span>
-            </Link>
-
-            <Link to="/about" onClick={closeSidebar} style={{
-              display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
-              margin: '0 0.5rem', borderRadius: '12px', color: 'white', textDecoration: 'none',
-              transition: 'all 0.3s ease'
-            }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
-               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-              <i className="fas fa-info-circle" style={{ width: '20px', color: '#F9C74F' }}></i>
-              <span>About Us</span>
-            </Link>
-
-            <Link to="/programs" onClick={closeSidebar} style={{
-              display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
-              margin: '0 0.5rem', borderRadius: '12px', color: 'white', textDecoration: 'none',
-              transition: 'all 0.3s ease'
-            }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
-               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-              <i className="fas fa-chalkboard-user" style={{ width: '20px', color: '#F9C74F' }}></i>
-              <span>Programs</span>
-            </Link>
-
-            <Link to="/events" onClick={closeSidebar} style={{
-              display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
-              margin: '0 0.5rem', borderRadius: '12px', color: 'white', textDecoration: 'none',
-              transition: 'all 0.3s ease'
-            }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
-               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-              <i className="fas fa-calendar-alt" style={{ width: '20px', color: '#F9C74F' }}></i>
-              <span>Events</span>
-            </Link>
-
-            <Link to="/news" onClick={closeSidebar} style={{
-              display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
-              margin: '0 0.5rem', borderRadius: '12px', color: 'white', textDecoration: 'none',
-              transition: 'all 0.3s ease'
-            }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
-               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-              <i className="fas fa-newspaper" style={{ width: '20px', color: '#F9C74F' }}></i>
-              <span>News & Stories</span>
-            </Link>
-
-            <Link to="/volunteers" onClick={closeSidebar} style={{
-              display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
-              margin: '0 0.5rem', borderRadius: '12px', color: 'white', textDecoration: 'none',
-              transition: 'all 0.3s ease'
-            }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
-               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-              <i className="fas fa-hands-helping" style={{ width: '20px', color: '#F9C74F' }}></i>
-              <span>Volunteers</span>
-            </Link>
-
-            <Link to="/contact" onClick={closeSidebar} style={{
-              display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
-              margin: '0 0.5rem', borderRadius: '12px', color: 'white', textDecoration: 'none',
-              transition: 'all 0.3s ease'
-            }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
-               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-              <i className="fas fa-envelope" style={{ width: '20px', color: '#F9C74F' }}></i>
-              <span>Contact Us</span>
-            </Link>
+            {[
+              { to: '/', icon: 'fas fa-home', label: 'Home' },
+              { to: '/about', icon: 'fas fa-info-circle', label: 'About Us' },
+              { to: '/programs', icon: 'fas fa-chalkboard-user', label: 'Programs' },
+              { to: '/events', icon: 'fas fa-calendar-alt', label: 'Events' },
+              { to: '/news', icon: 'fas fa-newspaper', label: 'News & Stories' },
+              { to: '/volunteers', icon: 'fas fa-hands-helping', label: 'Volunteers' },
+              { to: '/contact', icon: 'fas fa-envelope', label: 'Contact Us' }
+            ].map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                onClick={closeSidebar}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '0.875rem 1.5rem',
+                  margin: '0 0.5rem',
+                  borderRadius: '12px',
+                  color: isActive(item.to) ? '#F9C74F' : 'white',
+                  textDecoration: 'none',
+                  transition: 'all 0.3s ease',
+                  backgroundColor: isActive(item.to) ? 'rgba(249,199,79,0.2)' : 'transparent'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive(item.to)) {
+                    e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive(item.to)) {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }
+                }}
+              >
+                <i className={item.icon} style={{ width: '20px', color: '#F9C74F' }}></i>
+                <span>{item.label}</span>
+              </Link>
+            ))}
           </div>
 
           <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '1rem 1.5rem' }} />
 
-          {/* Account Section */}
           <div>
             <div style={{ padding: '0.75rem 1.5rem', color: 'rgba(255,255,255,0.5)', fontSize: '0.7rem', letterSpacing: '1px', fontWeight: 600 }}>
               ACCOUNT
             </div>
-            <div onClick={() => { closeSidebar(); onLoginClick(); }} style={{
-              display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
-              margin: '0 0.5rem', borderRadius: '12px', color: 'white', cursor: 'pointer',
-              transition: 'all 0.3s ease'
-            }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
-               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+            
+            <Link
+              to="/login"
+              onClick={closeSidebar}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '0.875rem 1.5rem',
+                margin: '0 0.5rem',
+                borderRadius: '12px',
+                color: 'white',
+                textDecoration: 'none',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
               <i className="fas fa-sign-in-alt" style={{ width: '20px', color: '#F9C74F' }}></i>
               <span>Sign In</span>
-            </div>
-            <div onClick={() => { closeSidebar(); alert('Sign up form would open here'); }} style={{
-              display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
-              margin: '0 0.5rem', borderRadius: '12px', color: 'white', cursor: 'pointer',
-              transition: 'all 0.3s ease'
-            }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
-               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+            </Link>
+            
+            <Link
+              to="/signup"
+              onClick={closeSidebar}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '0.875rem 1.5rem',
+                margin: '0 0.5rem',
+                borderRadius: '12px',
+                color: 'white',
+                textDecoration: 'none',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
               <i className="fas fa-user-plus" style={{ width: '20px', color: '#F9C74F' }}></i>
               <span>Sign Up</span>
-            </div>
+            </Link>
+            
             <Link to="/profile" onClick={closeSidebar} style={{
               display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
               margin: '0 0.5rem', borderRadius: '12px', color: 'white', textDecoration: 'none',
@@ -602,6 +941,7 @@ const Navbar = ({ onLoginClick }) => {
               <i className="fas fa-user" style={{ width: '20px', color: '#F9C74F' }}></i>
               <span>User Profile</span>
             </Link>
+            
             <Link to="/admin" onClick={closeSidebar} style={{
               display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
               margin: '0 0.5rem', borderRadius: '12px', color: 'white', textDecoration: 'none',
@@ -615,11 +955,11 @@ const Navbar = ({ onLoginClick }) => {
 
           <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '1rem 1.5rem' }} />
 
-          {/* Partners Section */}
           <div>
             <div style={{ padding: '0.75rem 1.5rem', color: 'rgba(255,255,255,0.5)', fontSize: '0.7rem', letterSpacing: '1px', fontWeight: 600 }}>
               PARTNERS & SUPPORT
             </div>
+            
             <div onClick={() => { closeSidebar(); alert('Partnership form would open here'); }} style={{
               display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
               margin: '0 0.5rem', borderRadius: '12px', color: 'white', cursor: 'pointer',
@@ -629,23 +969,20 @@ const Navbar = ({ onLoginClick }) => {
               <i className="fas fa-handshake" style={{ width: '20px', color: '#F9C74F' }}></i>
               <span>Become a Partner</span>
             </div>
-            <div onClick={() => { closeSidebar(); alert('Donation page would open here'); }} style={{
+            
+            <Link to="/donate" onClick={closeSidebar} style={{
               display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
-              margin: '0 0.5rem', borderRadius: '12px', color: 'white', cursor: 'pointer',
+              margin: '0 0.5rem', borderRadius: '12px', color: 'white', textDecoration: 'none',
               transition: 'all 0.3s ease'
             }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
               <i className="fas fa-donate" style={{ width: '20px', color: '#F9C74F' }}></i>
               <span>Donate</span>
-            </div>
+            </Link>
           </div>
         </div>
 
-        <div style={{
-          padding: '1rem 1.5rem',
-          borderTop: '1px solid rgba(255,255,255,0.1)',
-          textAlign: 'center'
-        }}>
+        <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
           <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: '0.75rem', fontSize: '1.1rem' }}>
             <a href="#" style={{ color: 'white', transition: 'color 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#F9C74F'} onMouseLeave={(e) => e.currentTarget.style.color = 'white'}>
               <i className="fab fa-instagram"></i>
@@ -672,7 +1009,7 @@ const Navbar = ({ onLoginClick }) => {
           to { opacity: 1; }
         }
         
-        @keyframes slideDown {
+        @keyframes fadeInUp {
           from {
             opacity: 0;
             transform: translateY(-10px);
@@ -681,6 +1018,14 @@ const Navbar = ({ onLoginClick }) => {
             opacity: 1;
             transform: translateY(0);
           }
+        }
+        
+        .dropdown-menu {
+          animation: fadeInUp 0.3s ease;
+        }
+        
+        .dropdown-item:hover i:last-child {
+          transform: translateX(4px);
         }
         
         .sidebar-container {
@@ -698,6 +1043,19 @@ const Navbar = ({ onLoginClick }) => {
         .sidebar-container::-webkit-scrollbar-thumb {
           background: #F9C74F;
           border-radius: 2px;
+        }
+        
+        /* Desktop Navigation */
+        @media (min-width: 992px) {
+          .desktop-nav-buttons {
+            display: flex !important;
+          }
+        }
+        
+        @media (max-width: 991px) {
+          .desktop-nav-buttons {
+            display: none !important;
+          }
         }
         
         @media (max-width: 768px) {

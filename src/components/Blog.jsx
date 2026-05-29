@@ -2,9 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { blogPosts } from '../data';
 
 const Blog = () => {
-  const [visibleCount, setVisibleCount] = useState(3); // Show first 3 blog posts initially
+  const [visibleCount, setVisibleCount] = useState(3);
   const [isLoading, setIsLoading] = useState(false);
   const [isViewMoreHovered, setIsViewMoreHovered] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   const displayedPosts = blogPosts.slice(0, visibleCount);
   const hasMore = visibleCount < blogPosts.length;
@@ -15,6 +17,30 @@ const Blog = () => {
       setVisibleCount(prev => Math.min(prev + 2, blogPosts.length));
       setIsLoading(false);
     }, 500);
+  };
+
+  const openModal = (post) => {
+    setSelectedPost(post);
+    setShowModal(true);
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedPost(null);
+    document.body.style.overflow = 'unset';
+  };
+
+  // Full content for each blog post
+  const getFullContent = (title) => {
+    const contents = {
+      "VUMA Launches Green Innovation Fund": "The VUMA Green Innovation Fund is a groundbreaking initiative designed to support young innovators and entrepreneurs who are developing sustainable solutions to environmental challenges. The fund provides seed funding, mentorship, and technical support to selected projects that demonstrate potential for significant environmental impact. Successful applicants will receive up to $10,000 in funding, access to a network of industry experts, and comprehensive business development training. The fund focuses on areas such as renewable energy, waste management, sustainable agriculture, and water conservation. Applications are open until June 30, 2026. This initiative is made possible through partnerships with UNDP, UNEP, and various private sector partners who share our commitment to nurturing green innovation among Tanzanian youth.",
+      
+      "Leadership Summit 2026 Recap": "The VUMA Leadership Summit 2026 brought together over 500 young leaders from across Tanzania for three days of intensive training, networking, and inspiration. Held at the Julius Nyerere International Convention Centre in Dar es Salaam, the summit featured keynote speeches from prominent leaders, interactive workshops on essential leadership skills, and panel discussions on pressing national issues. Highlights included a fireside chat with the Minister of Youth, a pitch competition where 10 young entrepreneurs presented their innovative ideas, and a commitment ceremony where participants pledged to take action in their communities. The summit concluded with the announcement of the VUMA Fellowship Program, which will provide ongoing support to 50 exceptional young leaders.",
+      
+      "Partnering with UNDP for Climate Action": "VUMA Tanzania is proud to announce a strategic partnership with the United Nations Development Programme (UNDP) to accelerate climate action across Tanzania. This collaboration will focus on three key areas: youth-led climate initiatives, policy advocacy, and community-based adaptation projects. Through this partnership, VUMA will receive technical support and funding to expand its climate action programs, reaching an additional 10,000 young people over the next two years. Joint activities will include climate literacy workshops, tree planting campaigns, renewable energy projects, and advocacy for stronger climate policies."
+    };
+    return contents[title] || `${title} is an important initiative by VUMA Tanzania. This article provides detailed insights into our work and impact. Discover how we are making a difference in youth innovation and climate action across Tanzania.`;
   };
 
   return (
@@ -42,11 +68,11 @@ const Blog = () => {
         padding: '1rem'
       }}>
         {displayedPosts.map((post, idx) => (
-          <BlogCard key={idx} post={post} index={idx} />
+          <BlogCard key={idx} post={post} index={idx} onCardClick={() => openModal(post)} />
         ))}
       </div>
 
-      {/* View More Button - Same style as Hero and Forms */}
+      {/* View More Button - Loads more cards */}
       {hasMore && (
         <div style={{
           textAlign: 'center',
@@ -140,6 +166,184 @@ const Blog = () => {
         </div>
       )}
 
+      {/* Blog Post Modal */}
+      {showModal && selectedPost && (
+        <div className="modal-overlay" onClick={closeModal} style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.85)',
+          backdropFilter: 'blur(8px)',
+          zIndex: 2000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '16px',
+          animation: 'fadeIn 0.3s ease'
+        }}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{
+            background: 'white',
+            borderRadius: '28px',
+            maxWidth: '700px',
+            width: '100%',
+            maxHeight: '85vh',
+            overflowY: 'auto',
+            position: 'relative',
+            animation: 'slideInUp 0.3s ease'
+          }}>
+            {/* Close Button */}
+            <button
+              onClick={closeModal}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: 'rgba(0,0,0,0.5)',
+                border: 'none',
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                cursor: 'pointer',
+                color: 'white',
+                fontSize: '1.2rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 10,
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.7)'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.5)'}
+            >
+              <i className="fas fa-times"></i>
+            </button>
+
+            {/* Modal Header with Image */}
+            <div style={{ position: 'relative', height: '220px', overflow: 'hidden' }}>
+              <img 
+                src={selectedPost.img} 
+                alt={selectedPost.title} 
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7))' }} />
+              <div style={{ position: 'absolute', bottom: '24px', left: '24px', right: '24px', zIndex: 10 }}>
+                <span style={{
+                  display: 'inline-block',
+                  background: '#F9C74F',
+                  color: '#0B3B2F',
+                  padding: '0.3rem 0.8rem',
+                  borderRadius: '20px',
+                  fontSize: '0.7rem',
+                  fontWeight: 600,
+                  marginBottom: '0.5rem'
+                }}>
+                  LATEST STORY
+                </span>
+                <h2 style={{ color: 'white', margin: 0, fontSize: 'clamp(1.3rem, 5vw, 1.8rem)' }}>{selectedPost.title}</h2>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div style={{ padding: 'clamp(1.5rem, 5vw, 2rem)' }}>
+              {/* Meta Information */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+                flexWrap: 'wrap',
+                marginBottom: '1.5rem',
+                paddingBottom: '1rem',
+                borderBottom: '1px solid #f0f0f0'
+              }}>
+                <span style={{ fontSize: '0.8rem', color: '#666' }}>
+                  <i className="far fa-calendar-alt" style={{ marginRight: '0.3rem', color: '#F9C74F' }}></i>
+                  {selectedPost.date}
+                </span>
+                <span style={{ fontSize: '0.8rem', color: '#666' }}>
+                  <i className="far fa-clock" style={{ marginRight: '0.3rem', color: '#F9C74F' }}></i>
+                  {selectedPost.readTime}
+                </span>
+                <span style={{ fontSize: '0.8rem', color: '#666' }}>
+                  <i className="far fa-eye" style={{ marginRight: '0.3rem', color: '#F9C74F' }}></i>
+                  {Math.floor(Math.random() * 500) + 100} views
+                </span>
+              </div>
+
+              {/* Full Content */}
+              <div style={{ marginBottom: '1.5rem' }}>
+                <h3 style={{ color: '#0B3B2F', marginBottom: '0.8rem', fontSize: '1.1rem' }}>
+                  <i className="fas fa-info-circle" style={{ marginRight: '0.5rem', color: '#F9C74F' }}></i>
+                  Full Story
+                </h3>
+                <p style={{ color: '#555', lineHeight: '1.8', fontSize: '0.95rem' }}>
+                  {getFullContent(selectedPost.title)}
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                <button
+                  onClick={closeModal}
+                  style={{
+                    flex: 1,
+                    background: 'transparent',
+                    border: '2px solid #ddd',
+                    padding: '0.8rem',
+                    borderRadius: '50px',
+                    color: '#666',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = '#d32f2f';
+                    e.currentTarget.style.color = '#d32f2f';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = '#ddd';
+                    e.currentTarget.style.color = '#666';
+                  }}
+                >
+                  <i className="fas fa-times" style={{ marginRight: '0.5rem' }}></i>
+                  Close
+                </button>
+                <button
+                  onClick={() => alert(`Subscribe to our newsletter for more updates!`)}
+                  style={{
+                    flex: 2,
+                    background: '#F9C74F',
+                    border: 'none',
+                    padding: '0.8rem',
+                    borderRadius: '50px',
+                    color: '#0B3B2F',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'scale(1.02)';
+                    e.currentTarget.style.boxShadow = '0 5px 20px rgba(249,199,79,0.4)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                >
+                  <i className="fas fa-envelope"></i>
+                  Subscribe for Updates
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style>{`
         @keyframes fadeInDown {
           from {
@@ -196,24 +400,6 @@ const Blog = () => {
           }
         }
         
-        @keyframes pulse {
-          0%, 100% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.02);
-          }
-        }
-        
-        @keyframes shimmer {
-          0% {
-            background-position: -100% 0;
-          }
-          100% {
-            background-position: 100% 0;
-          }
-        }
-        
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
@@ -228,6 +414,36 @@ const Blog = () => {
           }
         }
         
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        
+        @keyframes slideInUp {
+          from {
+            opacity: 0;
+            transform: translateY(50px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .modal-content::-webkit-scrollbar {
+          width: 6px;
+        }
+        
+        .modal-content::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 3px;
+        }
+        
+        .modal-content::-webkit-scrollbar-thumb {
+          background: #F9C74F;
+          border-radius: 3px;
+        }
+        
         @media (max-width: 768px) {
           .btn-view-more {
             min-width: 140px !important;
@@ -236,6 +452,14 @@ const Blog = () => {
           
           .btn-view-more span {
             font-size: 0.85rem !important;
+          }
+          
+          .modal-content {
+            max-height: 90vh;
+          }
+          
+          .modal-content > div:first-child {
+            height: 180px;
           }
         }
         
@@ -252,20 +476,9 @@ const Blog = () => {
           .fa-arrow-right {
             font-size: 0.7rem !important;
           }
-        }
-        
-        /* Touch device optimizations */
-        @media (hover: none) and (pointer: coarse) {
-          .btn-view-more {
-            -webkit-tap-highlight-color: transparent;
-          }
           
-          .btn-view-more:active {
-            transform: scale(0.98) !important;
-          }
-          
-          .fa-arrow-right {
-            animation: bounceArrow 1.5s ease-in-out infinite !important;
+          .modal-content {
+            border-radius: 20px !important;
           }
         }
       `}</style>
@@ -273,8 +486,8 @@ const Blog = () => {
   );
 };
 
-// Separate component for blog card with scroll animation
-const BlogCard = ({ post, index }) => {
+// Blog Card Component
+const BlogCard = ({ post, index, onCardClick }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -307,14 +520,12 @@ const BlogCard = ({ post, index }) => {
     };
   }, [hasAnimated]);
 
-  // Preload image
   useEffect(() => {
     const img = new Image();
     img.src = post.img;
     img.onload = () => setImageLoaded(true);
   }, [post.img]);
 
-  // Different animation styles based on index
   const getAnimationStyle = () => {
     if (!isVisible) {
       const animations = ['fadeInUp', 'zoomIn', 'slideInLeft', 'slideInRight'];
@@ -363,30 +574,25 @@ const BlogCard = ({ post, index }) => {
         }
         e.currentTarget.style.boxShadow = '0 12px 25px rgba(0,0,0,0.05)';
       }}
+      onClick={() => onCardClick(post)}
     >
-      {/* Image Container with Zoom Effect */}
-      <div
-        style={{
-          height: '180px',
-          overflow: 'hidden',
-          position: 'relative',
-          backgroundColor: '#f0f0f0'
-        }}
-      >
-        {/* Skeleton Loader */}
+      <div style={{
+        height: '180px',
+        overflow: 'hidden',
+        position: 'relative',
+        backgroundColor: '#f0f0f0'
+      }}>
         {!imageLoaded && (
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: 'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
-              backgroundSize: '200% 100%',
-              animation: 'shimmer 1.5s infinite'
-            }}
-          />
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
+            backgroundSize: '200% 100%',
+            animation: 'shimmer 1.5s infinite'
+          }} />
         )}
         
         <img
@@ -398,78 +604,61 @@ const BlogCard = ({ post, index }) => {
             objectFit: 'cover',
             transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
             transform: 'scale(1)',
-            opacity: imageLoaded ? 1 : 0,
-            transition: 'opacity 0.3s ease, transform 0.5s ease'
+            opacity: imageLoaded ? 1 : 0
           }}
           className="blog-image"
           loading="lazy"
           onLoad={() => setImageLoaded(true)}
         />
         
-        {/* Date Badge */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '12px',
-            right: '12px',
-            background: 'rgba(11, 59, 47, 0.9)',
-            color: '#F9C74F',
-            padding: '4px 10px',
-            borderRadius: '20px',
-            fontSize: '0.7rem',
-            fontWeight: 'bold',
-            backdropFilter: 'blur(4px)',
-            zIndex: 1,
-            transform: isVisible ? 'translateX(0)' : 'translateX(50px)',
-            transition: `transform 0.4s ease ${index * 0.1 + 0.2}s`
-          }}
-        >
+        <div style={{
+          position: 'absolute',
+          top: '12px',
+          right: '12px',
+          background: 'rgba(11, 59, 47, 0.9)',
+          color: '#F9C74F',
+          padding: '4px 10px',
+          borderRadius: '20px',
+          fontSize: '0.7rem',
+          fontWeight: 'bold',
+          backdropFilter: 'blur(4px)',
+          zIndex: 1,
+          transform: isVisible ? 'translateX(0)' : 'translateX(50px)',
+          transition: `transform 0.4s ease ${index * 0.1 + 0.2}s`
+        }}>
           <i className="fas fa-calendar-alt" style={{ marginRight: '4px', fontSize: '0.6rem' }}></i>
           {post.date.split(' ')[0]}
         </div>
         
-        {/* Category Tag */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '12px',
-            left: '12px',
-            background: '#F9C74F',
-            color: '#0B3B2F',
-            padding: '4px 10px',
-            borderRadius: '20px',
-            fontSize: '0.65rem',
-            fontWeight: 'bold',
-            zIndex: 1,
-            transform: isVisible ? 'translateX(0)' : 'translateX(-50px)',
-            transition: `transform 0.4s ease ${index * 0.1 + 0.3}s`
-          }}
-        >
+        <div style={{
+          position: 'absolute',
+          bottom: '12px',
+          left: '12px',
+          background: '#F9C74F',
+          color: '#0B3B2F',
+          padding: '4px 10px',
+          borderRadius: '20px',
+          fontSize: '0.65rem',
+          fontWeight: 'bold',
+          zIndex: 1,
+          transform: isVisible ? 'translateX(0)' : 'translateX(-50px)',
+          transition: `transform 0.4s ease ${index * 0.1 + 0.3}s`
+        }}>
           <i className="fas fa-newspaper" style={{ marginRight: '4px' }}></i>
           LATEST NEWS
         </div>
       </div>
       
-      {/* Content Section */}
-      <div
-        style={{
-          padding: '1.2rem',
-          background: 'white',
-          position: 'relative'
-        }}
-      >
-        {/* Meta Information */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.8rem',
-            marginBottom: '0.8rem',
-            fontSize: '0.7rem',
-            color: '#666',
-            flexWrap: 'wrap'
-          }}
-        >
+      <div style={{ padding: '1.2rem', background: 'white', position: 'relative' }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.8rem',
+          marginBottom: '0.8rem',
+          fontSize: '0.7rem',
+          color: '#666',
+          flexWrap: 'wrap'
+        }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             <i className="far fa-calendar" style={{ color: '#F9C74F' }}></i>
             {post.date}
@@ -478,144 +667,59 @@ const BlogCard = ({ post, index }) => {
             <i className="far fa-clock" style={{ color: '#F9C74F' }}></i>
             {post.readTime}
           </span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <i className="far fa-eye" style={{ color: '#F9C74F' }}></i>
-            {Math.floor(Math.random() * 500) + 100} views
-          </span>
         </div>
         
-        {/* Title */}
-        <h4
-          style={{
-            marginTop: '0',
-            marginBottom: '0.8rem',
-            fontSize: '1.1rem',
-            fontWeight: 700,
-            color: '#0B3B2F',
-            lineHeight: '1.4',
-            transition: 'color 0.3s ease'
-          }}
-          className="blog-title"
-        >
+        <h4 style={{
+          marginTop: '0',
+          marginBottom: '0.8rem',
+          fontSize: '1.1rem',
+          fontWeight: 700,
+          color: '#0B3B2F',
+          lineHeight: '1.4',
+          transition: 'color 0.3s ease'
+        }}
+        className="blog-title">
           {post.title}
         </h4>
         
-        {/* Excerpt (simulated) */}
-        <p
-          style={{
-            fontSize: '0.8rem',
-            color: '#666',
-            lineHeight: '1.5',
-            marginBottom: '1rem'
-          }}
-        >
+        <p style={{
+          fontSize: '0.8rem',
+          color: '#666',
+          lineHeight: '1.5',
+          marginBottom: '1rem'
+        }}>
           Discover how VUMA Tanzania is making a difference in youth innovation and climate action...
         </p>
         
-        {/* Read More Link */}
-        <div
-          style={{
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          borderTop: '1px solid #f0f0f0',
+          paddingTop: '0.8rem'
+        }}>
+          <div style={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
-            borderTop: '1px solid #f0f0f0',
-            paddingTop: '0.8rem'
-          }}
-        >
-          <a
-            href="#"
-            style={{
-              color: '#0B3B2F',
-              textDecoration: 'none',
-              fontSize: '0.85rem',
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              transition: 'all 0.3s ease'
-            }}
-            className="read-more-link"
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = '#F9C74F';
-              e.currentTarget.style.gap = '10px';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = '#0B3B2F';
-              e.currentTarget.style.gap = '6px';
-            }}
-          >
-            Read More
-            <i className="fas fa-arrow-right" style={{ fontSize: '0.7rem', transition: 'transform 0.3s ease' }}></i>
-          </a>
-          
-          {/* Share Icon */}
-          <div
-            style={{
-              display: 'flex',
-              gap: '0.5rem'
-            }}
-          >
-            <i
-              className="fab fa-facebook"
-              style={{
-                color: '#666',
-                fontSize: '0.8rem',
-                cursor: 'pointer',
-                transition: 'color 0.3s ease'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.color = '#1877f2'}
-              onMouseLeave={(e) => e.currentTarget.style.color = '#666'}
-              onClick={() => alert('Share on Facebook')}
-            ></i>
-            <i
-              className="fab fa-twitter"
-              style={{
-                color: '#666',
-                fontSize: '0.8rem',
-                cursor: 'pointer',
-                transition: 'color 0.3s ease'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.color = '#1da1f2'}
-              onMouseLeave={(e) => e.currentTarget.style.color = '#666'}
-              onClick={() => alert('Share on Twitter')}
-            ></i>
-            <i
-              className="fab fa-linkedin"
-              style={{
-                color: '#666',
-                fontSize: '0.8rem',
-                cursor: 'pointer',
-                transition: 'color 0.3s ease'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.color = '#0077b5'}
-              onMouseLeave={(e) => e.currentTarget.style.color = '#666'}
-              onClick={() => alert('Share on LinkedIn')}
-            ></i>
+            gap: '0.5rem',
+            color: '#F9C74F',
+            fontSize: '0.8rem',
+            fontWeight: 600
+          }}>
+            <i className="fas fa-eye"></i>
+            <span>Click to read full story</span>
           </div>
         </div>
       </div>
-      
+
       <style>{`
-        .blog-card {
-          position: relative;
-          overflow: hidden;
-        }
-        
-        .blog-card::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: -100%;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(249,199,79,0.1), transparent);
-          transition: left 0.5s ease;
-          z-index: 1;
-          pointer-events: none;
-        }
-        
-        .blog-card:hover::before {
-          left: 100%;
+        @keyframes shimmer {
+          0% {
+            background-position: -100% 0;
+          }
+          100% {
+            background-position: 100% 0;
+          }
         }
         
         .blog-image {
@@ -630,15 +734,6 @@ const BlogCard = ({ post, index }) => {
           color: #F9C74F !important;
         }
         
-        .read-more-link i {
-          transition: transform 0.3s ease;
-        }
-        
-        .read-more-link:hover i {
-          transform: translateX(4px);
-        }
-        
-        /* Mobile Responsive Styles */
         @media (max-width: 768px) {
           .blog-card {
             width: calc(50% - 0.75rem) !important;
@@ -655,20 +750,10 @@ const BlogCard = ({ post, index }) => {
           
           .blog-card h4 {
             font-size: 0.9rem !important;
-            margin-bottom: 0.5rem !important;
           }
           
           .blog-card p {
             font-size: 0.7rem !important;
-            margin-bottom: 0.8rem !important;
-          }
-          
-          .blog-card .read-more-link {
-            font-size: 0.75rem !important;
-          }
-          
-          .blog-card .meta-info {
-            font-size: 0.6rem !important;
           }
         }
         
@@ -685,53 +770,6 @@ const BlogCard = ({ post, index }) => {
           
           .blog-card h4 {
             font-size: 1rem !important;
-          }
-          
-          .blog-card p {
-            fontSize: 0.8rem !important;
-          }
-          
-          /* Improve touch targets on mobile */
-          .read-more-link,
-          .share-icon {
-            padding: 4px 8px;
-          }
-        }
-        
-        /* Tablet optimization */
-        @media (min-width: 769px) and (max-width: 1024px) {
-          .blog-card {
-            width: calc(33.33% - 1rem) !important;
-          }
-        }
-        
-        /* Reduced motion preference */
-        @media (prefers-reduced-motion: reduce) {
-          .blog-card,
-          .blog-image,
-          .read-more-link i,
-          .blog-card::before {
-            transition: none !important;
-            animation: none !important;
-          }
-        }
-        
-        /* Dark mode support */
-        @media (prefers-color-scheme: dark) {
-          .blog-card {
-            background: #1a1a1a;
-          }
-          
-          .blog-card h4 {
-            color: #e0e0e0;
-          }
-          
-          .blog-card p {
-            color: #b0b0b0;
-          }
-          
-          .blog-card .meta-info {
-            color: #888;
           }
         }
       `}</style>

@@ -17,7 +17,27 @@ import Volunteers from './pages/Volunteers';
 import Contact from './pages/Contact';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
+import Donate from './pages/Donate';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import VerifyOTP from './pages/VerifyOTP';
+import Report from './pages/Report';
+import Apply from './pages/Apply';
+import EventRegister from './pages/EventRegister';
+
+
+
+
+
+import AdminUsers from './admin/AdminUsers';
+import AdminProjects from './admin/AdminProjects';
+import AdminEvents from './admin/AdminEvents';
+import AdminVolunteers from './admin/AdminVolunteers';
+import AdminPartners from './admin/AdminPartners';
+import AdminMessages from './admin/AdminMessages';
 // ScrollToTop component to reset scroll on page change
+
+
 const ScrollToTop = () => {
   const { pathname } = useLocation();
 
@@ -94,6 +114,26 @@ function App() {
             <Route path="/volunteers" element={<Volunteers />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/donate" element={<Donate />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/verify-otp" element={<VerifyOTP />} />
+            <Route path="/report" element={<Report />} />
+            <Route path="/programs/apply" element={<Apply />} />
+            <Route path="/events/register" element={<EventRegister />} />
+
+
+
+
+
+            // Add these routes inside Routes
+<Route path="/admin" element={<AdminDashboard />} />
+<Route path="/admin/users" element={<AdminUsers />} />
+<Route path="/admin/projects" element={<AdminProjects />} />
+<Route path="/admin/events" element={<AdminEvents />} />
+<Route path="/admin/volunteers" element={<AdminVolunteers />} />
+<Route path="/admin/partners" element={<AdminPartners />} />
+<Route path="/admin/messages" element={<AdminMessages />} />
           </Routes>
         </main>
         

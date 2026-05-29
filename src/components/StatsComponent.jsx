@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const StatsComponent = () => {
+  const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
   const [counters, setCounters] = useState({
     experience: 0,
@@ -65,15 +67,18 @@ const StatsComponent = () => {
     });
   };
 
-  // Format number with commas for thousands
   const formatNumber = (num) => {
     return num.toLocaleString();
+  };
+
+  const handleViewReport = () => {
+    navigate('/report');
   };
 
   return (
     <div ref={sectionRef} style={{
       padding: '4rem 1.5rem',
-      background: 'transparent', // Transparent background
+      background: 'transparent',
       position: 'relative',
       overflow: 'hidden'
     }}>
@@ -127,7 +132,7 @@ const StatsComponent = () => {
         pointerEvents: 'none'
       }} />
 
-      {/* Section Header - Dark Text */}
+      {/* Section Header */}
       <div style={{
         textAlign: 'center',
         marginBottom: '3rem',
@@ -167,7 +172,7 @@ const StatsComponent = () => {
         </p>
       </div>
 
-      {/* Stats Grid - Light Theme Cards */}
+      {/* Stats Grid */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
@@ -207,7 +212,6 @@ const StatsComponent = () => {
               e.currentTarget.style.border = '1px solid rgba(11,59,47,0.1)';
             }}
           >
-            {/* Icon Container - Light Theme */}
             <div style={{
               width: '70px',
               height: '70px',
@@ -224,7 +228,6 @@ const StatsComponent = () => {
               <i className={stat.icon} style={{ fontSize: '2rem', color: '#0B3B2F' }}></i>
             </div>
 
-            {/* Counter Number - Dark Color */}
             <div style={{
               fontSize: 'clamp(2.5rem, 6vw, 3.5rem)',
               fontWeight: 800,
@@ -236,7 +239,6 @@ const StatsComponent = () => {
               {formatNumber(counters[stat.id])}{stat.suffix}
             </div>
 
-            {/* Label - Dark Gray */}
             <div style={{
               fontSize: 'clamp(0.85rem, 3vw, 1rem)',
               color: '#555',
@@ -246,7 +248,6 @@ const StatsComponent = () => {
               {stat.label}
             </div>
 
-            {/* Decorative line - Gold color */}
             <div style={{
               width: '50px',
               height: '3px',
@@ -261,7 +262,7 @@ const StatsComponent = () => {
         ))}
       </div>
 
-      {/* Call to Action Button - Light Theme */}
+      {/* Call to Action Button - Styled exactly like Join Movement button */}
       <div style={{
         textAlign: 'center',
         marginTop: '3rem',
@@ -271,32 +272,31 @@ const StatsComponent = () => {
         transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
         transition: 'all 0.6s ease 0.4s'
       }}>
-        <button
-          onClick={() => alert('Join us in making a difference!')}
+        <button 
+          className="btn-cta"
+          onClick={handleViewReport}
           style={{
-            background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)',
+            background: '#F9C74F',
             border: 'none',
-            padding: '1rem 2rem',
-            borderRadius: '50px',
-            color: 'white',
+            padding: '0.7rem 1.5rem',
+            borderRadius: '60px',
             fontWeight: 700,
-            fontSize: '1rem',
+            margin: '0',
             cursor: 'pointer',
             transition: 'all 0.3s ease',
+            fontSize: 'clamp(0.8rem, 3.5vw, 1rem)',
             display: 'inline-flex',
             alignItems: 'center',
             gap: '0.5rem',
-            boxShadow: '0 5px 20px rgba(0,0,0,0.1)'
+            color: '#0B3B2F'
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = 'scale(1.05)';
-            e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)';
-            e.currentTarget.style.background = 'linear-gradient(135deg, #1a5c48, #0B3B2F)';
+            e.currentTarget.style.boxShadow = '0 5px 20px rgba(249,199,79,0.4)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'scale(1)';
-            e.currentTarget.style.boxShadow = '0 5px 20px rgba(0,0,0,0.1)';
-            e.currentTarget.style.background = 'linear-gradient(135deg, #0B3B2F, #1a5c48)';
+            e.currentTarget.style.boxShadow = 'none';
           }}
         >
           <i className="fas fa-chart-simple"></i>
@@ -305,7 +305,6 @@ const StatsComponent = () => {
         </button>
       </div>
 
-      {/* CSS Animations */}
       <style>{`
         @keyframes float {
           0%, 100% {
@@ -326,6 +325,18 @@ const StatsComponent = () => {
           .stats-grid {
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1rem;
+          }
+          
+          .btn-cta {
+            padding: 0.6rem 1.2rem !important;
+            font-size: 0.85rem !important;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .btn-cta {
+            padding: 0.5rem 1rem !important;
+            font-size: 0.8rem !important;
           }
         }
       `}</style>

@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Timeline = () => {
+  const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
   const [activeEvent, setActiveEvent] = useState(null);
+  const [isRegisterHovered, setIsRegisterHovered] = useState(false);
+  const [isViewHovered, setIsViewHovered] = useState(false);
   const sectionRef = useRef(null);
 
   const events = [
@@ -63,6 +67,14 @@ const Timeline = () => {
       }
     };
   }, []);
+
+  const handleRegister = (eventTitle) => {
+    navigate('/events/register', { state: { eventName: eventTitle } });
+  };
+
+  const handleViewAllEvents = () => {
+    navigate('/events');
+  };
 
   return (
     <div ref={sectionRef} style={{
@@ -293,7 +305,7 @@ const Timeline = () => {
                     display: 'flex',
                     flexWrap: 'wrap',
                     gap: '1rem',
-                    marginBottom: '0.8rem'
+                    marginBottom: '1rem'
                   }}>
                     <div style={{
                       display: 'flex',
@@ -316,32 +328,40 @@ const Timeline = () => {
                       <span>{event.location}</span>
                     </div>
                   </div>
-                  <button
+                  
+                  {/* Register link with text and forward arrow */}
+                  <div
+                    onClick={() => handleRegister(event.title)}
+                    onMouseEnter={() => setIsRegisterHovered(true)}
+                    onMouseLeave={() => setIsRegisterHovered(false)}
                     style={{
-                      background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)',
-                      border: 'none',
-                      padding: '0.5rem 1rem',
-                      borderRadius: '25px',
-                      color: 'white',
-                      fontSize: '0.7rem',
-                      fontWeight: 600,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
                       cursor: 'pointer',
-                      transition: 'all 0.3s ease',
-                      width: '100%'
+                      padding: '0.5rem 0',
+                      transition: 'all 0.3s ease'
                     }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'scale(1.02)';
-                      e.currentTarget.style.boxShadow = '0 3px 10px rgba(11,59,47,0.3)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'scale(1)';
-                      e.currentTarget.style.boxShadow = 'none';
-                    }}
-                    onClick={() => alert(`Register for ${event.title}`)}
                   >
-                    Register Now
-                    <i className="fas fa-arrow-right" style={{ marginLeft: '0.5rem', fontSize: '0.6rem' }}></i>
-                  </button>
+                    <span style={{
+                      color: '#0B3B2F',
+                      fontWeight: 600,
+                      fontSize: '0.8rem',
+                      transition: 'color 0.3s ease'
+                    }}>
+                      Register Now
+                    </span>
+                    <i 
+                      className="fas fa-arrow-right" 
+                      style={{
+                        fontSize: '0.8rem',
+                        color: '#F9C74F',
+                        transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                        transform: isRegisterHovered ? 'translateX(8px)' : 'translateX(0)',
+                        animation: isRegisterHovered ? 'none' : 'bounceArrow 1.5s ease-in-out infinite'
+                      }}
+                    ></i>
+                  </div>
                 </div>
               )}
             </div>
@@ -349,7 +369,7 @@ const Timeline = () => {
         ))}
       </div>
 
-      {/* View All Events Button */}
+      {/* View All Events - Eye icon link */}
       <div style={{
         textAlign: 'center',
         marginTop: '2rem',
@@ -359,35 +379,38 @@ const Timeline = () => {
         transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
         transition: 'all 0.5s ease 0.45s'
       }}>
-        <button
+        <div
+          onClick={handleViewAllEvents}
+          onMouseEnter={() => setIsViewHovered(true)}
+          onMouseLeave={() => setIsViewHovered(false)}
           style={{
-            background: 'transparent',
-            border: '2px solid #F9C74F',
-            padding: '0.7rem 1.5rem',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            cursor: 'pointer',
+            padding: '0.5rem 1rem',
             borderRadius: '50px',
+            transition: 'all 0.3s ease'
+          }}
+        >
+          <i 
+            className="fas fa-eye" 
+            style={{
+              fontSize: '1rem',
+              color: '#F9C74F',
+              transition: 'transform 0.3s ease',
+              transform: isViewHovered ? 'scale(1.1)' : 'scale(1)'
+            }}
+          ></i>
+          <span style={{
             color: '#0B3B2F',
             fontWeight: 600,
             fontSize: '0.85rem',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.5rem'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = '#F9C74F';
-            e.currentTarget.style.transform = 'scale(1.05)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'transparent';
-            e.currentTarget.style.transform = 'scale(1)';
-          }}
-          onClick={() => alert('View all upcoming events')}
-        >
-          <i className="fas fa-calendar-week"></i>
-          View All Events
-          <i className="fas fa-arrow-right"></i>
-        </button>
+            transition: 'color 0.3s ease'
+          }}>
+            View All Events
+          </span>
+        </div>
       </div>
 
       {/* CSS Animations */}
@@ -400,6 +423,15 @@ const Timeline = () => {
           to {
             opacity: 1;
             transform: translateY(0);
+          }
+        }
+        
+        @keyframes bounceArrow {
+          0%, 100% {
+            transform: translateX(0);
+          }
+          50% {
+            transform: translateX(5px);
           }
         }
         
@@ -419,6 +451,10 @@ const Timeline = () => {
           .timeline-card .fa-calendar-alt,
           .timeline-card .fa-map-marker-alt {
             font-size: 0.55rem !important;
+          }
+          
+          .register-link span {
+            font-size: 0.75rem !important;
           }
         }
         

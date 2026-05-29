@@ -24,9 +24,9 @@ const Hero = ({ onLoginClick }) => {
       background: `linear-gradient(135deg, rgba(0,0,0,0.6), rgba(0,40,30,0.75)), url(${eventdImg})`,
       backgroundSize: 'cover',
       backgroundPosition: 'center center',
-      backgroundAttachment: 'scroll', // Changed from 'fixed' for better mobile performance
+      backgroundAttachment: 'scroll',
       transition: 'all 0.3s ease',
-      padding: '80px 1rem 60px' // Added padding for mobile
+      padding: '80px 1rem 60px'
     }}>
       {/* Animated Overlay */}
       <div style={{
@@ -84,8 +84,9 @@ const Hero = ({ onLoginClick }) => {
           animation: 'slideInUp 0.8s ease',
           lineHeight: '1.2'
         }}>
-          Empowering Youth. Igniting Innovation. Protecting Our Planet.
+          Vijana. Uongozi. Ubunifu. Mazingira
         </h1>
+        
         <p style={{ 
           fontSize: 'clamp(0.9rem, 4vw, 1.2rem)', 
           marginBottom: '1.5rem',
@@ -93,10 +94,122 @@ const Hero = ({ onLoginClick }) => {
           opacity: 0.95,
           padding: '0 0.5rem'
         }}>
-          Turning sustainable student ideas into community-scale solutions.
+          Empowering Youth, Strengthening Communities, Creating Sustainable Impact
         </p>
-        <div style={{
+        
+        <p style={{
+          fontSize: 'clamp(0.8rem, 3.5vw, 1rem)',
+          marginBottom: '2rem',
+          animation: 'slideInUp 0.8s ease 0.3s',
+          opacity: 0.9,
+          padding: '0 0.5rem',
+          lineHeight: '1.6'
+        }}>
+          VUMA Tanzania is a youth-led non-governmental organization dedicated
+          to empowering young people and communities through leadership, innovation, environmental action
+          and sustainable community development across Tanzania. Registered in the United Republic of
+          Tanzania as Non-Governmental Organization
+          <strong style={{ color: '#F9C74F', display: 'inline-block' }}> (Reg. No. 00NGO/R/9522)</strong>.
+        </p>
+
+        <h2 style={{
+          fontSize: 'clamp(1.2rem, 5vw, 2rem)',
+          fontWeight: 700,
+          marginBottom: '1rem',
           animation: 'slideInUp 0.8s ease 0.4s',
+          color: '#F9C74F'
+        }}>
+          Why We Exist?
+        </h2>
+        
+        <p style={{
+          fontSize: 'clamp(0.9rem, 4vw, 1.2rem)',
+          marginBottom: '2rem',
+          animation: 'slideInUp 0.8s ease 0.4s',
+          opacity: 0.9,
+          padding: '0 0.5rem',
+          lineHeight: '1.6'
+        }}>
+          VUMA Tanzania was established to create opportunities for young people
+          to lead positive change in their communities through education, innovation, volunteerism and social impact initiatives.
+          We believe in the power of youth to drive sustainable development and build a better future for Tanzania.
+        </p>
+
+        <h2 style={{
+          fontSize: 'clamp(1.2rem, 5vw, 2rem)',
+          fontWeight: 700,
+          marginBottom: '1rem',
+          animation: 'slideInUp 0.8s ease 0.5s',
+          color: '#F9C74F'
+        }}>
+          Who We Support?
+        </h2>
+        
+        <p style={{
+          fontSize: 'clamp(0.9rem, 4vw, 1.2rem)',
+          marginBottom: '1rem',
+          animation: 'slideInUp 0.8s ease 0.5s',
+          opacity: 0.9,
+          fontWeight: 600
+        }}>
+          We work with:
+        </p>
+        
+        {/* Styled List */}
+        <div style={{
+          textAlign: 'left',
+          maxWidth: '600px',
+          margin: '0 auto 2rem auto',
+          animation: 'slideInUp 0.8s ease 0.5s'
+        }}>
+          <ul style={{
+            listStyle: 'none',
+            padding: 0,
+            margin: 0
+          }}>
+            {[
+              'Young People and youth groups',
+              'Local communities',
+              'Women and children',
+              'Community innovators and volunteers',
+              'Educational institutions and youth organizations',
+              'Environmental and social impact initiatives Across Tanzania'
+            ].map((item, index) => (
+              <li key={index} style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                marginBottom: '12px',
+                padding: '8px 12px',
+                background: 'rgba(255,255,255,0.1)',
+                borderRadius: '12px',
+                backdropFilter: 'blur(5px)',
+                transition: 'transform 0.3s ease, background 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateX(8px)';
+                e.currentTarget.style.background = 'rgba(249,199,79,0.2)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateX(0)';
+                e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+              }}>
+                <i className="fas fa-check-circle" style={{
+                  color: '#F9C74F',
+                  fontSize: '1rem',
+                  minWidth: '20px'
+                }}></i>
+                <span style={{
+                  fontSize: 'clamp(0.8rem, 3.5vw, 0.9rem)',
+                  lineHeight: '1.4'
+                }}>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        
+        <div style={{
+          animation: 'slideInUp 0.8s ease 0.6s',
           display: 'flex',
           flexDirection: 'row',
           justifyContent: 'center',
@@ -162,41 +275,7 @@ const Hero = ({ onLoginClick }) => {
         </div>
       </div>
 
-      {/* Scroll Indicator - Hide on very small screens */}
-      <div style={{
-        position: 'absolute',
-        bottom: '1.5rem',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        zIndex: 2,
-        animation: 'bounce 2s infinite',
-        cursor: 'pointer',
-        display: 'block',
-        '@media (max-width: 480px)': {
-          display: 'none'
-        }
-      }}
-      onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}>
-        <div style={{
-          width: '26px',
-          height: '42px',
-          border: '2px solid white',
-          borderRadius: '15px',
-          position: 'relative'
-        }}>
-          <div style={{
-            position: 'absolute',
-            top: '6px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '3px',
-            height: '8px',
-            background: '#F9C74F',
-            borderRadius: '2px',
-            animation: 'scrollDown 1.5s infinite'
-          }} />
-        </div>
-      </div>
+     
 
       {/* CSS Animations */}
       <style>{`
@@ -270,6 +349,15 @@ const Hero = ({ onLoginClick }) => {
             font-size: 0.85rem !important;
             min-width: 130px !important;
           }
+          
+          ul li {
+            margin-bottom: 8px !important;
+            padding: 6px 10px !important;
+          }
+          
+          ul li span {
+            font-size: 0.75rem !important;
+          }
         }
         
         @media (max-width: 480px) {
@@ -293,6 +381,14 @@ const Hero = ({ onLoginClick }) => {
           
           .scroll-indicator {
             display: none !important;
+          }
+          
+          ul li {
+            padding: 5px 8px !important;
+          }
+          
+          ul li i {
+            font-size: 0.8rem !important;
           }
         }
         

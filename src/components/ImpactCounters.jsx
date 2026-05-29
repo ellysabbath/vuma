@@ -66,7 +66,7 @@ const ImpactCounters = () => {
         flexWrap: 'wrap',
         justifyContent: 'center',
         gap: '1.2rem',
-        maxWidth: 1200,
+        maxWidth: 1000,
         margin: 'auto'
       }}>
         {counters.map((counter, idx) => (
