@@ -5,96 +5,36 @@ import 'aos/dist/aos.css';
 
 const Volunteers = () => {
   const navigate = useNavigate();
+  const [volunteers, setVolunteers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [selectedVolunteer, setSelectedVolunteer] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [isJoinHovered, setIsJoinHovered] = useState(false);
 
   useEffect(() => {
     AOS.init({ duration: 800, once: false });
+    fetchVolunteers();
   }, []);
 
-  const volunteers = [
-    { 
-      id: 1,
-      name: 'Neema Juma',
-      role: 'Team Leader',
-      location: 'Dar es Salaam',
-      joinDate: 'January 2025',
-      hoursContributed: 245,
-      projectsParticipated: 8,
-      image: 'https://randomuser.me/api/portraits/women/68.jpg',
-      bio: 'Neema is a passionate environmental activist who has led multiple tree planting initiatives across Dar es Salaam. She is dedicated to empowering youth through environmental education.',
-      achievements: ['Best Volunteer 2025', '1000+ Trees Planted', 'Leadership Award'],
-      social: { twitter: '@neemaj', linkedin: 'neema-juma', instagram: '@neema_j' }
-    },
-    { 
-      id: 2,
-      name: 'James Omondi',
-      role: 'Event Coordinator',
-      location: 'Arusha',
-      joinDate: 'March 2025',
-      hoursContributed: 189,
-      projectsParticipated: 12,
-      image: 'https://randomuser.me/api/portraits/men/32.jpg',
-      bio: 'James is an experienced event coordinator who has organized over 15 community events. He specializes in bringing people together for social impact.',
-      achievements: ['Event Excellence Award', 'Community Champion', 'Top Organizer 2025'],
-      social: { twitter: '@jamesom', linkedin: 'james-omondi', instagram: '@james_om' }
-    },
-    { 
-      id: 3,
-      name: 'Grace Kimathi',
-      role: 'Digital Media Specialist',
-      location: 'Mwanza',
-      joinDate: 'February 2025',
-      hoursContributed: 156,
-      projectsParticipated: 6,
-      image: 'https://randomuser.me/api/portraits/women/45.jpg',
-      bio: 'Grace manages our social media presence and creates engaging content that has reached over 100,000 people. She is passionate about digital storytelling.',
-      achievements: ['Social Impact Award', 'Content Creator of the Year', 'Best Campaign 2025'],
-      social: { twitter: '@gracek', linkedin: 'grace-kimathi', instagram: '@grace_kim' }
-    },
-    { 
-      id: 4,
-      name: 'Michael John',
-      role: 'Environmental Lead',
-      location: 'Mbeya',
-      joinDate: 'April 2025',
-      hoursContributed: 210,
-      projectsParticipated: 10,
-      image: 'https://randomuser.me/api/portraits/men/45.jpg',
-      bio: 'Michael leads our environmental conservation projects, including tree planting and waste management initiatives across the region.',
-      achievements: ['Green Champion', 'Sustainability Leader', 'Environmental Award'],
-      social: { twitter: '@michaelj', linkedin: 'michael-john', instagram: '@michael_j' }
-    },
-    { 
-      id: 5,
-      name: 'Sarah Mbeki',
-      role: 'Youth Mentor',
-      location: 'Tanga',
-      joinDate: 'January 2025',
-      hoursContributed: 178,
-      projectsParticipated: 7,
-      image: 'https://randomuser.me/api/portraits/women/89.jpg',
-      bio: 'Sarah mentors young people in leadership and personal development. She has helped over 50 youth discover their potential.',
-      achievements: ['Mentor of the Year', 'Youth Impact Award', 'Community Hero'],
-      social: { twitter: '@sarahm', linkedin: 'sarah-mbeki', instagram: '@sarah_m' }
-    },
-    { 
-      id: 6,
-      name: 'Peter Otieno',
-      role: 'Fundraising Coordinator',
-      location: 'Dodoma',
-      joinDate: 'June 2025',
-      hoursContributed: 134,
-      projectsParticipated: 5,
-      image: 'https://randomuser.me/api/portraits/men/67.jpg',
-      bio: 'Peter coordinates our fundraising efforts and has helped raise over $50,000 for community projects.',
-      achievements: ['Top Fundraiser', 'Partnership Builder', 'Community Impact Award'],
-      social: { twitter: '@petero', linkedin: 'peter-otieno', instagram: '@peter_o' }
+  const fetchVolunteers = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('http://192.168.137.83:8000/api/volunteers/');
+      const data = await response.json();
+      if (data.success) {
+        setVolunteers(data.data);
+      } else {
+        setError('Failed to load volunteers');
+      }
+    } catch (error) {
+      setError('Network error. Please check your connection.');
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
-  const openModal = (volunteer) => {
+  const openModal = async (volunteer) => {
     setSelectedVolunteer(volunteer);
     setShowModal(true);
     document.body.style.overflow = 'hidden';
@@ -109,6 +49,31 @@ const Volunteers = () => {
   const handleJoinClick = () => {
     navigate('/signup');
   };
+
+  if (loading) {
+    return (
+      <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f9fbf7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <i className="fas fa-spinner fa-spin" style={{ fontSize: '3rem', color: '#0B3B2F' }}></i>
+          <p style={{ marginTop: '1rem', color: '#666' }}>Loading volunteers...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f9fbf7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <i className="fas fa-exclamation-circle" style={{ fontSize: '3rem', color: '#d32f2f' }}></i>
+          <p style={{ marginTop: '1rem', color: '#666' }}>{error}</p>
+          <button onClick={fetchVolunteers} style={{ marginTop: '1rem', background: '#F9C74F', border: 'none', padding: '0.5rem 1rem', borderRadius: '20px', cursor: 'pointer' }}>
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ paddingTop: '70px' }}>
@@ -129,68 +94,74 @@ const Volunteers = () => {
 
       {/* Volunteers Gallery */}
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '4rem 2rem' }}>
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
-          gap: '2rem',
-          marginBottom: '3rem'
-        }}>
-          {volunteers.map((volunteer, idx) => (
-            <div key={volunteer.id} data-aos="zoom-in" data-aos-delay={idx * 100} style={{
-              background: 'white',
-              borderRadius: '20px',
-              overflow: 'hidden',
-              boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
-              transition: 'transform 0.3s ease',
-              cursor: 'pointer',
-              textAlign: 'center'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
-            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-            onClick={() => openModal(volunteer)}>
-              <div style={{
-                width: '120px',
-                height: '120px',
-                margin: '1.5rem auto 0',
-                borderRadius: '50%',
+        {volunteers.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '3rem' }}>
+            <i className="fas fa-users" style={{ fontSize: '3rem', color: '#999' }}></i>
+            <p style={{ marginTop: '1rem', color: '#666' }}>No volunteers found.</p>
+          </div>
+        ) : (
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
+            gap: '2rem',
+            marginBottom: '3rem'
+          }}>
+            {volunteers.map((volunteer, idx) => (
+              <div key={volunteer.id} data-aos="zoom-in" data-aos-delay={idx * 100} style={{
+                background: 'white',
+                borderRadius: '20px',
                 overflow: 'hidden',
-                border: '3px solid #F9C74F'
-              }}>
-                <img 
-                  src={volunteer.image} 
-                  alt={volunteer.name}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-              </div>
-              <div style={{ padding: '1.5rem' }}>
-                <h3 style={{ color: '#0B3B2F', marginBottom: '0.3rem' }}>{volunteer.name}</h3>
-                <p style={{ color: '#F9C74F', fontWeight: 600, marginBottom: '0.5rem' }}>{volunteer.role}</p>
-                <p style={{ color: '#666', fontSize: '0.8rem', marginBottom: '0.3rem' }}>
-                  <i className="fas fa-map-marker-alt" style={{ marginRight: '0.3rem', color: '#F9C74F' }}></i>
-                  {volunteer.location}
-                </p>
-                <p style={{ color: '#666', fontSize: '0.8rem' }}>
-                  <i className="fas fa-clock" style={{ marginRight: '0.3rem', color: '#F9C74F' }}></i>
-                  {volunteer.hoursContributed}+ hours
-                </p>
-                {/* Eye Icon for viewing details */}
-                <div style={{ 
-                  marginTop: '0.8rem', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  gap: '0.5rem', 
-                  color: '#F9C74F', 
-                  fontSize: '0.8rem',
-                  cursor: 'pointer'
+                boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
+                transition: 'transform 0.3s ease',
+                cursor: 'pointer',
+                textAlign: 'center'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+              onClick={() => openModal(volunteer)}>
+                <div style={{
+                  width: '120px',
+                  height: '120px',
+                  margin: '1.5rem auto 0',
+                  borderRadius: '50%',
+                  overflow: 'hidden',
+                  border: '3px solid #F9C74F'
                 }}>
-                  <i className="fas fa-eye"></i>
-                  <span>View Profile</span>
+                  <img 
+                    src={volunteer.image} 
+                    alt={volunteer.name}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                </div>
+                <div style={{ padding: '1.5rem' }}>
+                  <h3 style={{ color: '#0B3B2F', marginBottom: '0.3rem' }}>{volunteer.name}</h3>
+                  <p style={{ color: '#F9C74F', fontWeight: 600, marginBottom: '0.5rem' }}>{volunteer.role}</p>
+                  <p style={{ color: '#666', fontSize: '0.8rem', marginBottom: '0.3rem' }}>
+                    <i className="fas fa-map-marker-alt" style={{ marginRight: '0.3rem', color: '#F9C74F' }}></i>
+                    {volunteer.location}
+                  </p>
+                  <p style={{ color: '#666', fontSize: '0.8rem' }}>
+                    <i className="fas fa-clock" style={{ marginRight: '0.3rem', color: '#F9C74F' }}></i>
+                    {volunteer.hours_contributed}+ hours
+                  </p>
+                  <div style={{ 
+                    marginTop: '0.8rem', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    gap: '0.5rem', 
+                    color: '#F9C74F', 
+                    fontSize: '0.8rem',
+                    cursor: 'pointer'
+                  }}>
+                    <i className="fas fa-eye"></i>
+                    <span>View Profile</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* Join Volunteer Team - Arrow Forward Icon */}
         <div style={{ 
@@ -326,15 +297,15 @@ const Volunteers = () => {
                 textAlign: 'center'
               }}>
                 <div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#F9C74F' }}>{selectedVolunteer.hoursContributed}+</div>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#F9C74F' }}>{selectedVolunteer.hours_contributed}+</div>
                   <div style={{ fontSize: '0.7rem', color: '#666' }}>Hours</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#F9C74F' }}>{selectedVolunteer.projectsParticipated}</div>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#F9C74F' }}>{selectedVolunteer.projects_participated}</div>
                   <div style={{ fontSize: '0.7rem', color: '#666' }}>Projects</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#F9C74F' }}>Since {selectedVolunteer.joinDate.split(' ')[1]}</div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#F9C74F' }}>{selectedVolunteer.join_date.split(' ')[1]}</div>
                   <div style={{ fontSize: '0.7rem', color: '#666' }}>Member</div>
                 </div>
               </div>
@@ -358,90 +329,91 @@ const Volunteers = () => {
               </div>
 
               {/* Achievements */}
-              <div style={{ marginBottom: '1.5rem' }}>
-                <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem', fontSize: '1rem' }}>
-                  <i className="fas fa-trophy" style={{ marginRight: '0.5rem', color: '#F9C74F' }}></i>
-                  Achievements
-                </h3>
-                <ul style={{ listStyle: 'none', padding: 0 }}>
-                  {selectedVolunteer.achievements.map((achievement, i) => (
-                    <li key={i} style={{ padding: '0.3rem 0', color: '#555', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
-                      <i className="fas fa-medal" style={{ color: '#F9C74F', fontSize: '0.7rem' }}></i>
-                      {achievement}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              {selectedVolunteer.achievements && selectedVolunteer.achievements.length > 0 && (
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem', fontSize: '1rem' }}>
+                    <i className="fas fa-trophy" style={{ marginRight: '0.5rem', color: '#F9C74F' }}></i>
+                    Achievements
+                  </h3>
+                  <ul style={{ listStyle: 'none', padding: 0 }}>
+                    {selectedVolunteer.achievements.map((achievement, i) => (
+                      <li key={i} style={{ padding: '0.3rem 0', color: '#555', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
+                        <i className="fas fa-medal" style={{ color: '#F9C74F', fontSize: '0.7rem' }}></i>
+                        {achievement}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
               {/* Social Links */}
-              <div style={{ marginBottom: '1rem' }}>
-                <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem', fontSize: '1rem' }}>
-                  <i className="fas fa-share-alt" style={{ marginRight: '0.5rem', color: '#F9C74F' }}></i>
-                  Connect
-                </h3>
-                <div style={{ display: 'flex', gap: '0.8rem' }}>
-                  <button style={{
-                    background: '#1877f2',
-                    border: 'none',
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '50%',
-                    color: 'white',
-                    cursor: 'pointer',
-                    transition: 'transform 0.3s ease'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                  onClick={() => alert(`Connect with ${selectedVolunteer.name} on Facebook`)}>
-                    <i className="fab fa-facebook-f"></i>
-                  </button>
-                  <button style={{
-                    background: '#1da1f2',
-                    border: 'none',
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '50%',
-                    color: 'white',
-                    cursor: 'pointer',
-                    transition: 'transform 0.3s ease'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                  onClick={() => alert(`Follow ${selectedVolunteer.name} on Twitter`)}>
-                    <i className="fab fa-twitter"></i>
-                  </button>
-                  <button style={{
-                    background: '#e4405f',
-                    border: 'none',
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '50%',
-                    color: 'white',
-                    cursor: 'pointer',
-                    transition: 'transform 0.3s ease'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                  onClick={() => alert(`Follow ${selectedVolunteer.name} on Instagram`)}>
-                    <i className="fab fa-instagram"></i>
-                  </button>
-                  <button style={{
-                    background: '#0077b5',
-                    border: 'none',
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '50%',
-                    color: 'white',
-                    cursor: 'pointer',
-                    transition: 'transform 0.3s ease'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                  onClick={() => alert(`Connect with ${selectedVolunteer.name} on LinkedIn`)}>
-                    <i className="fab fa-linkedin-in"></i>
-                  </button>
+              {selectedVolunteer.social && Object.keys(selectedVolunteer.social).length > 0 && (
+                <div style={{ marginBottom: '1rem' }}>
+                  <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem', fontSize: '1rem' }}>
+                    <i className="fas fa-share-alt" style={{ marginRight: '0.5rem', color: '#F9C74F' }}></i>
+                    Connect
+                  </h3>
+                  <div style={{ display: 'flex', gap: '0.8rem' }}>
+                    {selectedVolunteer.social.twitter && (
+                      <a href={`https://twitter.com/${selectedVolunteer.social.twitter}`} target="_blank" rel="noopener noreferrer" style={{
+                        background: '#1da1f2',
+                        border: 'none',
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                        color: 'white',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'transform 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
+                        <i className="fab fa-twitter"></i>
+                      </a>
+                    )}
+                    {selectedVolunteer.social.linkedin && (
+                      <a href={`https://linkedin.com/in/${selectedVolunteer.social.linkedin}`} target="_blank" rel="noopener noreferrer" style={{
+                        background: '#0077b5',
+                        border: 'none',
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                        color: 'white',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'transform 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
+                        <i className="fab fa-linkedin-in"></i>
+                      </a>
+                    )}
+                    {selectedVolunteer.social.instagram && (
+                      <a href={`https://instagram.com/${selectedVolunteer.social.instagram}`} target="_blank" rel="noopener noreferrer" style={{
+                        background: '#e4405f',
+                        border: 'none',
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                        color: 'white',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'transform 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
+                        <i className="fab fa-instagram"></i>
+                      </a>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Close Button */}
               <button
@@ -517,14 +489,6 @@ const Volunteers = () => {
         @media (max-width: 768px) {
           .modal-content {
             max-height: 90vh;
-          }
-          
-          .join-link {
-            font-size: 0.9rem !important;
-          }
-          
-          .join-icon {
-            font-size: 1rem !important;
           }
         }
         

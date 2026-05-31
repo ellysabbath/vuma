@@ -14,6 +14,8 @@ const VerifyOTP = () => {
   const [timeLeft, setTimeLeft] = useState(300);
   const [canResend, setCanResend] = useState(false);
   const [error, setError] = useState('');
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const inputRefs = useRef([]);
 
   useEffect(() => {
@@ -70,7 +72,7 @@ const VerifyOTP = () => {
     }
   };
 
-  const handleVerify = () => {
+  const handleVerify = async () => {
     const otpCode = otp.join('');
     if (otpCode.length !== 6) {
       setError('Please enter the 6-digit verification code');
@@ -78,81 +80,84 @@ const VerifyOTP = () => {
     }
     
     setIsLoading(true);
+    setError('');
     
-    setTimeout(() => {
-      const tempUser = localStorage.getItem('vuma_temp_user');
+    try {
+      const response = await fetch('http://192.168.137.1:8000/api/auth/verify-otp/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, otp: otpCode }),
+      });
       
-      if (tempUser) {
-        const userData = JSON.parse(tempUser);
+      const data = await response.json();
+      
+      if (data.success) {
+        localStorage.setItem('access_token', data.access);
+        localStorage.setItem('refresh_token', data.refresh);
+        localStorage.setItem('user', JSON.stringify(data.user));
         
-        if (userData.otp === otpCode) {
-          const verifiedUser = {
-            ...userData,
-            isVerified: true,
-            verifiedAt: new Date().toISOString()
-          };
-          
-          const existingUsers = localStorage.getItem('vuma_users');
-          const users = existingUsers ? JSON.parse(existingUsers) : [];
-          users.push(verifiedUser);
-          localStorage.setItem('vuma_users', JSON.stringify(users));
-          
-          localStorage.setItem('vuma_current_user', JSON.stringify({
-            email: userData.email,
-            fullName: userData.fullName,
-            role: userData.role,
-            isLoggedIn: true,
-            loginTime: new Date().toISOString()
-          }));
-          
-          localStorage.removeItem('vuma_temp_user');
-          
-          setIsLoading(false);
-          alert(`Welcome ${userData.fullName}! Your account has been verified.`);
+        setSuccessMessage('Email verified successfully! Redirecting to dashboard...');
+        setShowSuccess(true);
+        
+        setTimeout(() => {
           navigate('/');
-        } else {
-          setIsLoading(false);
-          setError('Invalid verification code. Please try again.');
-        }
+        }, 2000);
       } else {
-        setIsLoading(false);
-        setError('Session expired. Please register again.');
+        setError(data.error || 'Invalid verification code. Please try again.');
       }
-    }, 1500);
+    } catch (error) {
+      setError('Network error. Please check your connection.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleResendOtp = () => {
+  const handleResendOtp = async () => {
     setIsLoading(true);
     
-    setTimeout(() => {
-      const tempUser = localStorage.getItem('vuma_temp_user');
-      if (tempUser) {
-        const userData = JSON.parse(tempUser);
-        const newOTP = Math.floor(100000 + Math.random() * 900000).toString();
-        userData.otp = newOTP;
-        localStorage.setItem('vuma_temp_user', JSON.stringify(userData));
+    try {
+      const response = await fetch('http://192.168.137.1:8000/api/auth/resend-otp/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setSuccessMessage('New verification code sent to your email!');
+        setShowSuccess(true);
+        setTimeLeft(300);
+        setCanResend(false);
+        setOtp(['', '', '', '', '', '']);
+        inputRefs.current[0]?.focus();
         
-        alert(`New verification code: ${newOTP}\n\nThis would be sent to ${userData.email}`);
+        setTimeout(() => {
+          setShowSuccess(false);
+        }, 3000);
+        
+        const timer = setInterval(() => {
+          setTimeLeft((prev) => {
+            if (prev <= 1) {
+              clearInterval(timer);
+              setCanResend(true);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      } else {
+        setError(data.error || 'Failed to resend code. Please try again.');
       }
-      
+    } catch (error) {
+      setError('Network error. Please check your connection.');
+    } finally {
       setIsLoading(false);
-      setTimeLeft(300);
-      setCanResend(false);
-      setOtp(['', '', '', '', '', '']);
-      
-      const timer = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            setCanResend(true);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      
-      inputRefs.current[0].focus();
-    }, 1000);
+    }
   };
 
   const formatTime = (seconds) => {
@@ -160,6 +165,17 @@ const VerifyOTP = () => {
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
+
+  if (!email) {
+    return (
+      <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f9fbf7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <h2>No email provided</h2>
+          <Link to="/signup" style={{ color: '#F9C74F' }}>Go back to Sign Up</Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ 
@@ -178,7 +194,6 @@ const VerifyOTP = () => {
           padding: '2rem',
           boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
         }}>
-          {/* Logo Section */}
           <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
             <div style={{
               width: '80px',
@@ -192,35 +207,57 @@ const VerifyOTP = () => {
               overflow: 'hidden',
               boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
             }}>
-              <img 
-                src={logo} 
-                alt="VUMA Tanzania Logo" 
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover'
-                }}
-              />
+              <img src={logo} alt="VUMA Tanzania Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
             <h1 style={{ color: '#0B3B2F', fontSize: '1.5rem', marginBottom: '0.3rem' }}>Verify Your Email</h1>
             <p style={{ color: '#666', fontSize: '0.8rem' }}>We've sent a verification code to</p>
             <p style={{ color: '#F9C74F', fontWeight: 600, fontSize: '0.85rem', marginTop: '0.3rem', wordBreak: 'break-all' }}>
-              {email || 'your email address'}
+              {email}
             </p>
           </div>
 
-          {/* OTP Input Fields */}
+          {/* Success Alert with Circle */}
+          {showSuccess && (
+            <div style={{
+              position: 'fixed',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 9999,
+              animation: 'fadeInScale 0.3s ease'
+            }}>
+              <div style={{
+                background: 'white',
+                borderRadius: '20px',
+                padding: '2rem',
+                textAlign: 'center',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+                minWidth: '300px'
+              }}>
+                <div style={{
+                  width: '80px',
+                  height: '80px',
+                  borderRadius: '50%',
+                  background: '#4caf50',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 1rem',
+                  animation: 'scaleIn 0.5s ease'
+                }}>
+                  <i className="fas fa-check" style={{ fontSize: '2.5rem', color: 'white' }}></i>
+                </div>
+                <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem' }}>Success!</h3>
+                <p style={{ color: '#666', fontSize: '0.9rem' }}>{successMessage}</p>
+              </div>
+            </div>
+          )}
+
           <div style={{ marginBottom: '1.5rem' }}>
             <label style={{ display: 'block', marginBottom: '0.5rem', color: '#333', fontWeight: 600, fontSize: '0.85rem', textAlign: 'center' }}>
               Enter 6-digit verification code
             </label>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'center',
-              gap: '0.8rem',
-              flexWrap: 'wrap'
-            }}
-            onPaste={handlePaste}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.8rem', flexWrap: 'wrap' }} onPaste={handlePaste}>
               {otp.map((digit, index) => (
                 <input
                   key={index}
@@ -261,7 +298,6 @@ const VerifyOTP = () => {
             )}
           </div>
 
-          {/* Timer and Resend */}
           <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
             {!canResend ? (
               <p style={{ color: '#666', fontSize: '0.8rem' }}>
@@ -286,20 +322,19 @@ const VerifyOTP = () => {
             )}
           </div>
 
-          {/* Verify Button - Short text to prevent overflow */}
           <button
             type="button"
             onClick={handleVerify}
             disabled={isLoading}
             style={{
-              width: '80%',
+              width: '100%',
               background: isLoading ? '#0B3B2F' : '#F9C74F',
               border: 'none',
               padding: '0.7rem',
               borderRadius: '10px',
               color: isLoading ? 'white' : '#0B3B2F',
               fontWeight: 600,
-              fontSize: '0.7rem',
+              fontSize: '0.9rem',
               cursor: isLoading ? 'not-allowed' : 'pointer',
               transition: 'all 0.3s ease',
               marginBottom: '1rem',
@@ -307,16 +342,6 @@ const VerifyOTP = () => {
               alignItems: 'center',
               justifyContent: 'center',
               gap: '0.5rem'
-            }}
-            onMouseEnter={(e) => {
-              if (!isLoading) {
-                e.currentTarget.style.transform = 'scale(1.02)';
-                e.currentTarget.style.boxShadow = '0 5px 20px rgba(249,199,79,0.4)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.boxShadow = 'none';
             }}
           >
             {isLoading ? (
@@ -327,12 +352,11 @@ const VerifyOTP = () => {
             ) : (
               <>
                 <i className="fas fa-check-circle"></i>
-                <span>Verify</span>
+                <span>Verify Account</span>
               </>
             )}
           </button>
 
-          {/* Back to Sign Up */}
           <p style={{ textAlign: 'center', color: '#666', fontSize: '0.75rem', marginTop: '1rem' }}>
             Wrong email?{' '}
             <Link to="/signup" style={{ color: '#F9C74F', textDecoration: 'none', fontWeight: 600 }}>
@@ -348,27 +372,31 @@ const VerifyOTP = () => {
           to { opacity: 1; transform: translateX(0); }
         }
         
+        @keyframes fadeInScale {
+          from {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+          }
+        }
+        
+        @keyframes scaleIn {
+          from {
+            transform: scale(0);
+          }
+          to {
+            transform: scale(1);
+          }
+        }
+        
         @media (max-width: 480px) {
           input {
             width: 45px !important;
             height: 50px !important;
             font-size: 1.1rem !important;
-          }
-          
-          .otp-container {
-            gap: 0.5rem !important;
-          }
-          
-          button {
-            padding: 0.6rem !important;
-            font-size: 0.85rem !important;
-          }
-        }
-        
-        @media (max-width: 380px) {
-          input {
-            width: 40px !important;
-            height: 45px !important;
           }
         }
       `}</style>

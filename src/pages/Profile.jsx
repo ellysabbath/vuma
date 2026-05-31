@@ -1,450 +1,765 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
 const Profile = () => {
-  const [activeTab, setActiveTab] = useState('overview');
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
-  const [userData, setUserData] = useState({
-    name: 'John M. Kimathi',
-    email: 'john.kimathi@vuma.or.tz',
-    phone: '+255 123 456 789',
-    location: 'Dar es Salaam, Tanzania',
-    role: 'Youth Leader',
-    joinDate: 'January 15, 2025',
-    bio: 'Passionate about environmental conservation and youth empowerment. Leading community initiatives across Tanzania.',
-    interests: ['Environmental Conservation', 'Youth Leadership', 'Climate Action', 'Innovation'],
-    achievements: [
-      'Completed Leadership Bootcamp 2025',
-      'Planted 500+ trees in local communities',
-      'Organized 3 youth awareness workshops'
-    ],
-    socialLinks: {
-      twitter: '@johnkimathi',
-      linkedin: 'john-kimathi',
-      instagram: '@johnkimathi'
-    }
-  });
-
-  const [formData, setFormData] = useState(userData);
+  const [editedUser, setEditedUser] = useState({});
+  const [error, setError] = useState('');
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     AOS.init({ duration: 800, once: false });
+    fetchUserProfile();
   }, []);
+
+  const fetchUserProfile = async () => {
+    const token = localStorage.getItem('access_token');
+    
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://192.168.137.83:8000/api/auth/profile/', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data);
+        setEditedUser(data);
+      } else if (response.status === 401) {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user');
+        navigate('/login');
+      } else {
+        setError('Failed to load profile');
+      }
+    } catch (error) {
+      setError('Network error. Please check your connection.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleUpdateProfile = async () => {
+    const token = localStorage.getItem('access_token');
+    
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('http://192.168.137.83:8000/api/auth/profile/', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(editedUser),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data);
+        setEditedUser(data);
+        setIsEditing(false);
+        setSuccessMessage('Profile updated successfully!');
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 3000);
+        
+        const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+        const updatedUser = { ...storedUser, ...data };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || 'Failed to update profile');
+      }
+    } catch (error) {
+      setError('Network error. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  const handleProfilePictureUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setError('Please select an image file (JPEG, PNG, GIF)');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image size should be less than 5MB');
+      return;
+    }
+
+    setUploadingImage(true);
+    setError('');
+
+    try {
+      const base64String = await fileToBase64(file);
+      const token = localStorage.getItem('access_token');
+
+      const response = await fetch('http://192.168.137.83:8000/api/auth/profile/', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ...editedUser, profile_picture: base64String }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data);
+        setEditedUser(data);
+        setSuccessMessage('Profile picture updated successfully!');
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 3000);
+
+        const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+        const updatedUser = { ...storedUser, ...data };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      } else {
+        setError('Failed to upload profile picture');
+      }
+    } catch (error) {
+      setError('Network error. Please try again.');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleRemoveProfilePicture = async () => {
+    if (!window.confirm('Are you sure you want to remove your profile picture?')) return;
+
+    setUploadingImage(true);
+    setError('');
+
+    try {
+      const token = localStorage.getItem('access_token');
+
+      const response = await fetch('http://192.168.137.83:8000/api/auth/profile/', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ...editedUser, profile_picture: null }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data);
+        setEditedUser(data);
+        setSuccessMessage('Profile picture removed successfully!');
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 3000);
+      } else {
+        setError('Failed to remove profile picture');
+      }
+    } catch (error) {
+      setError('Network error. Please try again.');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setEditedUser(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = () => {
-    setUserData(formData);
-    setIsEditing(false);
-    alert('Profile updated successfully!');
+  const handleLogout = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
+    navigate('/login');
   };
 
-  const handleCancel = () => {
-    setFormData(userData);
-    setIsEditing(false);
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Not provided';
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    } catch {
+      return 'Not provided';
+    }
   };
 
-  const stats = [
-    { label: 'Projects Joined', value: '12', icon: 'fas fa-project-diagram' },
-    { label: 'Volunteer Hours', value: '245', icon: 'fas fa-clock' },
-    { label: 'Events Attended', value: '8', icon: 'fas fa-calendar-check' },
-    { label: 'Trees Planted', value: '156', icon: 'fas fa-tree' }
-  ];
+  const getGenderLabel = (genderCode) => {
+    const genders = {
+      'M': 'Male',
+      'F': 'Female',
+      'O': 'Other',
+      'P': 'Prefer not to say'
+    };
+    return genders[genderCode] || 'Not specified';
+  };
 
-  return (
-    <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f9fbf7' }}>
-      {/* Profile Header */}
-      <div style={{
-        background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)',
-        color: 'white',
-        padding: '3rem 2rem',
-        position: 'relative',
-        overflow: 'hidden'
+  const getRoleIcon = (role) => {
+    switch(role) {
+      case 'admin':
+        return 'fas fa-user-shield';
+      case 'volunteer':
+        return 'fas fa-hands-helping';
+      case 'innovator':
+        return 'fas fa-lightbulb';
+      case 'partner':
+        return 'fas fa-handshake';
+      default:
+        return 'fas fa-user';
+    }
+  };
+
+  const getRoleColor = (role) => {
+    switch(role) {
+      case 'admin':
+        return '#d32f2f';
+      case 'volunteer':
+        return '#4caf50';
+      case 'innovator':
+        return '#2196F3';
+      case 'partner':
+        return '#ff9800';
+      default:
+        return '#757575';
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div style={{ 
+        paddingTop: '70px', 
+        minHeight: '100vh', 
+        background: 'linear-gradient(135deg, #f9fbf7 0%, #f0f5ee 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
       }}>
-        <div style={{
-          position: 'absolute',
-          top: '-20%',
-          right: '-10%',
-          width: '300px',
-          height: '300px',
-          background: 'radial-gradient(circle, rgba(249,199,79,0.1) 0%, transparent 70%)',
-          borderRadius: '50%'
-        }} />
-        
-        <div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap' }}>
-            <div style={{
-              width: '120px',
-              height: '120px',
-              borderRadius: '50%',
-              background: '#F9C74F',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '3rem',
-              color: '#0B3B2F'
-            }}>
-              <i className="fas fa-user"></i>
-            </div>
-            <div style={{ flex: 1 }}>
-              <h1 style={{ fontSize: 'clamp(1.5rem, 5vw, 2rem)', marginBottom: '0.5rem' }}>
-                {userData.name}
-              </h1>
-              <p style={{ opacity: 0.9, marginBottom: '0.5rem' }}>
-                <i className="fas fa-envelope" style={{ marginRight: '0.5rem' }}></i>
-                {userData.email}
-              </p>
-              <p style={{ opacity: 0.9 }}>
-                <i className="fas fa-map-marker-alt" style={{ marginRight: '0.5rem' }}></i>
-                {userData.location}
-              </p>
-              <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
-                <span style={{
-                  background: 'rgba(249,199,79,0.2)',
-                  padding: '0.2rem 0.8rem',
-                  borderRadius: '20px',
-                  fontSize: '0.8rem'
-                }}>
-                  {userData.role}
-                </span>
-                <span style={{
-                  background: 'rgba(255,255,255,0.1)',
-                  padding: '0.2rem 0.8rem',
-                  borderRadius: '20px',
-                  fontSize: '0.8rem'
-                }}>
-                  Member since {userData.joinDate}
-                </span>
-              </div>
-            </div>
-            {!isEditing && (
-              <button
-                onClick={() => setIsEditing(true)}
-                style={{
-                  background: '#F9C74F',
-                  border: 'none',
-                  padding: '0.7rem 1.5rem',
-                  borderRadius: '50px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem'
-                }}
-              >
-                <i className="fas fa-edit"></i>
-                Edit Profile
-              </button>
-            )}
+        <div style={{ textAlign: 'center' }}>
+          <i className="fas fa-spinner fa-spin" style={{ fontSize: '3rem', color: '#0B3B2F' }}></i>
+          <p style={{ marginTop: '1rem', color: '#666' }}>Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f9fbf7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <i className="fas fa-user-slash" style={{ fontSize: '3rem', color: '#ff9800', marginBottom: '1rem' }}></i>
+          <h2>No user data found</h2>
+          <div onClick={() => navigate('/login')} style={{ marginTop: '1rem', cursor: 'pointer' }}>
+            <i className="fas fa-arrow-left" style={{ color: '#F9C74F', marginRight: '0.5rem' }}></i>
+            <span style={{ color: '#F9C74F', fontWeight: 600 }}>Go to Login</span>
           </div>
         </div>
       </div>
+    );
+  }
 
-      {/* Stats Section */}
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
+  return (
+    <div style={{ 
+      paddingTop: '70px', 
+      minHeight: '100vh', 
+      background: 'linear-gradient(135deg, #f9fbf7 0%, #f0f5ee 100%)'
+    }}>
+      <div style={{ background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)', color: 'white', padding: '2rem' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
+            <i className="fas fa-arrow-left" style={{ cursor: 'pointer', fontSize: '1.2rem' }} onClick={() => navigate('/')}></i>
+            <h1 style={{ fontSize: '1.8rem' }}>My Profile</h1>
+          </div>
+          <p>View and manage your personal information</p>
+        </div>
+      </div>
+
+      {showSuccess && (
         <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '1.5rem',
-          marginBottom: '2rem'
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: 9999,
+          animation: 'fadeInScale 0.3s ease'
         }}>
-          {stats.map((stat, idx) => (
-            <div key={idx} data-aos="fade-up" data-aos-delay={idx * 100} style={{
-              background: 'white',
-              borderRadius: '20px',
-              padding: '1.5rem',
-              textAlign: 'center',
-              boxShadow: '0 5px 15px rgba(0,0,0,0.05)'
+          <div style={{
+            background: 'white',
+            borderRadius: '20px',
+            padding: '2rem',
+            textAlign: 'center',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+            minWidth: '300px'
+          }}>
+            <div style={{
+              width: '80px',
+              height: '80px',
+              borderRadius: '50%',
+              background: '#4caf50',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 1rem',
+              animation: 'scaleIn 0.5s ease'
             }}>
-              <i className={stat.icon} style={{ fontSize: '2rem', color: '#F9C74F', marginBottom: '0.5rem' }}></i>
-              <div style={{ fontSize: '2rem', fontWeight: 800, color: '#0B3B2F' }}>{stat.value}</div>
-              <div style={{ color: '#666', fontSize: '0.85rem' }}>{stat.label}</div>
+              <i className="fas fa-check" style={{ fontSize: '2.5rem', color: 'white' }}></i>
             </div>
-          ))}
+            <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem' }}>Success!</h3>
+            <p style={{ color: '#666', fontSize: '0.9rem' }}>{successMessage}</p>
+          </div>
         </div>
+      )}
 
-        {/* Tabs */}
-        <div style={{
-          display: 'flex',
-          gap: '1rem',
-          borderBottom: '2px solid #e0e0e0',
-          marginBottom: '2rem',
-          flexWrap: 'wrap'
-        }}>
-          {['overview', 'activities', 'achievements', 'settings'].map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              style={{
-                background: 'none',
-                border: 'none',
-                padding: '0.8rem 1.5rem',
-                fontSize: '1rem',
+      {error && (
+        <div style={{ maxWidth: '1200px', margin: '1rem auto 0', padding: '0 2rem' }}>
+          <div style={{
+            background: '#ffebee',
+            color: '#d32f2f',
+            padding: '1rem',
+            borderRadius: '12px',
+            textAlign: 'center'
+          }}>
+            <i className="fas fa-exclamation-circle" style={{ marginRight: '0.5rem' }}></i>
+            {error}
+          </div>
+        </div>
+      )}
+
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem' }}>
+          
+          {/* Profile Picture & Basic Info Card */}
+          <div data-aos="fade-up" style={{
+            background: 'white',
+            borderRadius: '20px',
+            padding: '2rem',
+            textAlign: 'center',
+            boxShadow: '0 5px 15px rgba(0,0,0,0.05)'
+          }}>
+            <div style={{ 
+              padding: '20px 20px 10px 20px',
+              background: 'linear-gradient(135deg, #f0f5ee, #e8f3e4)',
+              borderRadius: '20px',
+              marginBottom: '20px'
+            }}>
+              <div style={{ position: 'relative', display: 'inline-block' }}>
+                <div
+                  style={{
+                    width: '180px',
+                    height: '180px',
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #F9C74F, #f8b500)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto',
+                    boxShadow: '0 15px 35px rgba(0,0,0,0.15)',
+                    overflow: 'hidden',
+                    cursor: 'pointer',
+                    position: 'relative',
+                    border: '5px solid white',
+                    transition: 'transform 0.3s ease'
+                  }}
+                  onClick={() => fileInputRef.current?.click()}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                >
+                  {user.profile_picture ? (
+                    <img 
+                      src={user.profile_picture} 
+                      alt="Profile" 
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                    />
+                  ) : (
+                    <i className="fas fa-user" style={{ fontSize: '5rem', color: '#0B3B2F' }}></i>
+                  )}
+                  {uploadingImage && (
+                    <div style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'rgba(0,0,0,0.7)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: '50%'
+                    }}>
+                      <i className="fas fa-spinner fa-spin" style={{ fontSize: '2.5rem', color: 'white' }}></i>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Camera Icon Overlay */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: '10px',
+                  right: '10px',
+                  background: '#0B3B2F',
+                  borderRadius: '50%',
+                  width: '40px',
+                  height: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+                  transition: 'transform 0.2s ease'
+                }}
+                onClick={() => fileInputRef.current?.click()}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                >
+                  <i className="fas fa-camera" style={{ color: 'white', fontSize: '1.2rem' }}></i>
+                </div>
+
+                {/* Remove Icon Overlay (only if picture exists) */}
+                {user.profile_picture && (
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '10px',
+                    left: '10px',
+                    background: '#d32f2f',
+                    borderRadius: '50%',
+                    width: '40px',
+                    height: '40px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+                    transition: 'transform 0.2s ease'
+                  }}
+                  onClick={handleRemoveProfilePicture}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                  >
+                    <i className="fas fa-trash-alt" style={{ color: 'white', fontSize: '1.2rem' }}></i>
+                  </div>
+                )}
+              </div>
+              
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handleProfilePictureUpload}
+              />
+            </div>
+
+            <h2 style={{ color: '#0B3B2F', marginBottom: '0.5rem', fontSize: '1.5rem' }}>{user.first_name || user.username} {user.last_name || ''}</h2>
+            <p style={{ color: '#666', marginBottom: '0.5rem', fontSize: '0.9rem' }}>{user.email}</p>
+            <p style={{ color: '#F9C74F', fontWeight: 600, fontSize: '0.9rem', marginBottom: '1rem' }}>@{user.username}</p>
+            
+            {/* Role Badge */}
+            <div style={{ marginBottom: '1rem' }}>
+              <span style={{
+                background: getRoleColor(user.role),
+                color: 'white',
+                padding: '0.5rem 1.2rem',
+                borderRadius: '30px',
+                fontSize: '0.85rem',
                 fontWeight: 600,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                <i className={getRoleIcon(user.role)}></i>
+                {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'User'}
+              </span>
+            </div>
+            
+            <div style={{ 
+              background: '#f9fbf7', 
+              padding: '0.8rem', 
+              borderRadius: '12px',
+              marginTop: '1rem'
+            }}>
+              <p style={{ color: '#666', fontSize: '0.8rem', marginBottom: '0.3rem' }}>
+                <i className="fas fa-calendar-alt"></i> Member since {formatDate(user.joined_date)}
+              </p>
+              <p style={{ marginTop: '0.3rem' }}>
+                {user.is_verified ? (
+                  <span style={{ color: '#4caf50', fontSize: '0.8rem' }}>
+                    <i className="fas fa-check-circle"></i> Email Verified
+                  </span>
+                ) : (
+                  <span style={{ color: '#ff9800', fontSize: '0.8rem' }}>
+                    <i className="fas fa-exclamation-circle"></i> Pending Verification
+                  </span>
+                )}
+              </p>
+            </div>
+            
+            {/* Logout Icon */}
+            <div style={{ marginTop: '1.5rem' }}>
+              <div onClick={handleLogout} style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
                 cursor: 'pointer',
-                color: activeTab === tab ? '#F9C74F' : '#666',
-                borderBottom: activeTab === tab ? '2px solid #F9C74F' : 'none',
-                transition: 'all 0.3s ease'
+                color: '#d32f2f',
+                transition: 'transform 0.2s ease',
+                fontSize: '0.9rem'
               }}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
-        </div>
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
+                <i className="fas fa-sign-out-alt" style={{ fontSize: '1.2rem' }}></i>
+                <span>Logout</span>
+              </div>
+            </div>
+          </div>
 
-        {/* Tab Content */}
-        {activeTab === 'overview' && (
-          <div data-aos="fade-up">
+          {/* Personal Information Card */}
+          <div data-aos="fade-up" data-aos-delay="100" style={{
+            background: 'white',
+            borderRadius: '20px',
+            padding: '2rem',
+            boxShadow: '0 5px 15px rgba(0,0,0,0.05)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h3 style={{ color: '#0B3B2F', fontSize: '1.2rem', margin: 0 }}>
+                <i className="fas fa-user-circle"></i> Personal Information
+              </h3>
+              {!isEditing && (
+                <div onClick={() => setIsEditing(true)} style={{
+                  color: '#F9C74F',
+                  cursor: 'pointer',
+                  transition: 'transform 0.3s ease'
+                }}>
+                  <i className="fas fa-edit" style={{ fontSize: '1.2rem' }}></i>
+                </div>
+              )}
+            </div>
+
             {isEditing ? (
-              // Edit Form
-              <div style={{ background: 'white', borderRadius: '24px', padding: '2rem', boxShadow: '0 5px 15px rgba(0,0,0,0.05)' }}>
-                <h3 style={{ color: '#0B3B2F', marginBottom: '1.5rem' }}>Edit Profile Information</h3>
-                <div style={{ display: 'grid', gap: '1.5rem' }}>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#555' }}>Full Name</label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid #ddd' }}
-                    />
+              <div>
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.85rem' }}>Username</label>
+                  <input
+                    type="text"
+                    name="username"
+                    value={editedUser.username || ''}
+                    onChange={handleInputChange}
+                    style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid #ddd' }}
+                  />
+                </div>
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.85rem' }}>First Name</label>
+                  <input
+                    type="text"
+                    name="first_name"
+                    value={editedUser.first_name || ''}
+                    onChange={handleInputChange}
+                    style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid #ddd' }}
+                  />
+                </div>
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.85rem' }}>Last Name</label>
+                  <input
+                    type="text"
+                    name="last_name"
+                    value={editedUser.last_name || ''}
+                    onChange={handleInputChange}
+                    style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid #ddd' }}
+                  />
+                </div>
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.85rem' }}>Phone</label>
+                  <input
+                    type="text"
+                    name="phone"
+                    value={editedUser.phone || ''}
+                    onChange={handleInputChange}
+                    style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid #ddd' }}
+                  />
+                </div>
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.85rem' }}>City</label>
+                  <input
+                    type="text"
+                    name="city"
+                    value={editedUser.city || ''}
+                    onChange={handleInputChange}
+                    style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid #ddd' }}
+                  />
+                </div>
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.85rem' }}>Region</label>
+                  <input
+                    type="text"
+                    name="region"
+                    value={editedUser.region || ''}
+                    onChange={handleInputChange}
+                    style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid #ddd' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                  <div onClick={() => setIsEditing(false)} style={{ flex: 1, background: '#f0f0f0', padding: '0.7rem', borderRadius: '50px', textAlign: 'center', cursor: 'pointer', fontWeight: 600 }}>
+                    Cancel
                   </div>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#555' }}>Email</label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid #ddd' }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#555' }}>Phone</label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid #ddd' }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#555' }}>Location</label>
-                    <input
-                      type="text"
-                      name="location"
-                      value={formData.location}
-                      onChange={handleInputChange}
-                      style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid #ddd' }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#555' }}>Bio</label>
-                    <textarea
-                      name="bio"
-                      value={formData.bio}
-                      onChange={handleInputChange}
-                      rows="4"
-                      style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '1px solid #ddd', resize: 'vertical' }}
-                    />
-                  </div>
-                  <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                    <button
-                      onClick={handleCancel}
-                      style={{
-                        background: '#e0e0e0',
-                        border: 'none',
-                        padding: '0.7rem 1.5rem',
-                        borderRadius: '50px',
-                        fontWeight: 600,
-                        cursor: 'pointer'
-                      }}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleSave}
-                      style={{
-                        background: '#F9C74F',
-                        border: 'none',
-                        padding: '0.7rem 1.5rem',
-                        borderRadius: '50px',
-                        fontWeight: 600,
-                        cursor: 'pointer'
-                      }}
-                    >
-                      Save Changes
-                    </button>
+                  <div onClick={handleUpdateProfile} style={{ flex: 1, background: '#0B3B2F', color: 'white', padding: '0.7rem', borderRadius: '50px', textAlign: 'center', cursor: 'pointer', fontWeight: 600 }}>
+                    Save Changes
                   </div>
                 </div>
               </div>
             ) : (
-              // View Mode
-              <>
-                <div style={{ background: 'white', borderRadius: '24px', padding: '2rem', marginBottom: '1.5rem', boxShadow: '0 5px 15px rgba(0,0,0,0.05)' }}>
-                  <h3 style={{ color: '#0B3B2F', marginBottom: '1rem' }}>About Me</h3>
-                  <p style={{ color: '#666', lineHeight: '1.6' }}>{userData.bio}</p>
+              <div>
+                <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f0f0f0', paddingBottom: '0.7rem' }}>
+                  <span style={{ color: '#666' }}>Username:</span>
+                  <span style={{ color: '#333', fontWeight: 500 }}>{user.username}</span>
                 </div>
-
-                <div style={{ background: 'white', borderRadius: '24px', padding: '2rem', marginBottom: '1.5rem', boxShadow: '0 5px 15px rgba(0,0,0,0.05)' }}>
-                  <h3 style={{ color: '#0B3B2F', marginBottom: '1rem' }}>Interests</h3>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.8rem' }}>
-                    {userData.interests.map((interest, idx) => (
-                      <span key={idx} style={{
-                        background: 'rgba(249,199,79,0.1)',
-                        color: '#0B3B2F',
-                        padding: '0.3rem 1rem',
-                        borderRadius: '20px',
-                        fontSize: '0.85rem'
-                      }}>
-                        {interest}
-                      </span>
-                    ))}
-                  </div>
+                <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f0f0f0', paddingBottom: '0.7rem' }}>
+                  <span style={{ color: '#666' }}>Full Name:</span>
+                  <span style={{ color: '#333', fontWeight: 500 }}>{user.first_name || ''} {user.last_name || ''}</span>
                 </div>
-
-                <div style={{ background: 'white', borderRadius: '24px', padding: '2rem', boxShadow: '0 5px 15px rgba(0,0,0,0.05)' }}>
-                  <h3 style={{ color: '#0B3B2F', marginBottom: '1rem' }}>Contact Information</h3>
-                  <div style={{ display: 'grid', gap: '1rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                      <i className="fas fa-phone" style={{ color: '#F9C74F', width: '30px' }}></i>
-                      <span>{userData.phone}</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                      <i className="fas fa-envelope" style={{ color: '#F9C74F', width: '30px' }}></i>
-                      <span>{userData.email}</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                      <i className="fas fa-map-marker-alt" style={{ color: '#F9C74F', width: '30px' }}></i>
-                      <span>{userData.location}</span>
-                    </div>
-                  </div>
+                <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f0f0f0', paddingBottom: '0.7rem' }}>
+                  <span style={{ color: '#666' }}>Email:</span>
+                  <span style={{ color: '#333', fontWeight: 500 }}>{user.email}</span>
                 </div>
-              </>
+                <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f0f0f0', paddingBottom: '0.7rem' }}>
+                  <span style={{ color: '#666' }}>Phone:</span>
+                  <span style={{ color: '#333', fontWeight: 500 }}>{user.phone || 'Not provided'}</span>
+                </div>
+                <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f0f0f0', paddingBottom: '0.7rem' }}>
+                  <span style={{ color: '#666' }}>City:</span>
+                  <span style={{ color: '#333', fontWeight: 500 }}>{user.city || 'Not provided'}</span>
+                </div>
+                <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f0f0f0', paddingBottom: '0.7rem' }}>
+                  <span style={{ color: '#666' }}>Region:</span>
+                  <span style={{ color: '#333', fontWeight: 500 }}>{user.region || 'Not provided'}</span>
+                </div>
+              </div>
             )}
           </div>
-        )}
 
-        {activeTab === 'activities' && (
-          <div data-aos="fade-up">
-            <div style={{ background: 'white', borderRadius: '24px', padding: '2rem', boxShadow: '0 5px 15px rgba(0,0,0,0.05)' }}>
-              <h3 style={{ color: '#0B3B2F', marginBottom: '1.5rem' }}>Recent Activities</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {[
-                  { title: 'Completed Leadership Bootcamp', date: 'March 2026', status: 'Completed' },
-                  { title: 'Joined Tree Planting Drive', date: 'February 2026', status: 'Completed' },
-                  { title: 'Registered for Climate Summit', date: 'January 2026', status: 'Upcoming' }
-                ].map((activity, idx) => (
-                  <div key={idx} style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '1rem',
-                    borderBottom: '1px solid #f0f0f0'
-                  }}>
-                    <div>
-                      <h4 style={{ marginBottom: '0.3rem' }}>{activity.title}</h4>
-                      <span style={{ fontSize: '0.8rem', color: '#888' }}>{activity.date}</span>
-                    </div>
-                    <span style={{
-                      background: activity.status === 'Completed' ? 'rgba(76, 175, 80, 0.1)' : 'rgba(249,199,79,0.1)',
-                      color: activity.status === 'Completed' ? '#4caf50' : '#F9C74F',
-                      padding: '0.2rem 0.8rem',
+          {/* Bio & Skills Card */}
+          <div data-aos="fade-up" data-aos-delay="200" style={{
+            background: 'white',
+            borderRadius: '20px',
+            padding: '2rem',
+            boxShadow: '0 5px 15px rgba(0,0,0,0.05)'
+          }}>
+            <h3 style={{ color: '#0B3B2F', fontSize: '1.2rem', marginBottom: '1.5rem' }}>
+              <i className="fas fa-file-alt"></i> Bio & Skills
+            </h3>
+            
+            <div style={{ marginBottom: '1.5rem' }}>
+              <span style={{ color: '#666', display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Bio</span>
+              <p style={{ color: '#333', lineHeight: '1.6' }}>{user.bio || 'No bio added yet.'}</p>
+            </div>
+            
+            <div style={{ marginBottom: '1.5rem' }}>
+              <span style={{ color: '#666', display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Skills</span>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                {user.skills ? (
+                  user.skills.split(',').map((skill, index) => (
+                    <span key={index} style={{
+                      background: '#e8f5e9',
+                      color: '#0B3B2F',
+                      padding: '0.4rem 1rem',
                       borderRadius: '20px',
-                      fontSize: '0.75rem'
-                    }}>
-                      {activity.status}
-                    </span>
-                  </div>
-                ))}
+                      fontSize: '0.85rem',
+                      fontWeight: 500
+                    }}>{skill.trim()}</span>
+                  ))
+                ) : (
+                  <span style={{ color: '#999' }}>No skills added yet.</span>
+                )}
               </div>
             </div>
-          </div>
-        )}
+            
+            <div>
+              <span style={{ color: '#666', display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Availability</span>
+              <div style={{
+                background: '#f0f5ee',
+                padding: '0.7rem',
+                borderRadius: '10px',
+                color: '#0B3B2F',
+                fontWeight: 500
+              }}>
+                <i className="fas fa-clock" style={{ marginRight: '0.5rem' }}></i>
+                {user.availability || 'Not specified'}
+              </div>
+            </div>
 
-        {activeTab === 'achievements' && (
-          <div data-aos="fade-up">
-            <div style={{ background: 'white', borderRadius: '24px', padding: '2rem', boxShadow: '0 5px 15px rgba(0,0,0,0.05)' }}>
-              <h3 style={{ color: '#0B3B2F', marginBottom: '1.5rem' }}>My Achievements</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem' }}>
-                {userData.achievements.map((achievement, idx) => (
-                  <div key={idx} style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem',
-                    padding: '1rem',
-                    background: '#f9fbf7',
-                    borderRadius: '16px'
-                  }}>
-                    <i className="fas fa-trophy" style={{ color: '#F9C74F', fontSize: '1.5rem' }}></i>
-                    <span>{achievement}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'settings' && (
-          <div data-aos="fade-up">
-            <div style={{ background: 'white', borderRadius: '24px', padding: '2rem', boxShadow: '0 5px 15px rgba(0,0,0,0.05)' }}>
-              <h3 style={{ color: '#0B3B2F', marginBottom: '1.5rem' }}>Account Settings</h3>
-              <div style={{ display: 'grid', gap: '1rem' }}>
-                <div style={{ padding: '1rem', borderBottom: '1px solid #f0f0f0' }}>
-                  <h4>Change Password</h4>
-                  <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '0.3rem' }}>Update your password regularly to keep your account secure</p>
-                  <button style={{
-                    marginTop: '0.8rem',
-                    background: 'transparent',
-                    border: '1px solid #F9C74F',
-                    padding: '0.5rem 1rem',
-                    borderRadius: '50px',
-                    cursor: 'pointer'
-                  }}>
-                    Change Password
-                  </button>
-                </div>
-                <div style={{ padding: '1rem', borderBottom: '1px solid #f0f0f0' }}>
-                  <h4>Notification Preferences</h4>
-                  <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '0.3rem' }}>Manage how you receive updates from VUMA Tanzania</p>
-                  <button style={{
-                    marginTop: '0.8rem',
-                    background: 'transparent',
-                    border: '1px solid #F9C74F',
-                    padding: '0.5rem 1rem',
-                    borderRadius: '50px',
-                    cursor: 'pointer'
-                  }}>
-                    Manage Notifications
-                  </button>
-                </div>
-                <div style={{ padding: '1rem' }}>
-                  <h4>Delete Account</h4>
-                  <p style={{ fontSize: '0.8rem', color: '#d32f2f', marginTop: '0.3rem' }}>Permanently delete your account and all associated data</p>
-                  <button style={{
-                    marginTop: '0.8rem',
-                    background: '#d32f2f',
-                    color: 'white',
-                    border: 'none',
-                    padding: '0.5rem 1rem',
-                    borderRadius: '50px',
-                    cursor: 'pointer'
-                  }}>
-                    Delete Account
-                  </button>
+            {user.role === 'volunteer' && user.total_hours > 0 && (
+              <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid #f0f0f0' }}>
+                <span style={{ color: '#666', display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Total Volunteer Hours</span>
+                <div style={{
+                  background: '#e8f5e9',
+                  padding: '0.7rem',
+                  borderRadius: '10px',
+                  textAlign: 'center'
+                }}>
+                  <span style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#0B3B2F' }}>{user.total_hours}</span>
+                  <span style={{ color: '#666', marginLeft: '0.5rem' }}>hours</span>
                 </div>
               </div>
-            </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
+
+      <style>{`
+        @keyframes fadeInScale {
+          from {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+          }
+        }
+        
+        @keyframes scaleIn {
+          from {
+            transform: scale(0);
+          }
+          to {
+            transform: scale(1);
+          }
+        }
+        
+        @media (max-width: 768px) {
+          div[style*="grid-template-columns"] {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </div>
   );
 };

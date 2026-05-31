@@ -3,49 +3,26 @@ import { useNavigate } from 'react-router-dom';
 
 const Timeline = () => {
   const navigate = useNavigate();
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [isVisible, setIsVisible] = useState(false);
   const [activeEvent, setActiveEvent] = useState(null);
   const [isRegisterHovered, setIsRegisterHovered] = useState(false);
   const [isViewHovered, setIsViewHovered] = useState(false);
   const sectionRef = useRef(null);
-
-  const events = [
-    { 
-      id: 1,
-      icon: "fas fa-chalkboard-user", 
-      date: "May 30, 2026", 
-      title: "Youth Leadership Bootcamp",
-      subtitle: "Online Workshop",
-      description: "Join us for an intensive leadership training session designed to empower young leaders with essential skills.",
-      time: "10:00 AM - 4:00 PM EAT",
-      location: "Virtual (Zoom)",
-      color: "#F9C74F"
-    },
-    { 
-      id: 2,
-      icon: "fas fa-leaf", 
-      date: "June 5, 2026", 
-      title: "World Environment Day",
-      subtitle: "Tree Planting Drive",
-      description: "Be part of the global movement! Plant trees and help restore our environment.",
-      time: "8:00 AM - 2:00 PM EAT",
-      location: "Multiple locations across Tanzania",
-      color: "#F9C74F"
-    },
-    { 
-      id: 3,
-      icon: "fas fa-microphone-alt", 
-      date: "June 12, 2026", 
-      title: "Climate Policy Webinar",
-      subtitle: "Expert Panel Discussion",
-      description: "Learn from climate policy experts and engage in meaningful discussions about climate action.",
-      time: "2:00 PM - 5:00 PM EAT",
-      location: "Virtual (Zoom & YouTube)",
-      color: "#F9C74F"
-    }
-  ];
+  
+  // Custom alert states
+  const [customAlert, setCustomAlert] = useState({
+    show: false,
+    type: 'success',
+    title: '',
+    message: ''
+  });
 
   useEffect(() => {
+    fetchEvents();
+    
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -68,13 +45,169 @@ const Timeline = () => {
     };
   }, []);
 
-  const handleRegister = (eventTitle) => {
-    navigate('/events/register', { state: { eventName: eventTitle } });
+  const showAlert = (type, title, message) => {
+    setCustomAlert({
+      show: true,
+      type,
+      title,
+      message
+    });
+    if (type === 'success') {
+      setTimeout(() => {
+        closeAlert();
+      }, 2000);
+    }
+  };
+
+  const closeAlert = () => {
+    setCustomAlert({
+      show: false,
+      type: 'success',
+      title: '',
+      message: ''
+    });
+  };
+
+  const fetchEvents = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('http://192.168.137.83:8000/api/events/');
+      const data = await response.json();
+      if (data.success) {
+        setEvents(data.data);
+      } else {
+        setError('Failed to load events');
+        showAlert('error', 'Error!', 'Failed to load events');
+      }
+    } catch (error) {
+      setError('Network error. Please check your connection.');
+      showAlert('error', 'Network Error', 'Please check your connection and try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getEventIcon = (type) => {
+    switch(type) {
+      case 'Online':
+        return 'fas fa-laptop';
+      case 'In-Person':
+        return 'fas fa-users';
+      case 'Webinar':
+        return 'fas fa-chalkboard-user';
+      case 'Hybrid':
+        return 'fas fa-people-arrows';
+      default:
+        return 'fas fa-calendar-alt';
+    }
+  };
+
+  const getEventSubtitle = (type) => {
+    switch(type) {
+      case 'Online':
+        return 'Online Event';
+      case 'In-Person':
+        return 'In-Person Event';
+      case 'Webinar':
+        return 'Webinar';
+      case 'Hybrid':
+        return 'Hybrid Event';
+      default:
+        return 'Upcoming Event';
+    }
+  };
+
+  const handleRegister = (eventTitle, eventId) => {
+    navigate(`/events/register/${eventId}`, { state: { eventName: eventTitle, eventId: eventId } });
   };
 
   const handleViewAllEvents = () => {
     navigate('/events');
   };
+
+  if (loading) {
+    return (
+      <div ref={sectionRef} style={{
+        maxWidth: '900px',
+        margin: '0 auto',
+        padding: '2rem 1rem',
+        textAlign: 'center'
+      }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '400px'
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <i className="fas fa-spinner fa-spin" style={{ fontSize: '3rem', color: '#0B3B2F' }}></i>
+            <p style={{ marginTop: '1rem', color: '#666' }}>Loading upcoming events...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div ref={sectionRef} style={{
+        maxWidth: '900px',
+        margin: '0 auto',
+        padding: '2rem 1rem',
+        textAlign: 'center'
+      }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '400px'
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <i className="fas fa-exclamation-circle" style={{ fontSize: '3rem', color: '#d32f2f' }}></i>
+            <p style={{ marginTop: '1rem', color: '#666' }}>{error}</p>
+            <button 
+              onClick={fetchEvents} 
+              style={{ 
+                marginTop: '1rem', 
+                background: '#F9C74F', 
+                border: 'none', 
+                padding: '0.5rem 1rem', 
+                borderRadius: '20px', 
+                cursor: 'pointer',
+                color: '#0B3B2F',
+                fontWeight: 600
+              }}
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show only upcoming events (you can filter by date if needed)
+  const upcomingEvents = events.filter(event => event.registered < event.capacity).slice(0, 3);
+
+  if (upcomingEvents.length === 0) {
+    return (
+      <div ref={sectionRef} style={{
+        maxWidth: '900px',
+        margin: '0 auto',
+        padding: '2rem 1rem',
+        textAlign: 'center'
+      }}>
+        <div style={{
+          textAlign: 'center',
+          padding: '3rem'
+        }}>
+          <i className="fas fa-calendar-check" style={{ fontSize: '3rem', color: '#F9C74F' }}></i>
+          <h3 style={{ color: '#0B3B2F', marginTop: '1rem' }}>No Upcoming Events</h3>
+          <p style={{ color: '#666' }}>Check back soon for exciting events!</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div ref={sectionRef} style={{
@@ -83,6 +216,102 @@ const Timeline = () => {
       padding: '2rem 1rem',
       position: 'relative'
     }}>
+      {/* Custom Alert Modal */}
+      {customAlert.show && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.5)',
+          backdropFilter: 'blur(4px)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          animation: 'fadeIn 0.3s ease'
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '20px',
+            maxWidth: '400px',
+            width: '90%',
+            padding: '2rem',
+            textAlign: 'center',
+            animation: 'slideInUp 0.3s ease',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+          }}>
+            <div style={{ marginBottom: '1rem' }}>
+              {customAlert.type === 'success' && (
+                <div style={{
+                  width: '70px',
+                  height: '70px',
+                  background: '#4caf50',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto'
+                }}>
+                  <i className="fas fa-check" style={{ fontSize: '2rem', color: 'white' }}></i>
+                </div>
+              )}
+              {customAlert.type === 'error' && (
+                <div style={{
+                  width: '70px',
+                  height: '70px',
+                  background: '#d32f2f',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto'
+                }}>
+                  <i className="fas fa-times" style={{ fontSize: '2rem', color: 'white' }}></i>
+                </div>
+              )}
+            </div>
+            
+            <h3 style={{
+              color: customAlert.type === 'error' ? '#d32f2f' : '#0B3B2F',
+              marginBottom: '0.5rem',
+              fontSize: '1.5rem'
+            }}>
+              {customAlert.title}
+            </h3>
+            
+            <p style={{ color: '#666', marginBottom: '1.5rem', lineHeight: '1.5' }}>
+              {customAlert.message}
+            </p>
+            
+            {customAlert.type === 'error' && (
+              <button
+                onClick={closeAlert}
+                style={{
+                  padding: '0.6rem 2rem',
+                  background: '#d32f2f',
+                  border: 'none',
+                  borderRadius: '50px',
+                  color: 'white',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}
+              >
+                OK
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Decorative Background */}
       <div style={{
         position: 'absolute',
@@ -156,7 +385,7 @@ const Timeline = () => {
           '@media (min-width: 768px)': { display: 'block' }
         }} />
 
-        {events.map((event, idx) => (
+        {upcomingEvents.map((event, idx) => (
           <div
             key={event.id}
             style={{
@@ -205,14 +434,14 @@ const Timeline = () => {
                   width: '50px',
                   height: '50px',
                   borderRadius: '50%',
-                  background: `linear-gradient(135deg, ${event.color}, ${event.color}dd)`,
+                  background: 'linear-gradient(135deg, #F9C74F, #F9C74Fdd)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   flexShrink: 0,
                   boxShadow: '0 4px 10px rgba(249,199,79,0.3)'
                 }}>
-                  <i className={event.icon} style={{ fontSize: '1.3rem', color: '#0B3B2F' }}></i>
+                  <i className={getEventIcon(event.type)} style={{ fontSize: '1.3rem', color: '#0B3B2F' }}></i>
                 </div>
 
                 {/* Event Info */}
@@ -232,7 +461,7 @@ const Timeline = () => {
                       fontSize: '0.65rem',
                       fontWeight: 600
                     }}>
-                      {event.subtitle}
+                      {getEventSubtitle(event.type)}
                     </span>
                     <span style={{
                       fontSize: '0.7rem',
@@ -327,20 +556,34 @@ const Timeline = () => {
                       <i className="fas fa-map-marker-alt" style={{ color: '#F9C74F', width: '20px' }}></i>
                       <span>{event.location}</span>
                     </div>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      fontSize: '0.7rem',
+                      color: '#666'
+                    }}>
+                      <i className="fas fa-users" style={{ color: '#F9C74F', width: '20px' }}></i>
+                      <span>{event.registered}/{event.capacity} spots filled</span>
+                    </div>
                   </div>
                   
                   {/* Register link with text and forward arrow */}
                   <div
-                    onClick={() => handleRegister(event.title)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRegister(event.title, event.id);
+                    }}
                     onMouseEnter={() => setIsRegisterHovered(true)}
                     onMouseLeave={() => setIsRegisterHovered(false)}
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '0.5rem',
-                      cursor: 'pointer',
+                      cursor: event.registered >= event.capacity ? 'not-allowed' : 'pointer',
                       padding: '0.5rem 0',
-                      transition: 'all 0.3s ease'
+                      transition: 'all 0.3s ease',
+                      opacity: event.registered >= event.capacity ? 0.5 : 1
                     }}
                   >
                     <span style={{
@@ -349,18 +592,20 @@ const Timeline = () => {
                       fontSize: '0.8rem',
                       transition: 'color 0.3s ease'
                     }}>
-                      Register Now
+                      {event.registered >= event.capacity ? 'Fully Booked' : 'Register Now'}
                     </span>
-                    <i 
-                      className="fas fa-arrow-right" 
-                      style={{
-                        fontSize: '0.8rem',
-                        color: '#F9C74F',
-                        transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                        transform: isRegisterHovered ? 'translateX(8px)' : 'translateX(0)',
-                        animation: isRegisterHovered ? 'none' : 'bounceArrow 1.5s ease-in-out infinite'
-                      }}
-                    ></i>
+                    {event.registered < event.capacity && (
+                      <i 
+                        className="fas fa-arrow-right" 
+                        style={{
+                          fontSize: '0.8rem',
+                          color: '#F9C74F',
+                          transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                          transform: isRegisterHovered ? 'translateX(8px)' : 'translateX(0)',
+                          animation: isRegisterHovered ? 'none' : 'bounceArrow 1.5s ease-in-out infinite'
+                        }}
+                      ></i>
+                    )}
                   </div>
                 </div>
               )}
@@ -370,48 +615,50 @@ const Timeline = () => {
       </div>
 
       {/* View All Events - Eye icon link */}
-      <div style={{
-        textAlign: 'center',
-        marginTop: '2rem',
-        position: 'relative',
-        zIndex: 1,
-        opacity: isVisible ? 1 : 0,
-        transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
-        transition: 'all 0.5s ease 0.45s'
-      }}>
-        <div
-          onClick={handleViewAllEvents}
-          onMouseEnter={() => setIsViewHovered(true)}
-          onMouseLeave={() => setIsViewHovered(false)}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            cursor: 'pointer',
-            padding: '0.5rem 1rem',
-            borderRadius: '50px',
-            transition: 'all 0.3s ease'
-          }}
-        >
-          <i 
-            className="fas fa-eye" 
+      {events.length > 3 && (
+        <div style={{
+          textAlign: 'center',
+          marginTop: '2rem',
+          position: 'relative',
+          zIndex: 1,
+          opacity: isVisible ? 1 : 0,
+          transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
+          transition: 'all 0.5s ease 0.45s'
+        }}>
+          <div
+            onClick={handleViewAllEvents}
+            onMouseEnter={() => setIsViewHovered(true)}
+            onMouseLeave={() => setIsViewHovered(false)}
             style={{
-              fontSize: '1rem',
-              color: '#F9C74F',
-              transition: 'transform 0.3s ease',
-              transform: isViewHovered ? 'scale(1.1)' : 'scale(1)'
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              cursor: 'pointer',
+              padding: '0.5rem 1rem',
+              borderRadius: '50px',
+              transition: 'all 0.3s ease'
             }}
-          ></i>
-          <span style={{
-            color: '#0B3B2F',
-            fontWeight: 600,
-            fontSize: '0.85rem',
-            transition: 'color 0.3s ease'
-          }}>
-            View All Events
-          </span>
+          >
+            <i 
+              className="fas fa-eye" 
+              style={{
+                fontSize: '1rem',
+                color: '#F9C74F',
+                transition: 'transform 0.3s ease',
+                transform: isViewHovered ? 'scale(1.1)' : 'scale(1)'
+              }}
+            ></i>
+            <span style={{
+              color: '#0B3B2F',
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              transition: 'color 0.3s ease'
+            }}>
+              View All Events
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* CSS Animations */}
       <style>{`
@@ -435,6 +682,22 @@ const Timeline = () => {
           }
         }
         
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        
+        @keyframes slideInUp {
+          from {
+            opacity: 0;
+            transform: translateY(50px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
         @media (max-width: 768px) {
           .timeline-card {
             margin: 0 0.5rem;
@@ -451,10 +714,6 @@ const Timeline = () => {
           .timeline-card .fa-calendar-alt,
           .timeline-card .fa-map-marker-alt {
             font-size: 0.55rem !important;
-          }
-          
-          .register-link span {
-            font-size: 0.75rem !important;
           }
         }
         

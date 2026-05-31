@@ -2,10 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-import { projects } from '../data/projects';
 
 const Programs = () => {
   const navigate = useNavigate();
+  const [programs, setPrograms] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [visibleCount, setVisibleCount] = useState(3);
   const [isLoading, setIsLoading] = useState(false);
   const [isViewMoreHovered, setIsViewMoreHovered] = useState(false);
@@ -16,7 +19,28 @@ const Programs = () => {
 
   useEffect(() => {
     AOS.init({ duration: 800, once: false });
+    fetchData();
   }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [programsRes, projectsRes] = await Promise.all([
+        fetch('http://192.168.137.83:8000/api/programs/'),
+        fetch('http://192.168.137.83:8000/api/programs/projects/')
+      ]);
+      
+      const programsData = await programsRes.json();
+      const projectsData = await projectsRes.json();
+      
+      if (programsData.success) setPrograms(programsData.data);
+      if (projectsData.success) setProjects(projectsData.data);
+    } catch (error) {
+      setError('Network error. Please check your connection.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const displayedProjects = projects.slice(0, visibleCount);
   const hasMore = visibleCount < projects.length;
@@ -28,51 +52,6 @@ const Programs = () => {
       setIsLoading(false);
     }, 500);
   };
-
-  const programs = [
-    { 
-      id: 1, 
-      title: 'Innovation Leadership', 
-      icon: 'fas fa-lightbulb', 
-      color: '#F9C74F', 
-      description: 'Develop leadership skills to drive innovation in your community.', 
-      features: ['Leadership Training', 'Mentorship Program', 'Networking Events'],
-      fullDescription: 'Our Innovation Leadership program is designed to equip young leaders with the skills, knowledge, and network needed to drive positive change. Participants engage in hands-on workshops, receive one-on-one mentoring from industry experts, and connect with like-minded peers. The program covers strategic thinking, problem-solving, team management, and effective communication.',
-      duration: '3 months',
-      eligibility: 'Young leaders aged 18-35',
-      certification: 'Certificate of Completion',
-      outcomes: ['Enhanced leadership capabilities', 'Expanded professional network', 'Practical project management skills'],
-      image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=400&h=300&fit=crop'
-    },
-    { 
-      id: 2, 
-      title: 'Environmental Innovation', 
-      icon: 'fas fa-leaf', 
-      color: '#2b7a5c', 
-      description: 'Create sustainable solutions for environmental challenges.', 
-      features: ['Green Projects', 'Climate Action', 'Sustainability Workshops'],
-      fullDescription: 'The Environmental Innovation program empowers participants to develop and implement sustainable solutions to environmental challenges. Through hands-on projects, workshops, and mentorship, participants learn to create impactful green initiatives. Topics include climate change mitigation, waste management, renewable energy, and sustainable agriculture.',
-      duration: '4 months',
-      eligibility: 'Environmental enthusiasts and activists',
-      certification: 'Green Innovation Certificate',
-      outcomes: ['Real-world project implementation', 'Environmental impact assessment skills', 'Community engagement experience'],
-      image: 'https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?w=400&h=300&fit=crop'
-    },
-    { 
-      id: 3, 
-      title: 'Mentorship Program', 
-      icon: 'fas fa-handshake', 
-      color: '#F9C74F', 
-      description: 'Connect with experienced mentors to guide your journey.', 
-      features: ['One-on-One Mentoring', 'Career Guidance', 'Skill Development'],
-      fullDescription: 'Our Mentorship Program pairs young professionals with experienced mentors from various industries. Mentors provide guidance, share insights, and help mentees navigate their career paths. The program includes regular one-on-one sessions, group workshops, and networking events designed to foster meaningful professional relationships.',
-      duration: '6 months',
-      eligibility: 'Young professionals and students',
-      certification: 'Mentorship Completion Certificate',
-      outcomes: ['Career advancement guidance', 'Professional network expansion', 'Personal development support'],
-      image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=400&h=300&fit=crop'
-    }
-  ];
 
   const openProgramModal = (program) => {
     setSelectedProgram(program);
@@ -102,6 +81,31 @@ const Programs = () => {
     navigate('/programs/apply', { state: { programName: programTitle } });
   };
 
+  if (loading) {
+    return (
+      <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f9fbf7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <i className="fas fa-spinner fa-spin" style={{ fontSize: '3rem', color: '#0B3B2F' }}></i>
+          <p style={{ marginTop: '1rem', color: '#666' }}>Loading programs...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f9fbf7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <i className="fas fa-exclamation-circle" style={{ fontSize: '3rem', color: '#d32f2f' }}></i>
+          <p style={{ marginTop: '1rem', color: '#666' }}>{error}</p>
+          <button onClick={fetchData} style={{ marginTop: '1rem', background: '#F9C74F', border: 'none', padding: '0.5rem 1rem', borderRadius: '20px', cursor: 'pointer' }}>
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ paddingTop: '70px' }}>
       {/* Hero Section */}
@@ -119,7 +123,7 @@ const Programs = () => {
         </p>
       </div>
 
-      {/* Programs Cards - Reduced Width */}
+      {/* Programs Cards */}
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '4rem 2rem' }}>
         <div style={{ 
           display: 'grid', 
@@ -149,7 +153,7 @@ const Programs = () => {
               <div style={{ padding: '1.2rem' }}>
                 <p style={{ color: '#666', marginBottom: '0.8rem', fontSize: '0.85rem' }}>{program.description}</p>
                 <ul style={{ listStyle: 'none', padding: 0 }}>
-                  {program.features.slice(0, 2).map((feature, i) => (
+                  {program.features && program.features.slice(0, 2).map((feature, i) => (
                     <li key={i} style={{ padding: '0.3rem 0', color: '#555', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}>
                       <i className="fas fa-check-circle" style={{ color: '#F9C74F', fontSize: '0.7rem' }}></i>
                       {feature}
@@ -240,7 +244,7 @@ const Programs = () => {
                   <i className="fas fa-info-circle" style={{ marginRight: '0.5rem', color: '#F9C74F' }}></i>
                   About This Program
                 </h3>
-                <p style={{ color: '#666', lineHeight: '1.6', fontSize: 'clamp(0.85rem, 3.5vw, 1rem)' }}>{selectedProgram.fullDescription}</p>
+                <p style={{ color: '#666', lineHeight: '1.6', fontSize: 'clamp(0.85rem, 3.5vw, 1rem)' }}>{selectedProgram.full_description}</p>
               </div>
 
               <div style={{
@@ -281,7 +285,7 @@ const Programs = () => {
                   Key Outcomes
                 </h3>
                 <ul style={{ listStyle: 'none', padding: 0 }}>
-                  {selectedProgram.outcomes.map((outcome, i) => (
+                  {selectedProgram.outcomes && selectedProgram.outcomes.map((outcome, i) => (
                     <li key={i} style={{ padding: '0.5rem 0', color: '#555', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: 'clamp(0.85rem, 3.5vw, 0.9rem)' }}>
                       <i className="fas fa-check-circle" style={{ color: '#F9C74F', fontSize: '0.8rem' }}></i>
                       {outcome}
@@ -296,7 +300,7 @@ const Programs = () => {
                   Program Features
                 </h3>
                 <ul style={{ listStyle: 'none', padding: 0 }}>
-                  {selectedProgram.features.map((feature, i) => (
+                  {selectedProgram.features && selectedProgram.features.map((feature, i) => (
                     <li key={i} style={{ padding: '0.5rem 0', color: '#555', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: 'clamp(0.85rem, 3.5vw, 0.9rem)' }}>
                       <i className="fas fa-star" style={{ color: '#F9C74F', fontSize: '0.8rem' }}></i>
                       {feature}
@@ -356,62 +360,75 @@ const Programs = () => {
         <h2 data-aos="fade-up" style={{ textAlign: 'center', marginBottom: '2rem', color: '#0B3B2F' }}>Featured Projects</h2>
         
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
-            gap: '1.5rem',
-            marginBottom: '2rem'
-          }}>
-            {displayedProjects.map((project, idx) => (
-              <div key={idx} data-aos="zoom-in" data-aos-delay={idx * 100} style={{ 
-                background: 'white', 
-                borderRadius: '16px', 
-                overflow: 'hidden', 
-                boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
-                transition: 'transform 0.3s ease',
-                cursor: 'pointer',
-                maxWidth: '320px',
-                margin: '0 auto'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
-              onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-              onClick={() => openProjectModal(project)}>
-                <img src={project.img} alt={project.title} style={{ width: '100%', height: '180px', objectFit: 'cover' }} />
-                <div style={{ padding: '1rem' }}>
-                  <h4 style={{ color: '#0B3B2F', marginBottom: '0.5rem', fontSize: '1rem' }}>{project.title}</h4>
-                  <p style={{ fontSize: '0.75rem', color: '#666' }}>{project.description.substring(0, 60)}...</p>
-                  <div style={{
-                    marginTop: '0.8rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    flexWrap: 'wrap',
-                    gap: '0.5rem'
-                  }}>
-                    <span style={{
-                      fontSize: '0.65rem',
-                      background: 'rgba(249,199,79,0.1)',
-                      color: '#F9C74F',
-                      padding: '0.2rem 0.6rem',
-                      borderRadius: '20px'
-                    }}>
-                      {project.cat === 'leadership' ? 'Leadership' : 'Environment'}
-                    </span>
-                    <span style={{
-                      fontSize: '0.65rem',
-                      color: '#F9C74F',
+          {projects.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '3rem' }}>
+              <i className="fas fa-project-diagram" style={{ fontSize: '3rem', color: '#999' }}></i>
+              <p style={{ marginTop: '1rem', color: '#666' }}>No projects available at the moment.</p>
+            </div>
+          ) : (
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
+              gap: '1.5rem',
+              marginBottom: '2rem'
+            }}>
+              {displayedProjects.map((project, idx) => (
+                <div key={project.id} data-aos="zoom-in" data-aos-delay={idx * 100} style={{ 
+                  background: 'white', 
+                  borderRadius: '16px', 
+                  overflow: 'hidden', 
+                  boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
+                  transition: 'transform 0.3s ease',
+                  cursor: 'pointer',
+                  maxWidth: '320px',
+                  margin: '0 auto'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                onClick={() => openProjectModal(project)}>
+                  {project.image_base64 ? (
+                    <img src={project.image_base64} alt={project.title} style={{ width: '100%', height: '180px', objectFit: 'cover' }} />
+                  ) : (
+                    <div style={{ width: '100%', height: '180px', background: 'linear-gradient(135deg, #F9C74F, #f8b500)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <i className="fas fa-image" style={{ fontSize: '3rem', color: 'white' }}></i>
+                    </div>
+                  )}
+                  <div style={{ padding: '1rem' }}>
+                    <h4 style={{ color: '#0B3B2F', marginBottom: '0.5rem', fontSize: '1rem' }}>{project.title}</h4>
+                    <p style={{ fontSize: '0.75rem', color: '#666' }}>{project.description.substring(0, 60)}...</p>
+                    <div style={{
+                      marginTop: '0.8rem',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '0.3rem'
+                      justifyContent: 'space-between',
+                      flexWrap: 'wrap',
+                      gap: '0.5rem'
                     }}>
-                      <i className="fas fa-eye"></i>
-                      View Details
-                    </span>
+                      <span style={{
+                        fontSize: '0.65rem',
+                        background: 'rgba(249,199,79,0.1)',
+                        color: '#F9C74F',
+                        padding: '0.2rem 0.6rem',
+                        borderRadius: '20px'
+                      }}>
+                        {project.category === 'leadership' ? 'Leadership' : project.category === 'environment' ? 'Environment' : project.category}
+                      </span>
+                      <span style={{
+                        fontSize: '0.65rem',
+                        color: '#F9C74F',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.3rem'
+                      }}>
+                        <i className="fas fa-eye"></i>
+                        View Details
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           {/* View More Button */}
           {hasMore && (
@@ -503,7 +520,13 @@ const Programs = () => {
             animation: 'slideInUp 0.3s ease'
           }}>
             <div style={{ position: 'relative', height: '200px', overflow: 'hidden' }}>
-              <img src={selectedProject.img} alt={selectedProject.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              {selectedProject.image_base64 ? (
+                <img src={selectedProject.image_base64} alt={selectedProject.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #F9C74F, #f8b500)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <i className="fas fa-image" style={{ fontSize: '4rem', color: 'white' }}></i>
+                </div>
+              )}
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7))' }} />
               <button onClick={closeProjectModal} style={{
                 position: 'absolute', top: '16px', right: '16px', background: 'rgba(0,0,0,0.5)', border: 'none',
@@ -514,11 +537,11 @@ const Programs = () => {
               </button>
               <div style={{ position: 'absolute', bottom: '20px', left: '20px', right: '20px', zIndex: 10 }}>
                 <span style={{
-                  display: 'inline-block', background: selectedProject.cat === 'leadership' ? '#F9C74F' : '#2b7a5c',
-                  color: selectedProject.cat === 'leadership' ? '#0B3B2F' : 'white', padding: '0.2rem 0.6rem',
+                  display: 'inline-block', background: selectedProject.category === 'leadership' ? '#F9C74F' : '#2b7a5c',
+                  color: selectedProject.category === 'leadership' ? '#0B3B2F' : 'white', padding: '0.2rem 0.6rem',
                   borderRadius: '20px', fontSize: '0.65rem', fontWeight: 600, marginBottom: '0.5rem'
                 }}>
-                  {selectedProject.cat === 'leadership' ? 'LEADERSHIP' : 'ENVIRONMENT'}
+                  {selectedProject.category === 'leadership' ? 'LEADERSHIP' : selectedProject.category.toUpperCase()}
                 </span>
                 <h2 style={{ color: 'white', margin: 0, fontSize: 'clamp(1.2rem, 5vw, 1.5rem)' }}>{selectedProject.title}</h2>
               </div>

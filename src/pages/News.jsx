@@ -1,28 +1,85 @@
 import React, { useEffect, useState } from 'react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-import { blogPosts } from '../data';
 
 const News = () => {
+  const [news, setNews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [visibleCount, setVisibleCount] = useState(6);
   const [selectedPost, setSelectedPost] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [liking, setLiking] = useState(false);
 
   useEffect(() => {
     AOS.init({ duration: 800, once: false });
+    fetchNews();
   }, []);
 
-  const displayedPosts = blogPosts.slice(0, visibleCount);
-  const hasMore = visibleCount < blogPosts.length;
-
-  const loadMore = () => {
-    setVisibleCount(prev => Math.min(prev + 3, blogPosts.length));
+  const fetchNews = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('http://192.168.137.83:8000/api/news/');
+      const data = await response.json();
+      if (data.success) {
+        setNews(data.data);
+      } else {
+        setError('Failed to load news');
+      }
+    } catch (error) {
+      setError('Network error. Please check your connection.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const openModal = (post) => {
+  const handleLike = async (id, e) => {
+    e.stopPropagation();
+    setLiking(true);
+    try {
+      const response = await fetch(`http://192.168.137.83:8000/api/news/${id}/like/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
+      if (data.success) {
+        setNews(prevNews => 
+          prevNews.map(item => 
+            item.id === id ? { ...item, likes: data.likes } : item
+          )
+        );
+        if (selectedPost && selectedPost.id === id) {
+          setSelectedPost({ ...selectedPost, likes: data.likes });
+        }
+      }
+    } catch (error) {
+      console.error('Error liking news:', error);
+    } finally {
+      setLiking(false);
+    }
+  };
+
+  const openModal = async (post) => {
     setSelectedPost(post);
     setShowModal(true);
     document.body.style.overflow = 'hidden';
+    
+    try {
+      const response = await fetch(`http://192.168.137.83:8000/api/news/${post.id}/`);
+      const data = await response.json();
+      if (data.success) {
+        setSelectedPost(data.data);
+        setNews(prevNews => 
+          prevNews.map(item => 
+            item.id === post.id ? { ...item, views: data.data.views } : item
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Error fetching post details:', error);
+    }
   };
 
   const closeModal = () => {
@@ -31,17 +88,59 @@ const News = () => {
     document.body.style.overflow = 'unset';
   };
 
-  // Full content for each blog post
-  const getFullContent = (title) => {
-    const contents = {
-      "VUMA Launches Green Innovation Fund": "The VUMA Green Innovation Fund is a groundbreaking initiative designed to support young innovators and entrepreneurs who are developing sustainable solutions to environmental challenges. The fund provides seed funding, mentorship, and technical support to selected projects that demonstrate potential for significant environmental impact. Successful applicants will receive up to $10,000 in funding, access to a network of industry experts, and comprehensive business development training. The fund focuses on areas such as renewable energy, waste management, sustainable agriculture, and water conservation. Applications are open until June 30, 2026. This initiative is made possible through partnerships with UNDP, UNEP, and various private sector partners who share our commitment to nurturing green innovation among Tanzanian youth.",
-      
-      "Leadership Summit 2026 Recap": "The VUMA Leadership Summit 2026 brought together over 500 young leaders from across Tanzania for three days of intensive training, networking, and inspiration. Held at the Julius Nyerere International Convention Centre in Dar es Salaam, the summit featured keynote speeches from prominent leaders, interactive workshops on essential leadership skills, and panel discussions on pressing national issues. Highlights included a fireside chat with the Minister of Youth, a pitch competition where 10 young entrepreneurs presented their innovative ideas, and a commitment ceremony where participants pledged to take action in their communities. The summit concluded with the announcement of the VUMA Fellowship Program, which will provide ongoing support to 50 exceptional young leaders.",
-      
-      "Partnering with UNDP for Climate Action": "VUMA Tanzania is proud to announce a strategic partnership with the United Nations Development Programme (UNDP) to accelerate climate action across Tanzania. This collaboration will focus on three key areas: youth-led climate initiatives, policy advocacy, and community-based adaptation projects. Through this partnership, VUMA will receive technical support and funding to expand its climate action programs, reaching an additional 10,000 young people over the next two years. Joint activities will include climate literacy workshops, tree planting campaigns, renewable energy projects, and advocacy for stronger climate policies. The partnership was officially launched at a ceremony attended by UNDP Country Representative and VUMA leadership, marking a significant milestone in our journey to empower youth in the fight against climate change."
-    };
-    return contents[title] || "Discover how VUMA Tanzania is making a difference in youth innovation and climate action. This article provides insights into our latest initiatives, success stories, and upcoming opportunities for young people across Tanzania. We are committed to transparency and sharing our journey with our community. Read on to learn more about the impact we're creating together.";
+  const loadMore = () => {
+    setVisibleCount(prev => Math.min(prev + 3, news.length));
   };
+
+  const displayedPosts = news.slice(0, visibleCount);
+  const hasMore = visibleCount < news.length;
+
+  const shareOnSocial = (platform, title) => {
+    const url = window.location.href;
+    let shareUrl = '';
+    switch(platform) {
+      case 'facebook':
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+        break;
+      case 'twitter':
+        shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`;
+        break;
+      case 'linkedin':
+        shareUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}`;
+        break;
+      case 'whatsapp':
+        shareUrl = `https://wa.me/?text=${encodeURIComponent(title + ' ' + url)}`;
+        break;
+      default:
+        return;
+    }
+    window.open(shareUrl, '_blank', 'width=600,height=400');
+  };
+
+  if (loading) {
+    return (
+      <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f9fbf7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <i className="fas fa-spinner fa-spin" style={{ fontSize: '3rem', color: '#0B3B2F' }}></i>
+          <p style={{ marginTop: '1rem', color: '#666' }}>Loading news...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f9fbf7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <i className="fas fa-exclamation-circle" style={{ fontSize: '3rem', color: '#d32f2f' }}></i>
+          <p style={{ marginTop: '1rem', color: '#666' }}>{error}</p>
+          <button onClick={fetchNews} style={{ marginTop: '1rem', background: '#F9C74F', border: 'none', padding: '0.5rem 1rem', borderRadius: '20px', cursor: 'pointer' }}>
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ paddingTop: '70px' }}>
@@ -60,47 +159,54 @@ const News = () => {
         </p>
       </div>
 
-      {/* Blog Cards Grid - Reduced Width */}
+      {/* Blog Cards Grid */}
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '4rem 2rem' }}>
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
-          gap: '1.5rem',
-          maxWidth: '1000px',
-          margin: '0 auto'
-        }}>
-          {displayedPosts.map((post, idx) => (
-            <div key={idx} data-aos="fade-up" data-aos-delay={idx * 100} style={{
-              background: 'white',
-              borderRadius: '20px',
-              overflow: 'hidden',
-              boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
-              transition: 'transform 0.3s ease',
-              cursor: 'pointer',
-              maxWidth: '320px',
-              margin: '0 auto'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
-            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-            onClick={() => openModal(post)}>
-              <div style={{ height: '180px', overflow: 'hidden' }}>
-                <img src={post.img} alt={post.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              </div>
-              <div style={{ padding: '1.2rem' }}>
-                <span style={{ fontSize: '0.7rem', color: '#888' }}>
-                  <i className="far fa-calendar-alt" style={{ marginRight: '0.3rem' }}></i>
-                  {post.date} • {post.readTime}
-                </span>
-                <h3 style={{ color: '#0B3B2F', margin: '0.5rem 0', fontSize: '1rem' }}>{post.title}</h3>
-                <p style={{ color: '#666', marginBottom: '1rem', fontSize: '0.8rem' }}>Discover how VUMA Tanzania is making a difference...</p>
-                <div style={{ color: '#F9C74F', fontWeight: 600, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <i className="fas fa-eye"></i>
-                  Click to read more
+        {news.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '3rem' }}>
+            <i className="fas fa-newspaper" style={{ fontSize: '3rem', color: '#999' }}></i>
+            <p style={{ marginTop: '1rem', color: '#666' }}>No news articles available at the moment.</p>
+          </div>
+        ) : (
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
+            gap: '1.5rem',
+            maxWidth: '1000px',
+            margin: '0 auto'
+          }}>
+            {displayedPosts.map((post, idx) => (
+              <div key={post.id} data-aos="fade-up" data-aos-delay={idx * 100} style={{
+                background: 'white',
+                borderRadius: '20px',
+                overflow: 'hidden',
+                boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
+                transition: 'transform 0.3s ease',
+                cursor: 'pointer',
+                maxWidth: '320px',
+                margin: '0 auto'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+              onClick={() => openModal(post)}>
+                <div style={{ height: '180px', overflow: 'hidden' }}>
+                  <img src={post.image} alt={post.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+                <div style={{ padding: '1.2rem' }}>
+                  <span style={{ fontSize: '0.7rem', color: '#888' }}>
+                    <i className="far fa-calendar-alt" style={{ marginRight: '0.3rem' }}></i>
+                    {post.date} • {post.read_time}
+                  </span>
+                  <h3 style={{ color: '#0B3B2F', margin: '0.5rem 0', fontSize: '1rem' }}>{post.title}</h3>
+                  <p style={{ color: '#666', marginBottom: '1rem', fontSize: '0.8rem' }}>{post.excerpt || 'Discover how VUMA Tanzania is making a difference...'}</p>
+                  <div style={{ color: '#F9C74F', fontWeight: 600, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <i className="fas fa-eye"></i>
+                    Click to read more
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* Load More Button */}
         {hasMore && (
@@ -158,7 +264,7 @@ const News = () => {
             {/* Modal Header with Image */}
             <div style={{ position: 'relative', height: '220px', overflow: 'hidden' }}>
               <img 
-                src={selectedPost.img} 
+                src={selectedPost.image} 
                 alt={selectedPost.title} 
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
@@ -222,15 +328,25 @@ const News = () => {
                 </span>
                 <span style={{ fontSize: '0.8rem', color: '#666' }}>
                   <i className="far fa-clock" style={{ marginRight: '0.3rem', color: '#F9C74F' }}></i>
-                  {selectedPost.readTime}
+                  {selectedPost.read_time}
                 </span>
                 <span style={{ fontSize: '0.8rem', color: '#666' }}>
                   <i className="far fa-eye" style={{ marginRight: '0.3rem', color: '#F9C74F' }}></i>
-                  {Math.floor(Math.random() * 500) + 100} views
+                  {selectedPost.views} views
                 </span>
-                <span style={{ fontSize: '0.8rem', color: '#666' }}>
-                  <i className="far fa-heart" style={{ marginRight: '0.3rem', color: '#F9C74F' }}></i>
-                  {Math.floor(Math.random() * 50) + 10} likes
+                <span 
+                  onClick={(e) => handleLike(selectedPost.id, e)}
+                  style={{ 
+                    fontSize: '0.8rem', 
+                    color: '#666', 
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.3rem'
+                  }}
+                >
+                  <i className={`fa${liking ? 's fa-spinner fa-spin' : 'r fa-heart'}`} style={{ color: liking ? '#F9C74F' : '#ff6b6b' }}></i>
+                  {selectedPost.likes} likes
                 </span>
               </div>
 
@@ -241,31 +357,27 @@ const News = () => {
                   Full Story
                 </h3>
                 <p style={{ color: '#555', lineHeight: '1.8', fontSize: '0.95rem' }}>
-                  {getFullContent(selectedPost.title)}
+                  {selectedPost.content}
                 </p>
               </div>
 
               {/* Key Highlights */}
-              <div style={{ marginBottom: '1.5rem', background: '#f9fbf7', padding: '1rem', borderRadius: '16px' }}>
-                <h4 style={{ color: '#0B3B2F', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
-                  <i className="fas fa-star" style={{ marginRight: '0.5rem', color: '#F9C74F' }}></i>
-                  Key Highlights
-                </h4>
-                <ul style={{ listStyle: 'none', padding: 0 }}>
-                  <li style={{ padding: '0.3rem 0', color: '#555', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
-                    <i className="fas fa-check-circle" style={{ color: '#F9C74F', fontSize: '0.7rem' }}></i>
-                    Impactful initiative launched in 2026
-                  </li>
-                  <li style={{ padding: '0.3rem 0', color: '#555', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
-                    <i className="fas fa-check-circle" style={{ color: '#F9C74F', fontSize: '0.7rem' }}></i>
-                    Partnership with leading organizations
-                  </li>
-                  <li style={{ padding: '0.3rem 0', color: '#555', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
-                    <i className="fas fa-check-circle" style={{ color: '#F9C74F', fontSize: '0.7rem' }}></i>
-                    Over 500 youth already participating
-                  </li>
-                </ul>
-              </div>
+              {selectedPost.key_highlights && selectedPost.key_highlights.length > 0 && (
+                <div style={{ marginBottom: '1.5rem', background: '#f9fbf7', padding: '1rem', borderRadius: '16px' }}>
+                  <h4 style={{ color: '#0B3B2F', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
+                    <i className="fas fa-star" style={{ marginRight: '0.5rem', color: '#F9C74F' }}></i>
+                    Key Highlights
+                  </h4>
+                  <ul style={{ listStyle: 'none', padding: 0 }}>
+                    {selectedPost.key_highlights.map((highlight, index) => (
+                      <li key={index} style={{ padding: '0.3rem 0', color: '#555', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
+                        <i className="fas fa-check-circle" style={{ color: '#F9C74F', fontSize: '0.7rem' }}></i>
+                        {highlight}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
               {/* Share Section */}
               <div style={{ marginBottom: '1rem' }}>
@@ -274,7 +386,7 @@ const News = () => {
                   Share this article
                 </h4>
                 <div style={{ display: 'flex', gap: '0.8rem' }}>
-                  <button style={{
+                  <button onClick={() => shareOnSocial('facebook', selectedPost.title)} style={{
                     background: '#1877f2',
                     border: 'none',
                     width: '36px',
@@ -285,11 +397,10 @@ const News = () => {
                     transition: 'transform 0.3s ease'
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                  onClick={() => alert('Share on Facebook')}>
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
                     <i className="fab fa-facebook-f"></i>
                   </button>
-                  <button style={{
+                  <button onClick={() => shareOnSocial('twitter', selectedPost.title)} style={{
                     background: '#1da1f2',
                     border: 'none',
                     width: '36px',
@@ -300,11 +411,10 @@ const News = () => {
                     transition: 'transform 0.3s ease'
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                  onClick={() => alert('Share on Twitter')}>
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
                     <i className="fab fa-twitter"></i>
                   </button>
-                  <button style={{
+                  <button onClick={() => shareOnSocial('linkedin', selectedPost.title)} style={{
                     background: '#0077b5',
                     border: 'none',
                     width: '36px',
@@ -315,11 +425,10 @@ const News = () => {
                     transition: 'transform 0.3s ease'
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                  onClick={() => alert('Share on LinkedIn')}>
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
                     <i className="fab fa-linkedin-in"></i>
                   </button>
-                  <button style={{
+                  <button onClick={() => shareOnSocial('whatsapp', selectedPost.title)} style={{
                     background: '#25D366',
                     border: 'none',
                     width: '36px',
@@ -330,8 +439,7 @@ const News = () => {
                     transition: 'transform 0.3s ease'
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                  onClick={() => alert('Share on WhatsApp')}>
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
                     <i className="fab fa-whatsapp"></i>
                   </button>
                 </div>
@@ -365,7 +473,7 @@ const News = () => {
                   Close
                 </button>
                 <button
-                  onClick={() => alert(`Subscribe to our newsletter for more updates!`)}
+                  onClick={() => alert('Subscribe to our newsletter for more updates!')}
                   style={{
                     flex: 2,
                     background: '#F9C74F',

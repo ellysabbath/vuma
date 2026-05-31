@@ -11,6 +11,7 @@ const Navbar = () => {
   const [isServicesDropdownOpen, setIsServicesDropdownOpen] = useState(false);
   const [isAboutDropdownOpen, setIsAboutDropdownOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
   const userMenuRef = useRef(null);
   const servicesDropdownRef = useRef(null);
   const aboutDropdownRef = useRef(null);
@@ -25,7 +26,18 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    const userData = localStorage.getItem('user');
+    if (token && userData) {
+      setIsLoggedIn(true);
+      setUser(JSON.parse(userData));
+    } else {
+      setIsLoggedIn(false);
+      setUser(null);
+    }
+  }, [location]);
+
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
@@ -42,7 +54,6 @@ const Navbar = () => {
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
-  // Close sidebar when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (isSidebarOpen && !e.target.closest('.sidebar-container') && !e.target.closest('.menu-toggle-btn')) {
@@ -53,7 +64,6 @@ const Navbar = () => {
     return () => document.removeEventListener('click', handleClickOutside);
   }, [isSidebarOpen]);
 
-  // Prevent body scroll when sidebar is open
   useEffect(() => {
     if (isSidebarOpen) {
       document.body.style.overflow = 'hidden';
@@ -65,7 +75,6 @@ const Navbar = () => {
     };
   }, [isSidebarOpen]);
 
-  // Close sidebar on escape key
   useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === 'Escape' && isSidebarOpen) {
@@ -89,22 +98,15 @@ const Navbar = () => {
     setIsUserMenuOpen(!isUserMenuOpen);
   };
 
-  const handleLoginClick = () => {
-    setIsUserMenuOpen(false);
-    navigate('/login');
-  };
-
   const handleLogoutClick = (e) => {
     e.preventDefault();
     setIsUserMenuOpen(false);
     setIsLoggedIn(false);
-    alert('You have been logged out successfully!');
+    setUser(null);
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
     navigate('/');
-  };
-
-  const handleSettingsClick = () => {
-    setIsUserMenuOpen(false);
-    navigate('/settings');
   };
 
   const handleProfileClick = () => {
@@ -112,7 +114,6 @@ const Navbar = () => {
     navigate('/profile');
   };
 
-  // Hover handlers for About dropdown with delay
   const handleAboutMouseEnter = () => {
     if (aboutTimeoutRef.current) {
       clearTimeout(aboutTimeoutRef.current);
@@ -138,7 +139,6 @@ const Navbar = () => {
     }, 200);
   };
 
-  // Hover handlers for Services dropdown with delay
   const handleServicesMouseEnter = () => {
     if (servicesTimeoutRef.current) {
       clearTimeout(servicesTimeoutRef.current);
@@ -164,12 +164,10 @@ const Navbar = () => {
     }, 200);
   };
 
-  // Check if link is active
   const isActive = (path) => {
     return location.pathname === path;
   };
 
-  // About Us dropdown items
   const aboutItems = [
     { id: 'leaders', label: 'Our Leaders', icon: 'fas fa-users', path: '/leadership' },
     { id: 'mission', label: 'Our Mission', icon: 'fas fa-bullseye', path: '/about#mission' },
@@ -177,17 +175,16 @@ const Navbar = () => {
     { id: 'volunteers', label: 'Volunteers', icon: 'fas fa-hands-helping', path: '/volunteers' }
   ];
 
-  // Services dropdown items
   const servicesItems = [
     { id: 'home', label: 'Home', icon: 'fas fa-home', path: '/' },
     { id: 'programs', label: 'Programs', icon: 'fas fa-chalkboard-user', path: '/programs' },
+    { id: 'partners', label: 'Partners', icon: 'fas fa-handshake', path: '/partners' },
     { id: 'news', label: 'News & Stories', icon: 'fas fa-newspaper', path: '/news' },
     { id: 'contact', label: 'Contact', icon: 'fas fa-envelope', path: '/contact' }
   ];
 
   return (
     <>
-      {/* Navbar */}
       <nav className={`navbar ${scrolled ? 'scrolled' : ''}`} style={{
         position: 'fixed',
         top: 0,
@@ -211,7 +208,6 @@ const Navbar = () => {
           alignItems: 'center',
           width: '100%'
         }}>
-          {/* Menu Toggle Button */}
           <button 
             className="menu-toggle-btn"
             onClick={toggleSidebar}
@@ -267,7 +263,6 @@ const Navbar = () => {
             </div>
           </button>
 
-          {/* Logo */}
           <Link 
             to="/" 
             onClick={closeSidebar}
@@ -312,14 +307,11 @@ const Navbar = () => {
             </div>
           </Link>
 
-          {/* Desktop Navigation Buttons */}
           <div className="desktop-nav-buttons" style={{
             display: 'none',
             alignItems: 'center',
             gap: '0.5rem'
           }}>
-            
-            {/* About Us Dropdown */}
             <div 
               style={{ position: 'relative' }} 
               ref={aboutDropdownRef}
@@ -404,7 +396,6 @@ const Navbar = () => {
               )}
             </div>
 
-            {/* Our Services Dropdown */}
             <div 
               style={{ position: 'relative' }} 
               ref={servicesDropdownRef}
@@ -487,7 +478,6 @@ const Navbar = () => {
               )}
             </div>
 
-            {/* Blog Button */}
             <Link 
               to="/news"
               className="desktop-nav-link"
@@ -519,7 +509,6 @@ const Navbar = () => {
               Blog
             </Link>
 
-            {/* Contact Button */}
             <Link 
               to="/contact"
               className="desktop-nav-link"
@@ -551,7 +540,6 @@ const Navbar = () => {
               Contact
             </Link>
 
-            {/* Donate Button */}
             <Link 
               to="/donate"
               className="donate-btn"
@@ -584,14 +572,13 @@ const Navbar = () => {
             </Link>
           </div>
 
-          {/* User Profile / Login Button */}
           <div style={{ position: 'relative' }} ref={userMenuRef}>
-            {isLoggedIn ? (
+            {isLoggedIn && user ? (
               <button
                 onClick={toggleUserMenu}
                 style={{
-                  background: 'linear-gradient(135deg, #F9C74F, #f6b83e)',
-                  border: '2px solid rgba(249,199,79,0.5)',
+                  background: 'none',
+                  border: 'none',
                   width: '40px',
                   height: '40px',
                   borderRadius: '50%',
@@ -600,19 +587,42 @@ const Navbar = () => {
                   alignItems: 'center',
                   justifyContent: 'center',
                   transition: 'all 0.3s ease',
-                  color: '#0B3B2F',
-                  fontSize: '1rem'
+                  padding: 0,
+                  overflow: 'hidden'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'scale(1.05)';
-                  e.currentTarget.style.boxShadow = '0 3px 10px rgba(249,199,79,0.3)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'scale(1)';
-                  e.currentTarget.style.boxShadow = 'none';
                 }}
               >
-                <i className="fas fa-user-check"></i>
+                {user.profile_picture ? (
+                  <img 
+                    src={user.profile_picture} 
+                    alt="Profile" 
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      border: '2px solid #F9C74F',
+                      borderRadius: '50%'
+                    }}
+                  />
+                ) : (
+                  <div style={{
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #F9C74F, #f6b83e)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#0B3B2F'
+                  }}>
+                    <i className="fas fa-user" style={{ fontSize: '1.2rem' }}></i>
+                  </div>
+                )}
               </button>
             ) : (
               <Link
@@ -646,8 +656,7 @@ const Navbar = () => {
               </Link>
             )}
 
-            {/* User Dropdown Menu */}
-            {isUserMenuOpen && isLoggedIn && (
+            {isUserMenuOpen && isLoggedIn && user && (
               <div style={{
                 position: 'absolute',
                 top: '50px',
@@ -666,21 +675,38 @@ const Navbar = () => {
                   color: 'white',
                   textAlign: 'center'
                 }}>
-                  <div style={{
-                    width: '50px',
-                    height: '50px',
-                    borderRadius: '50%',
-                    background: '#F9C74F',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    margin: '0 auto 8px',
-                    fontSize: '1.3rem'
-                  }}>
-                    <i className="fas fa-leaf" style={{ color: '#0B3B2F' }}></i>
-                  </div>
+                  {user.profile_picture ? (
+                    <div style={{
+                      width: '50px',
+                      height: '50px',
+                      borderRadius: '50%',
+                      margin: '0 auto 8px',
+                      overflow: 'hidden',
+                      border: '2px solid #F9C74F'
+                    }}>
+                      <img 
+                        src={user.profile_picture} 
+                        alt="Profile" 
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    </div>
+                  ) : (
+                    <div style={{
+                      width: '50px',
+                      height: '50px',
+                      borderRadius: '50%',
+                      background: '#F9C74F',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      margin: '0 auto 8px',
+                      fontSize: '1.3rem'
+                    }}>
+                      <i className="fas fa-user" style={{ color: '#0B3B2F' }}></i>
+                    </div>
+                  )}
                   <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>Welcome Back!</div>
-                  <div style={{ fontSize: '0.7rem', opacity: 0.8 }}>user@vuma.or.tz</div>
+                  <div style={{ fontSize: '0.7rem', opacity: 0.8 }}>{user.email || user.username}</div>
                 </div>
 
                 <Link
@@ -705,27 +731,29 @@ const Navbar = () => {
                   <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
                 </Link>
                 
-                <Link
-                  to="/settings"
-                  onClick={() => setIsUserMenuOpen(false)}
-                  className="dropdown-item"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    padding: '0.8rem 1rem',
-                    color: '#333',
-                    textDecoration: 'none',
-                    transition: 'all 0.3s ease',
-                    borderBottom: '1px solid #f0f0f0'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
-                >
-                  <i className="fas fa-cog" style={{ width: '20px', color: '#F9C74F' }}></i>
-                  <span style={{ flex: 1 }}>Settings</span>
-                  <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
-                </Link>
+                {user.role === 'admin' && (
+                  <Link
+                    to="/admin"
+                    onClick={() => setIsUserMenuOpen(false)}
+                    className="dropdown-item"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      padding: '0.8rem 1rem',
+                      color: '#333',
+                      textDecoration: 'none',
+                      transition: 'all 0.3s ease',
+                      borderBottom: '1px solid #f0f0f0'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                  >
+                    <i className="fas fa-user-shield" style={{ width: '20px', color: '#F9C74F' }}></i>
+                    <span style={{ flex: 1 }}>Admin Dashboard</span>
+                    <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
+                  </Link>
+                )}
                 
                 <button
                   onClick={handleLogoutClick}
@@ -756,7 +784,6 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* Overlay */}
       {isSidebarOpen && (
         <div 
           className="sidebar-overlay"
@@ -775,7 +802,6 @@ const Navbar = () => {
         />
       )}
 
-      {/* Sidebar */}
       <div 
         className="sidebar-container"
         style={{
@@ -795,7 +821,6 @@ const Navbar = () => {
           overflowX: 'hidden'
         }}
       >
-        {/* Sidebar Header */}
         <Link
           to="/"
           onClick={closeSidebar}
@@ -834,7 +859,6 @@ const Navbar = () => {
           <p style={{ color: '#F9C74F', margin: '5px 0 0', fontSize: '0.7rem' }}>Youth Innovation Hub</p>
         </Link>
 
-        {/* Sidebar Menu Items */}
         <div style={{ flex: 1, padding: '0.5rem 0' }}>
           <div>
             <div style={{ padding: '0.75rem 1.5rem', color: 'rgba(255,255,255,0.5)', fontSize: '0.7rem', letterSpacing: '1px', fontWeight: 600 }}>
@@ -848,6 +872,7 @@ const Navbar = () => {
               { to: '/events', icon: 'fas fa-calendar-alt', label: 'Events' },
               { to: '/news', icon: 'fas fa-newspaper', label: 'News & Stories' },
               { to: '/volunteers', icon: 'fas fa-hands-helping', label: 'Volunteers' },
+              { to: '/partners', icon: 'fas fa-handshake', label: 'Partners' },
               { to: '/contact', icon: 'fas fa-envelope', label: 'Contact Us' }
             ].map((item) => (
               <Link
@@ -890,84 +915,92 @@ const Navbar = () => {
               ACCOUNT
             </div>
             
-            <Link
-              to="/login"
-              onClick={closeSidebar}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '0.875rem 1.5rem',
-                margin: '0 0.5rem',
-                borderRadius: '12px',
-                color: 'white',
-                textDecoration: 'none',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-            >
-              <i className="fas fa-sign-in-alt" style={{ width: '20px', color: '#F9C74F' }}></i>
-              <span>Sign In</span>
-            </Link>
-            
-            <Link
-              to="/signup"
-              onClick={closeSidebar}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '0.875rem 1.5rem',
-                margin: '0 0.5rem',
-                borderRadius: '12px',
-                color: 'white',
-                textDecoration: 'none',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-            >
-              <i className="fas fa-user-plus" style={{ width: '20px', color: '#F9C74F' }}></i>
-              <span>Sign Up</span>
-            </Link>
-            
-            <Link to="/profile" onClick={closeSidebar} style={{
-              display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
-              margin: '0 0.5rem', borderRadius: '12px', color: 'white', textDecoration: 'none',
-              transition: 'all 0.3s ease'
-            }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
-               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-              <i className="fas fa-user" style={{ width: '20px', color: '#F9C74F' }}></i>
-              <span>User Profile</span>
-            </Link>
-            
-            <Link to="/admin" onClick={closeSidebar} style={{
-              display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
-              margin: '0 0.5rem', borderRadius: '12px', color: 'white', textDecoration: 'none',
-              transition: 'all 0.3s ease'
-            }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
-               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-              <i className="fas fa-user-shield" style={{ width: '20px', color: '#F9C74F' }}></i>
-              <span>Admin Dashboard</span>
-            </Link>
+            {!isLoggedIn ? (
+              <>
+                <Link
+                  to="/login"
+                  onClick={closeSidebar}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '0.875rem 1.5rem',
+                    margin: '0 0.5rem',
+                    borderRadius: '12px',
+                    color: 'white',
+                    textDecoration: 'none',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <i className="fas fa-sign-in-alt" style={{ width: '20px', color: '#F9C74F' }}></i>
+                  <span>Sign In</span>
+                </Link>
+                
+                <Link
+                  to="/signup"
+                  onClick={closeSidebar}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '0.875rem 1.5rem',
+                    margin: '0 0.5rem',
+                    borderRadius: '12px',
+                    color: 'white',
+                    textDecoration: 'none',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <i className="fas fa-user-plus" style={{ width: '20px', color: '#F9C74F' }}></i>
+                  <span>Sign Up</span>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link to="/profile" onClick={closeSidebar} style={{
+                  display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
+                  margin: '0 0.5rem', borderRadius: '12px', color: 'white', textDecoration: 'none',
+                  transition: 'all 0.3s ease'
+                }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
+                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                  <i className="fas fa-user" style={{ width: '20px', color: '#F9C74F' }}></i>
+                  <span>My Profile</span>
+                </Link>
+                
+                {user?.role === 'admin' && (
+                  <Link to="/admin" onClick={closeSidebar} style={{
+                    display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
+                    margin: '0 0.5rem', borderRadius: '12px', color: 'white', textDecoration: 'none',
+                    transition: 'all 0.3s ease'
+                  }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
+                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                    <i className="fas fa-user-shield" style={{ width: '20px', color: '#F9C74F' }}></i>
+                    <span>Admin Dashboard</span>
+                  </Link>
+                )}
+                
+                <button onClick={handleLogoutClick} style={{
+                  display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
+                  margin: '0 0.5rem', borderRadius: '12px', color: '#ff6b6b', background: 'none',
+                  border: 'none', cursor: 'pointer', transition: 'all 0.3s ease', width: '100%'
+                }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,107,107,0.1)'}
+                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                  <i className="fas fa-sign-out-alt" style={{ width: '20px' }}></i>
+                  <span>Logout</span>
+                </button>
+              </>
+            )}
           </div>
 
           <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '1rem 1.5rem' }} />
 
           <div>
             <div style={{ padding: '0.75rem 1.5rem', color: 'rgba(255,255,255,0.5)', fontSize: '0.7rem', letterSpacing: '1px', fontWeight: 600 }}>
-              PARTNERS & SUPPORT
-            </div>
-            
-            <div onClick={() => { closeSidebar(); alert('Partnership form would open here'); }} style={{
-              display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
-              margin: '0 0.5rem', borderRadius: '12px', color: 'white', cursor: 'pointer',
-              transition: 'all 0.3s ease'
-            }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
-               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-              <i className="fas fa-handshake" style={{ width: '20px', color: '#F9C74F' }}></i>
-              <span>Become a Partner</span>
+              SUPPORT
             </div>
             
             <Link to="/donate" onClick={closeSidebar} style={{
@@ -1045,7 +1078,6 @@ const Navbar = () => {
           border-radius: 2px;
         }
         
-        /* Desktop Navigation */
         @media (min-width: 992px) {
           .desktop-nav-buttons {
             display: flex !important;

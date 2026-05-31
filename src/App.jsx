@@ -18,9 +18,9 @@ import Contact from './pages/Contact';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
 import Donate from './pages/Donate';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-import VerifyOTP from './pages/VerifyOTP';
+import Login from './auth/Login';
+import Signup from './auth/SignUp';
+import VerifyOTP from './auth/VerifyOTP';
 import Report from './pages/Report';
 import Apply from './pages/Apply';
 import EventRegister from './pages/EventRegister';
@@ -35,6 +35,16 @@ import AdminEvents from './admin/AdminEvents';
 import AdminVolunteers from './admin/AdminVolunteers';
 import AdminPartners from './admin/AdminPartners';
 import AdminMessages from './admin/AdminMessages';
+import UserDetails from './admin/UserDetails';
+import ProjectDetails from './admin/ProjectDetails';
+import EventDetails from './admin/EventDetails';
+import PartnerDetails from './admin/PartnerDetails';
+import VolunteerDetails from './admin/VolunteerDetails';
+import Partners from './pages/partners';
+import AdminPrograms from './admin/AdminPrograms';
+import ProgramDetails from './admin/ProgramsDetails';
+import AdminNews from './admin/AdminNews';
+import NewsDetails from './admin/NewsDetails';
 // ScrollToTop component to reset scroll on page change
 
 
@@ -121,6 +131,7 @@ function App() {
             <Route path="/report" element={<Report />} />
             <Route path="/programs/apply" element={<Apply />} />
             <Route path="/events/register" element={<EventRegister />} />
+            <Route path="/partners" element={<Partners />} />
 
 
 
@@ -134,6 +145,17 @@ function App() {
 <Route path="/admin/volunteers" element={<AdminVolunteers />} />
 <Route path="/admin/partners" element={<AdminPartners />} />
 <Route path="/admin/messages" element={<AdminMessages />} />
+<Route path="/admin/news" element={<AdminNews />} />
+
+<Route path="/admin/users/:id" element={<UserDetails />} />
+<Route path="/admin/projects/:id" element={<ProjectDetails />} />
+<Route path="/admin/events/:id" element={<EventDetails />} />
+<Route path="/admin/partners/:id" element={<PartnerDetails />} />
+<Route path="/admin/volunteers/:id" element={<VolunteerDetails />} />
+<Route path="/admin/programs" element={<AdminPrograms />} />
+<Route path="/admin/programs/:id" element={<ProgramDetails />} />
+<Route path="/admin/news/:id" element={<NewsDetails />} />
+<Route path="/events/register/:id" element={<EventRegister />} />
           </Routes>
         </main>
         

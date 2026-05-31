@@ -1,50 +1,279 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { blogPosts } from '../data';
 
 const Blog = () => {
+  const [news, setNews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [visibleCount, setVisibleCount] = useState(3);
   const [isLoading, setIsLoading] = useState(false);
   const [isViewMoreHovered, setIsViewMoreHovered] = useState(false);
-  const [selectedPost, setSelectedPost] = useState(null);
+  const [selectedNews, setSelectedNews] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  
+  // Custom alert states
+  const [customAlert, setCustomAlert] = useState({
+    show: false,
+    type: 'success',
+    title: '',
+    message: ''
+  });
 
-  const displayedPosts = blogPosts.slice(0, visibleCount);
-  const hasMore = visibleCount < blogPosts.length;
+  useEffect(() => {
+    fetchNews();
+  }, []);
+
+  const showAlert = (type, title, message) => {
+    setCustomAlert({
+      show: true,
+      type,
+      title,
+      message
+    });
+    if (type === 'success') {
+      setTimeout(() => {
+        closeAlert();
+      }, 2000);
+    }
+  };
+
+  const closeAlert = () => {
+    setCustomAlert({
+      show: false,
+      type: 'success',
+      title: '',
+      message: ''
+    });
+  };
+
+  const fetchNews = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('http://192.168.137.83:8000/api/news/');
+      const data = await response.json();
+      if (data.success) {
+        setNews(data.data);
+      } else {
+        setError('Failed to load news');
+        showAlert('error', 'Error!', 'Failed to load news articles');
+      }
+    } catch (error) {
+      setError('Network error. Please check your connection.');
+      showAlert('error', 'Network Error', 'Please check your connection and try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getNewsImage = (newsItem) => {
+    if (newsItem && newsItem.image_base64) {
+      if (newsItem.image_base64.startsWith('data:image')) {
+        return newsItem.image_base64;
+      }
+      return `data:image/jpeg;base64,${newsItem.image_base64}`;
+    }
+    return 'https://via.placeholder.com/400x250?text=No+Image';
+  };
+
+  const displayedNews = news.slice(0, visibleCount);
+  const hasMore = visibleCount < news.length;
 
   const loadMore = () => {
     setIsLoading(true);
     setTimeout(() => {
-      setVisibleCount(prev => Math.min(prev + 2, blogPosts.length));
+      setVisibleCount(prev => Math.min(prev + 3, news.length));
       setIsLoading(false);
     }, 500);
   };
 
-  const openModal = (post) => {
-    setSelectedPost(post);
+  const openModal = (newsItem) => {
+    setSelectedNews(newsItem);
     setShowModal(true);
     document.body.style.overflow = 'hidden';
   };
 
   const closeModal = () => {
     setShowModal(false);
-    setSelectedPost(null);
+    setSelectedNews(null);
     document.body.style.overflow = 'unset';
   };
 
-  // Full content for each blog post
-  const getFullContent = (title) => {
-    const contents = {
-      "VUMA Launches Green Innovation Fund": "The VUMA Green Innovation Fund is a groundbreaking initiative designed to support young innovators and entrepreneurs who are developing sustainable solutions to environmental challenges. The fund provides seed funding, mentorship, and technical support to selected projects that demonstrate potential for significant environmental impact. Successful applicants will receive up to $10,000 in funding, access to a network of industry experts, and comprehensive business development training. The fund focuses on areas such as renewable energy, waste management, sustainable agriculture, and water conservation. Applications are open until June 30, 2026. This initiative is made possible through partnerships with UNDP, UNEP, and various private sector partners who share our commitment to nurturing green innovation among Tanzanian youth.",
-      
-      "Leadership Summit 2026 Recap": "The VUMA Leadership Summit 2026 brought together over 500 young leaders from across Tanzania for three days of intensive training, networking, and inspiration. Held at the Julius Nyerere International Convention Centre in Dar es Salaam, the summit featured keynote speeches from prominent leaders, interactive workshops on essential leadership skills, and panel discussions on pressing national issues. Highlights included a fireside chat with the Minister of Youth, a pitch competition where 10 young entrepreneurs presented their innovative ideas, and a commitment ceremony where participants pledged to take action in their communities. The summit concluded with the announcement of the VUMA Fellowship Program, which will provide ongoing support to 50 exceptional young leaders.",
-      
-      "Partnering with UNDP for Climate Action": "VUMA Tanzania is proud to announce a strategic partnership with the United Nations Development Programme (UNDP) to accelerate climate action across Tanzania. This collaboration will focus on three key areas: youth-led climate initiatives, policy advocacy, and community-based adaptation projects. Through this partnership, VUMA will receive technical support and funding to expand its climate action programs, reaching an additional 10,000 young people over the next two years. Joint activities will include climate literacy workshops, tree planting campaigns, renewable energy projects, and advocacy for stronger climate policies."
-    };
-    return contents[title] || `${title} is an important initiative by VUMA Tanzania. This article provides detailed insights into our work and impact. Discover how we are making a difference in youth innovation and climate action across Tanzania.`;
+  const handleSubscribe = () => {
+    showAlert('success', 'Thank You!', 'Thanks for subscribing to our newsletter!');
   };
+
+  if (loading) {
+    return (
+      <>
+        <h2 className="section-title" style={{
+          textAlign: 'center',
+          fontSize: 'clamp(1.5rem, 5vw, 2rem)',
+          fontWeight: 800,
+          margin: '2rem 0 1rem',
+          background: 'linear-gradient(135deg, #0B3B2F, #2b7a5c)',
+          WebkitBackgroundClip: 'text',
+          backgroundClip: 'text',
+          color: 'transparent'
+        }}>
+          News & Stories
+        </h2>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '400px'
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <i className="fas fa-spinner fa-spin" style={{ fontSize: '3rem', color: '#0B3B2F' }}></i>
+            <p style={{ marginTop: '1rem', color: '#666' }}>Loading amazing stories...</p>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <h2 className="section-title" style={{
+          textAlign: 'center',
+          fontSize: 'clamp(1.5rem, 5vw, 2rem)',
+          fontWeight: 800,
+          margin: '2rem 0 1rem',
+          background: 'linear-gradient(135deg, #0B3B2F, #2b7a5c)',
+          WebkitBackgroundClip: 'text',
+          backgroundClip: 'text',
+          color: 'transparent'
+        }}>
+          News & Stories
+        </h2>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '400px'
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <i className="fas fa-exclamation-circle" style={{ fontSize: '3rem', color: '#d32f2f' }}></i>
+            <p style={{ marginTop: '1rem', color: '#666' }}>{error}</p>
+            <button 
+              onClick={fetchNews} 
+              style={{ 
+                marginTop: '1rem', 
+                background: '#F9C74F', 
+                border: 'none', 
+                padding: '0.5rem 1rem', 
+                borderRadius: '20px', 
+                cursor: 'pointer',
+                color: '#0B3B2F',
+                fontWeight: 600
+              }}
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
+      {/* Custom Alert Modal */}
+      {customAlert.show && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.5)',
+          backdropFilter: 'blur(4px)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          animation: 'fadeIn 0.3s ease'
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '20px',
+            maxWidth: '400px',
+            width: '90%',
+            padding: '2rem',
+            textAlign: 'center',
+            animation: 'slideInUp 0.3s ease',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+          }}>
+            <div style={{ marginBottom: '1rem' }}>
+              {customAlert.type === 'success' && (
+                <div style={{
+                  width: '70px',
+                  height: '70px',
+                  background: '#4caf50',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto'
+                }}>
+                  <i className="fas fa-check" style={{ fontSize: '2rem', color: 'white' }}></i>
+                </div>
+              )}
+              {customAlert.type === 'error' && (
+                <div style={{
+                  width: '70px',
+                  height: '70px',
+                  background: '#d32f2f',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto'
+                }}>
+                  <i className="fas fa-times" style={{ fontSize: '2rem', color: 'white' }}></i>
+                </div>
+              )}
+            </div>
+            
+            <h3 style={{
+              color: customAlert.type === 'error' ? '#d32f2f' : '#0B3B2F',
+              marginBottom: '0.5rem',
+              fontSize: '1.5rem'
+            }}>
+              {customAlert.title}
+            </h3>
+            
+            <p style={{ color: '#666', marginBottom: '1.5rem', lineHeight: '1.5' }}>
+              {customAlert.message}
+            </p>
+            
+            {customAlert.type === 'error' && (
+              <button
+                onClick={closeAlert}
+                style={{
+                  padding: '0.6rem 2rem',
+                  background: '#d32f2f',
+                  border: 'none',
+                  borderRadius: '50px',
+                  color: 'white',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}
+              >
+                OK
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       <h2 className="section-title" style={{
         textAlign: 'center',
         fontSize: 'clamp(1.5rem, 5vw, 2rem)',
@@ -67,12 +296,12 @@ const Blog = () => {
         gap: '1.5rem',
         padding: '1rem'
       }}>
-        {displayedPosts.map((post, idx) => (
-          <BlogCard key={idx} post={post} index={idx} onCardClick={() => openModal(post)} />
+        {displayedNews.map((item, idx) => (
+          <BlogCard key={item.id} news={item} index={idx} onCardClick={() => openModal(item)} getNewsImage={getNewsImage} />
         ))}
       </div>
 
-      {/* View More Button - Loads more cards */}
+      {/* View More Button */}
       {hasMore && (
         <div style={{
           textAlign: 'center',
@@ -146,8 +375,8 @@ const Blog = () => {
         </div>
       )}
 
-      {/* Show all message when no more items */}
-      {!hasMore && blogPosts.length > 3 && (
+      {/* Show all message */}
+      {!hasMore && news.length > 3 && (
         <div style={{
           textAlign: 'center',
           marginTop: '2rem',
@@ -162,12 +391,12 @@ const Blog = () => {
           marginRight: 'auto'
         }}>
           <i className="fas fa-check-circle" style={{ color: '#F9C74F', marginRight: '0.5rem' }}></i>
-          You've seen all {blogPosts.length} amazing stories!
+          You've seen all {news.length} amazing stories!
         </div>
       )}
 
-      {/* Blog Post Modal */}
-      {showModal && selectedPost && (
+      {/* News Modal */}
+      {showModal && selectedNews && (
         <div className="modal-overlay" onClick={closeModal} style={{
           position: 'fixed',
           top: 0,
@@ -193,7 +422,6 @@ const Blog = () => {
             position: 'relative',
             animation: 'slideInUp 0.3s ease'
           }}>
-            {/* Close Button */}
             <button
               onClick={closeModal}
               style={{
@@ -220,12 +448,15 @@ const Blog = () => {
               <i className="fas fa-times"></i>
             </button>
 
-            {/* Modal Header with Image */}
             <div style={{ position: 'relative', height: '220px', overflow: 'hidden' }}>
               <img 
-                src={selectedPost.img} 
-                alt={selectedPost.title} 
+                src={getNewsImage(selectedNews)} 
+                alt={selectedNews.title} 
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = 'https://via.placeholder.com/600x400?text=No+Image';
+                }}
               />
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7))' }} />
               <div style={{ position: 'absolute', bottom: '24px', left: '24px', right: '24px', zIndex: 10 }}>
@@ -241,13 +472,11 @@ const Blog = () => {
                 }}>
                   LATEST STORY
                 </span>
-                <h2 style={{ color: 'white', margin: 0, fontSize: 'clamp(1.3rem, 5vw, 1.8rem)' }}>{selectedPost.title}</h2>
+                <h2 style={{ color: 'white', margin: 0, fontSize: 'clamp(1.3rem, 5vw, 1.8rem)' }}>{selectedNews.title}</h2>
               </div>
             </div>
 
-            {/* Modal Body */}
             <div style={{ padding: 'clamp(1.5rem, 5vw, 2rem)' }}>
-              {/* Meta Information */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -259,30 +488,58 @@ const Blog = () => {
               }}>
                 <span style={{ fontSize: '0.8rem', color: '#666' }}>
                   <i className="far fa-calendar-alt" style={{ marginRight: '0.3rem', color: '#F9C74F' }}></i>
-                  {selectedPost.date}
+                  {selectedNews.date}
                 </span>
                 <span style={{ fontSize: '0.8rem', color: '#666' }}>
                   <i className="far fa-clock" style={{ marginRight: '0.3rem', color: '#F9C74F' }}></i>
-                  {selectedPost.readTime}
+                  {selectedNews.read_time}
                 </span>
                 <span style={{ fontSize: '0.8rem', color: '#666' }}>
                   <i className="far fa-eye" style={{ marginRight: '0.3rem', color: '#F9C74F' }}></i>
-                  {Math.floor(Math.random() * 500) + 100} views
+                  {selectedNews.views} views
+                </span>
+                <span style={{ fontSize: '0.8rem', color: '#666' }}>
+                  <i className="fas fa-heart" style={{ marginRight: '0.3rem', color: '#F9C74F' }}></i>
+                  {selectedNews.likes} likes
                 </span>
               </div>
 
-              {/* Full Content */}
+              {/* Key Highlights */}
+              {selectedNews.key_highlights && selectedNews.key_highlights.length > 0 && (
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <h3 style={{ color: '#0B3B2F', marginBottom: '0.8rem', fontSize: '1.1rem' }}>
+                    <i className="fas fa-star" style={{ marginRight: '0.5rem', color: '#F9C74F' }}></i>
+                    Key Highlights
+                  </h3>
+                  <ul style={{ listStyle: 'none', padding: 0 }}>
+                    {selectedNews.key_highlights.map((highlight, idx) => (
+                      <li key={idx} style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '0.5rem',
+                        marginBottom: '0.8rem',
+                        color: '#666'
+                      }}>
+                        <i className="fas fa-check-circle" style={{ color: '#2b7a5c', marginTop: '0.2rem' }}></i>
+                        {highlight}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               <div style={{ marginBottom: '1.5rem' }}>
                 <h3 style={{ color: '#0B3B2F', marginBottom: '0.8rem', fontSize: '1.1rem' }}>
                   <i className="fas fa-info-circle" style={{ marginRight: '0.5rem', color: '#F9C74F' }}></i>
                   Full Story
                 </h3>
-                <p style={{ color: '#555', lineHeight: '1.8', fontSize: '0.95rem' }}>
-                  {getFullContent(selectedPost.title)}
-                </p>
+                <div style={{ color: '#555', lineHeight: '1.8', fontSize: '0.95rem' }}>
+                  {selectedNews.content.split('\n').map((paragraph, idx) => (
+                    <p key={idx} style={{ marginBottom: '1rem' }}>{paragraph}</p>
+                  ))}
+                </div>
               </div>
 
-              {/* Action Buttons */}
               <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
                 <button
                   onClick={closeModal}
@@ -310,7 +567,7 @@ const Blog = () => {
                   Close
                 </button>
                 <button
-                  onClick={() => alert(`Subscribe to our newsletter for more updates!`)}
+                  onClick={handleSubscribe}
                   style={{
                     flex: 2,
                     background: '#F9C74F',
@@ -487,7 +744,7 @@ const Blog = () => {
 };
 
 // Blog Card Component
-const BlogCard = ({ post, index, onCardClick }) => {
+const BlogCard = ({ news, index, onCardClick, getNewsImage }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -522,9 +779,9 @@ const BlogCard = ({ post, index, onCardClick }) => {
 
   useEffect(() => {
     const img = new Image();
-    img.src = post.img;
+    img.src = getNewsImage(news);
     img.onload = () => setImageLoaded(true);
-  }, [post.img]);
+  }, [news, getNewsImage]);
 
   const getAnimationStyle = () => {
     if (!isVisible) {
@@ -574,7 +831,7 @@ const BlogCard = ({ post, index, onCardClick }) => {
         }
         e.currentTarget.style.boxShadow = '0 12px 25px rgba(0,0,0,0.05)';
       }}
-      onClick={() => onCardClick(post)}
+      onClick={() => onCardClick(news)}
     >
       <div style={{
         height: '180px',
@@ -596,8 +853,8 @@ const BlogCard = ({ post, index, onCardClick }) => {
         )}
         
         <img
-          src={post.img}
-          alt={post.title}
+          src={getNewsImage(news)}
+          alt={news.title}
           style={{
             width: '100%',
             height: '100%',
@@ -627,7 +884,7 @@ const BlogCard = ({ post, index, onCardClick }) => {
           transition: `transform 0.4s ease ${index * 0.1 + 0.2}s`
         }}>
           <i className="fas fa-calendar-alt" style={{ marginRight: '4px', fontSize: '0.6rem' }}></i>
-          {post.date.split(' ')[0]}
+          {news.date.split(' ')[0]}
         </div>
         
         <div style={{
@@ -661,11 +918,11 @@ const BlogCard = ({ post, index, onCardClick }) => {
         }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             <i className="far fa-calendar" style={{ color: '#F9C74F' }}></i>
-            {post.date}
+            {news.date}
           </span>
           <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             <i className="far fa-clock" style={{ color: '#F9C74F' }}></i>
-            {post.readTime}
+            {news.read_time}
           </span>
         </div>
         
@@ -679,7 +936,7 @@ const BlogCard = ({ post, index, onCardClick }) => {
           transition: 'color 0.3s ease'
         }}
         className="blog-title">
-          {post.title}
+          {news.title}
         </h4>
         
         <p style={{
@@ -688,7 +945,7 @@ const BlogCard = ({ post, index, onCardClick }) => {
           lineHeight: '1.5',
           marginBottom: '1rem'
         }}>
-          Discover how VUMA Tanzania is making a difference in youth innovation and climate action...
+          {news.excerpt || news.content.substring(0, 100)}...
         </p>
         
         <div style={{

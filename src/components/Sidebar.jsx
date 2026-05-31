@@ -1,10 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import logo from '../assets/vuma.png';
 
 const Sidebar = ({ isOpen, onClose, onLoginClick }) => {
   const location = useLocation();
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [user, setUser] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    const userData = localStorage.getItem('user');
+    
+    if (token && userData) {
+      setIsLoggedIn(true);
+      setUser(JSON.parse(userData));
+    } else {
+      setIsLoggedIn(false);
+      setUser(null);
+    }
+  }, [location]);
 
   const menuItems = {
     main: [
@@ -25,31 +40,39 @@ const Sidebar = ({ isOpen, onClose, onLoginClick }) => {
       { id: 'events', label: 'Events', icon: 'fas fa-calendar-alt', path: '/events' },
       { id: 'news', label: 'News & Stories', icon: 'fas fa-newspaper', path: '/news' },
       { id: 'volunteers', label: 'Volunteers', icon: 'fas fa-hands-helping', path: '/volunteers' },
+      { id: 'partners', label: 'Partners', icon: 'fas fa-handshake', path: '/partners' },
       { id: 'contact', label: 'Contact', icon: 'fas fa-envelope', path: '/contact' }
     ],
     account: [
-      { id: 'signin', label: 'Sign In', icon: 'fas fa-sign-in-alt', action: 'login' },
       { id: 'signup', label: 'Sign Up', icon: 'fas fa-user-plus', action: 'signup' },
-      { id: 'profile', label: 'User Profile', icon: 'fas fa-user', action: 'profile' },
-      { id: 'admin', label: 'Admin Dashboard', icon: 'fas fa-user-shield', action: 'admin' }
+      { id: 'profile', label: 'My Profile', icon: 'fas fa-user', action: 'profile' },
+      { id: 'logout', label: 'Logout', icon: 'fas fa-sign-out-alt', action: 'logout' }
     ],
-    partners: [
-      { id: 'partners', label: 'Become a Partner', icon: 'fas fa-handshake', action: 'partner' },
+    admin: [
+      { id: 'admin-dashboard', label: 'Admin Dashboard', icon: 'fas fa-tachometer-alt', path: '/admin' },
+      { id: 'admin-users', label: 'Manage Users', icon: 'fas fa-users', path: '/admin/users' },
+      { id: 'admin-projects', label: 'Manage Projects', icon: 'fas fa-project-diagram', path: '/admin/projects' },
+      { id: 'admin-events', label: 'Manage Events', icon: 'fas fa-calendar-alt', path: '/admin/events' },
+      { id: 'admin-partners', label: 'Manage Partners', icon: 'fas fa-handshake', path: '/admin/partners' },
+      { id: 'admin-volunteers', label: 'Manage Volunteers', icon: 'fas fa-hands-helping', path: '/admin/volunteers' }
+    ],
+    support: [
       { id: 'donate', label: 'Donate', icon: 'fas fa-donate', action: 'donate' }
     ]
   };
 
   const handleActionClick = (item) => {
-    if (item.action === 'login') {
-      onLoginClick();
-    } else if (item.action === 'signup') {
-      alert('Sign up form would open here');
+    if (item.action === 'signup') {
+      window.location.href = '/signup';
     } else if (item.action === 'profile') {
-      alert('User profile would open here');
-    } else if (item.action === 'admin') {
-      alert('Admin dashboard would open here');
-    } else if (item.action === 'partner') {
-      alert('Partnership form would open here');
+      window.location.href = '/profile';
+    } else if (item.action === 'logout') {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user');
+      setIsLoggedIn(false);
+      setUser(null);
+      window.location.href = '/';
     } else if (item.action === 'donate') {
       alert('Donation page would open here');
     }
@@ -64,9 +87,20 @@ const Sidebar = ({ isOpen, onClose, onLoginClick }) => {
     return location.pathname === path;
   };
 
+  const getAccountItems = () => {
+    if (isLoggedIn) {
+      return menuItems.account.filter(item => item.id !== 'signup');
+    } else {
+      return menuItems.account.filter(item => item.id !== 'profile' && item.id !== 'logout');
+    }
+  };
+
+  const isAdmin = () => {
+    return isLoggedIn && user && user.role === 'admin';
+  };
+
   return (
     <>
-      {/* Overlay for mobile */}
       {isOpen && (
         <div
           onClick={onClose}
@@ -83,7 +117,6 @@ const Sidebar = ({ isOpen, onClose, onLoginClick }) => {
         />
       )}
 
-      {/* Sidebar */}
       <div
         style={{
           position: 'fixed',
@@ -99,7 +132,6 @@ const Sidebar = ({ isOpen, onClose, onLoginClick }) => {
           flexDirection: 'column'
         }}
       >
-        {/* Header with Logo */}
         <Link
           to="/"
           onClick={onClose}
@@ -136,7 +168,6 @@ const Sidebar = ({ isOpen, onClose, onLoginClick }) => {
           <p style={{ color: '#F9C74F', margin: '5px 0 0', fontSize: '0.75rem' }}>Youth Innovation Hub</p>
         </Link>
 
-        {/* Menu Items */}
         <div style={{ 
           flex: 1, 
           padding: '0.5rem 0',
@@ -228,6 +259,42 @@ const Sidebar = ({ isOpen, onClose, onLoginClick }) => {
             ))}
           </div>
 
+          {/* Admin Section - Only show if user is admin */}
+          {isAdmin() && (
+            <div style={{ marginTop: '1rem' }}>
+              <div style={{
+                padding: '0.5rem 1.5rem',
+                color: 'rgba(255,255,255,0.5)',
+                fontSize: '0.7rem',
+                fontWeight: 600
+              }}>
+                ADMIN PANEL
+              </div>
+              
+              {menuItems.admin.map((item) => (
+                <Link
+                  key={item.id}
+                  to={item.path}
+                  onClick={onClose}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '0.75rem 1.5rem',
+                    margin: '0 0.5rem',
+                    borderRadius: '12px',
+                    textDecoration: 'none',
+                    backgroundColor: isActive(item.path) ? 'rgba(249,199,79,0.2)' : 'transparent',
+                    color: isActive(item.path) ? '#F9C74F' : 'white'
+                  }}
+                >
+                  <i className={item.icon} style={{ width: '20px' }}></i>
+                  <span>{item.label}</span>
+                </Link>
+              ))}
+            </div>
+          )}
+
           {/* Account Section */}
           <div style={{ marginTop: '1rem' }}>
             <div style={{
@@ -239,7 +306,7 @@ const Sidebar = ({ isOpen, onClose, onLoginClick }) => {
               ACCOUNT
             </div>
             
-            {menuItems.account.map((item) => (
+            {getAccountItems().map((item) => (
               <div
                 key={item.id}
                 onClick={() => handleActionClick(item)}
@@ -260,7 +327,7 @@ const Sidebar = ({ isOpen, onClose, onLoginClick }) => {
             ))}
           </div>
 
-          {/* Partners Section */}
+          {/* Support Section */}
           <div style={{ marginTop: '1rem' }}>
             <div style={{
               padding: '0.5rem 1.5rem',
@@ -268,10 +335,10 @@ const Sidebar = ({ isOpen, onClose, onLoginClick }) => {
               fontSize: '0.7rem',
               fontWeight: 600
             }}>
-              PARTNERS & SUPPORT
+              SUPPORT
             </div>
             
-            {menuItems.partners.map((item) => (
+            {menuItems.support.map((item) => (
               <div
                 key={item.id}
                 onClick={() => handleActionClick(item)}
