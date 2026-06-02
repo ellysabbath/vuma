@@ -51,7 +51,7 @@ const AdminEvents = () => {
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://192.168.137.83:8000/api/events/');
+      const response = await fetch('https://vuma.pythonanywhere.com/api/events/');
       const data = await response.json();
       if (data.success) {
         setEvents(data.data);
@@ -125,7 +125,7 @@ const AdminEvents = () => {
     const token = localStorage.getItem('access_token');
     
     try {
-      const response = await fetch(`http://192.168.137.83:8000/api/events/${editingEvent.id}/`, {
+      const response = await fetch(`https://vuma.pythonanywhere.com/api/events/${editingEvent.id}/`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -183,7 +183,7 @@ const AdminEvents = () => {
     const token = localStorage.getItem('access_token');
     
     try {
-      const response = await fetch('http://192.168.137.83:8000/api/events/', {
+      const response = await fetch('https://vuma.pythonanywhere.com/api/events/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -212,7 +212,7 @@ const AdminEvents = () => {
       const token = localStorage.getItem('access_token');
       
       try {
-        const response = await fetch(`http://192.168.137.83:8000/api/events/${id}/`, {
+        const response = await fetch(`https://vuma.pythonanywhere.com/api/events/${id}/`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${token}`

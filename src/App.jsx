@@ -45,6 +45,7 @@ import AdminPrograms from './admin/AdminPrograms';
 import ProgramDetails from './admin/ProgramsDetails';
 import AdminNews from './admin/AdminNews';
 import NewsDetails from './admin/NewsDetails';
+import AdminLeadership from './admin/AdminLeaderShip';
 // ScrollToTop component to reset scroll on page change
 
 
@@ -146,6 +147,7 @@ function App() {
 <Route path="/admin/partners" element={<AdminPartners />} />
 <Route path="/admin/messages" element={<AdminMessages />} />
 <Route path="/admin/news" element={<AdminNews />} />
+<Route path="/admin/leadership" element={<AdminLeadership />} />
 
 <Route path="/admin/users/:id" element={<UserDetails />} />
 <Route path="/admin/projects/:id" element={<ProjectDetails />} />

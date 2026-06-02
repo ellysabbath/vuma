@@ -97,7 +97,7 @@ const Login = () => {
     setError('');
     
     try {
-      const response = await fetch('http://192.168.137.83:8000/api/auth/login/', {
+      const response = await fetch('https://vuma.pythonanywhere.com/api/auth/login/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -141,7 +141,7 @@ const Login = () => {
     setError('');
     
     try {
-      const response = await fetch('http://192.168.137.83:8000/api/auth/verify-login-otp/', {
+      const response = await fetch('https://vuma.pythonanywhere.com/api/auth/verify-login-otp/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -182,7 +182,7 @@ const Login = () => {
     setIsLoading(true);
     
     try {
-      const response = await fetch('http://192.168.137.83:8000/api/auth/login/', {
+      const response = await fetch('https://vuma.pythonanywhere.com/api/auth/login/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

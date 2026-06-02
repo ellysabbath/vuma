@@ -53,7 +53,7 @@ const AdminPartners = () => {
   const fetchPartners = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://192.168.137.83:8000/api/partners/');
+      const response = await fetch('https://vuma.pythonanywhere.com/api/partners/');
       const data = await response.json();
       if (data.success) {
         setPartners(data.data);
@@ -146,7 +146,7 @@ const AdminPartners = () => {
     }
     
     try {
-      const response = await fetch(`http://192.168.137.83:8000/api/partners/${editingPartner.id}/`, {
+      const response = await fetch(`https://vuma.pythonanywhere.com/api/partners/${editingPartner.id}/`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -202,7 +202,7 @@ const AdminPartners = () => {
     }
     
     try {
-      const response = await fetch('http://192.168.137.83:8000/api/partners/', {
+      const response = await fetch('https://vuma.pythonanywhere.com/api/partners/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -228,7 +228,7 @@ const AdminPartners = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this partner?')) {
       try {
-        const response = await fetch(`http://192.168.137.83:8000/api/partners/${id}/`, {
+        const response = await fetch(`https://vuma.pythonanywhere.com/api/partners/${id}/`, {
           method: 'DELETE',
         });
         

@@ -7,6 +7,8 @@ const Contact = () => {
   const navigate = useNavigate();
   const [isSubmitHovered, setIsSubmitHovered] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -14,6 +16,8 @@ const Contact = () => {
     message: ''
   });
   const [errors, setErrors] = useState({});
+
+  const API_BASE_URL = 'https://vuma.pythonanywhere.com/api';
 
   useEffect(() => {
     AOS.init({ duration: 800, once: false });
@@ -38,20 +42,85 @@ const Contact = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const showAlert = (message) => {
+    setSuccessMessage(message);
+    setShowSuccess(true);
+    setTimeout(() => {
+      setShowSuccess(false);
+      setSuccessMessage('');
+    }, 3000);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
     
     setIsSubmitting(true);
-    setTimeout(() => {
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/contact/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        showAlert(data.message);
+        setFormData({ name: '', email: '', subject: '', message: '' });
+      } else {
+        alert(data.error || 'Failed to send message. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      alert('Network error. Please check your connection and try again.');
+    } finally {
       setIsSubmitting(false);
-      alert('Message sent! We will get back to you soon.');
-      setFormData({ name: '', email: '', subject: '', message: '' });
-    }, 1500);
+    }
   };
 
   return (
     <div style={{ paddingTop: '70px' }}>
+      {/* Success Alert */}
+      {showSuccess && (
+        <div style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: 9999,
+          animation: 'fadeInScale 0.3s ease'
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '20px',
+            padding: '2rem',
+            textAlign: 'center',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+            minWidth: '300px'
+          }}>
+            <div style={{
+              width: '80px',
+              height: '80px',
+              borderRadius: '50%',
+              background: '#4caf50',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 1rem',
+              animation: 'scaleIn 0.5s ease'
+            }}>
+              <i className="fas fa-check" style={{ fontSize: '2.5rem', color: 'white' }}></i>
+            </div>
+            <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem' }}>Success!</h3>
+            <p style={{ color: '#666', fontSize: '0.9rem' }}>{successMessage}</p>
+          </div>
+        </div>
+      )}
+
       <div style={{
         background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)',
         color: 'white',
@@ -110,7 +179,7 @@ const Contact = () => {
             </div>
           </div>
 
-          {/* Contact Form with Icon Submit */}
+          {/* Contact Form */}
           <div data-aos="fade-left">
             <form onSubmit={handleSubmit} style={{ background: 'white', padding: '2rem', borderRadius: '24px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}>
               <div style={{ marginBottom: '1rem' }}>
@@ -197,7 +266,6 @@ const Contact = () => {
                 {errors.message && <p style={{ color: '#d32f2f', fontSize: '0.7rem', marginTop: '0.3rem' }}>{errors.message}</p>}
               </div>
               
-              {/* Submit with Icon instead of Button */}
               <div
                 onClick={handleSubmit}
                 onMouseEnter={() => setIsSubmitHovered(true)}
@@ -258,6 +326,14 @@ const Contact = () => {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
         }
+        @keyframes fadeInScale {
+          from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+          to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        @keyframes scaleIn {
+          from { transform: scale(0); }
+          to { transform: scale(1); }
+        }
         
         input:focus, textarea:focus {
           outline: none;
@@ -267,10 +343,6 @@ const Contact = () => {
         @media (max-width: 768px) {
           .contact-form {
             padding: 1.5rem !important;
-          }
-          
-          .submit-link span {
-            font-size: 0.85rem !important;
           }
         }
       `}</style>

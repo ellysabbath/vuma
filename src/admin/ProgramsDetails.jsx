@@ -24,7 +24,7 @@ const ProgramDetails = () => {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch(`http://192.168.137.83:8000/api/programs/${id}/`);
+      const response = await fetch(`https://vuma.pythonanywhere.com/api/programs/${id}/`);
       const data = await response.json();
       if (data.success) {
         setProgram(data.data);
@@ -40,7 +40,7 @@ const ProgramDetails = () => {
 
   const handleDelete = async () => {
     try {
-      const response = await fetch(`http://192.168.137.83:8000/api/programs/${program.id}/`, {
+      const response = await fetch(`https://vuma.pythonanywhere.com/api/programs/${program.id}/`, {
         method: 'DELETE',
       });
       const data = await response.json();
@@ -100,7 +100,7 @@ const ProgramDetails = () => {
     }
     
     try {
-      const response = await fetch(`http://192.168.137.83:8000/api/programs/${editingProgram.id}/`, {
+      const response = await fetch(`https://vuma.pythonanywhere.com/api/programs/${editingProgram.id}/`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

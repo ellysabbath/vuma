@@ -19,7 +19,7 @@ const News = () => {
   const fetchNews = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://192.168.137.83:8000/api/news/');
+      const response = await fetch('https://vuma.pythonanywhere.com/api/news/');
       const data = await response.json();
       if (data.success) {
         setNews(data.data);
@@ -37,7 +37,7 @@ const News = () => {
     e.stopPropagation();
     setLiking(true);
     try {
-      const response = await fetch(`http://192.168.137.83:8000/api/news/${id}/like/`, {
+      const response = await fetch(`https://vuma.pythonanywhere.com/api/news/${id}/like/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,7 +67,7 @@ const News = () => {
     document.body.style.overflow = 'hidden';
     
     try {
-      const response = await fetch(`http://192.168.137.83:8000/api/news/${post.id}/`);
+      const response = await fetch(`https://vuma.pythonanywhere.com/api/news/${post.id}/`);
       const data = await response.json();
       if (data.success) {
         setSelectedPost(data.data);

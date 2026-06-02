@@ -1,54 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 const Testimonials = () => {
-  const testimonials = [
-    { 
-      id: 1,
-      text: "VUMA turned my green startup idea into a funded project. Most impactful youth hub in Tanzania.",
-      author: "Neema J.",
-      role: "Innovator",
-      image: "https://randomuser.me/api/portraits/women/68.jpg",
-      rating: 5,
-      date: "March 2026"
-    },
-    { 
-      id: 2,
-      text: "The leadership workshops gave me tools to mobilize 100+ students for climate action.",
-      author: "David M.",
-      role: "Volunteer Leader",
-      image: "https://randomuser.me/api/portraits/men/32.jpg",
-      rating: 5,
-      date: "February 2026"
-    },
-    { 
-      id: 3,
-      text: "Partnering with VUMA aligns with the Vice President's Office goal of youth empowerment.",
-      author: "Government Rep.",
-      role: "Ministry of Youth",
-      image: "https://randomuser.me/api/portraits/men/45.jpg",
-      rating: 5,
-      date: "January 2026"
-    },
-    { 
-      id: 4,
-      text: "The skills I gained from VUMA's programs helped me start my own environmental initiative.",
-      author: "Sarah K.",
-      role: "Youth Leader",
-      image: "https://randomuser.me/api/portraits/women/45.jpg",
-      rating: 5,
-      date: "December 2025"
-    },
-    { 
-      id: 5,
-      text: "VUMA is transforming youth engagement in climate action across Tanzania.",
-      author: "John M.",
-      role: "Climate Activist",
-      image: "https://randomuser.me/api/portraits/men/68.jpg",
-      rating: 5,
-      date: "November 2025"
-    }
-  ];
-
+  const [testimonials, setTestimonials] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -56,6 +11,33 @@ const Testimonials = () => {
   const sectionRef = useRef(null);
   const [touchStart, setTouchStart] = useState(null);
   const autoScrollRef = useRef(null);
+
+  const API_BASE_URL = 'https://vuma.pythonanywhere.com/api';
+
+  // Fetch testimonials from API
+  useEffect(() => {
+    fetchTestimonials();
+  }, []);
+
+  const fetchTestimonials = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/testimonials/`);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const data = await response.json();
+      // Handle both array response and object-wrapped response
+      const testimonialsArray = Array.isArray(data) ? data : (data.data || data.results || []);
+      setTestimonials(testimonialsArray);
+      setError(null);
+    } catch (error) {
+      console.error('Error fetching testimonials:', error);
+      setError('Failed to load testimonials. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -82,7 +64,7 @@ const Testimonials = () => {
 
   // Auto-scroll from right to left
   useEffect(() => {
-    if (isPlaying) {
+    if (isPlaying && testimonials.length > 0) {
       autoScrollRef.current = setInterval(() => {
         next();
       }, 4000);
@@ -92,17 +74,17 @@ const Testimonials = () => {
         clearInterval(autoScrollRef.current);
       }
     };
-  }, [currentIndex, isPlaying]);
+  }, [currentIndex, isPlaying, testimonials.length]);
 
   const next = () => {
-    if (isAnimating) return;
+    if (isAnimating || testimonials.length === 0) return;
     setIsAnimating(true);
     setCurrentIndex((prev) => (prev + 1) % testimonials.length);
     setTimeout(() => setIsAnimating(false), 500);
   };
 
   const prev = () => {
-    if (isAnimating) return;
+    if (isAnimating || testimonials.length === 0) return;
     setIsAnimating(true);
     setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
     setTimeout(() => setIsAnimating(false), 500);
@@ -169,8 +151,112 @@ const Testimonials = () => {
     }, 4000);
   };
 
+  // Get initials for avatar
+  const getInitials = (name) => {
+    return name.charAt(0).toUpperCase();
+  };
+
+  // Get random color for avatar based on name
+  const getAvatarColor = (name) => {
+    const colors = [
+      '#0B3B2F', '#F9C74F', '#2b7a5c', '#2196F3', '#9C27B0', 
+      '#FF9800', '#4caf50', '#d32f2f', '#00BCD4', '#795548'
+    ];
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return colors[Math.abs(hash) % colors.length];
+  };
+
+  const getRatingStars = (rating) => {
+    return '★'.repeat(rating) + '☆'.repeat(5 - rating);
+  };
+
   // Create doubled array for seamless infinite scroll
-  const infiniteTestimonials = [...testimonials, ...testimonials];
+  const infiniteTestimonials = testimonials.length > 0 ? [...testimonials, ...testimonials] : [];
+
+  if (loading) {
+    return (
+      <div ref={sectionRef} style={{
+        padding: '3rem 1rem',
+        background: 'linear-gradient(135deg, #f9fbf7 0%, #f0f5ee 100%)',
+        position: 'relative',
+        overflow: 'hidden',
+        minHeight: '500px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            width: '60px',
+            height: '60px',
+            border: '3px solid #F9C74F',
+            borderTopColor: '#0B3B2F',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 1rem'
+          }} />
+          <p style={{ color: '#666' }}>Loading testimonials...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div ref={sectionRef} style={{
+        padding: '3rem 1rem',
+        background: 'linear-gradient(135deg, #f9fbf7 0%, #f0f5ee 100%)',
+        position: 'relative',
+        overflow: 'hidden',
+        minHeight: '500px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <i className="fas fa-exclamation-circle" style={{ fontSize: '3rem', color: '#d32f2f', marginBottom: '1rem' }}></i>
+          <p style={{ color: '#666' }}>{error}</p>
+          <button 
+            onClick={fetchTestimonials}
+            style={{
+              marginTop: '1rem',
+              background: '#0B3B2F',
+              color: 'white',
+              border: 'none',
+              padding: '0.5rem 1rem',
+              borderRadius: '20px',
+              cursor: 'pointer'
+            }}
+          >
+            <i className="fas fa-sync-alt"></i> Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (testimonials.length === 0) {
+    return (
+      <div ref={sectionRef} style={{
+        padding: '3rem 1rem',
+        background: 'linear-gradient(135deg, #f9fbf7 0%, #f0f5ee 100%)',
+        position: 'relative',
+        overflow: 'hidden',
+        minHeight: '500px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <i className="fas fa-comment-dots" style={{ fontSize: '3rem', color: '#F9C74F', marginBottom: '1rem' }}></i>
+          <p style={{ color: '#666' }}>No testimonials yet. Check back soon!</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div ref={sectionRef} style={{
@@ -179,6 +265,75 @@ const Testimonials = () => {
       position: 'relative',
       overflow: 'hidden'
     }}>
+      {/* CSS Animations */}
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translate(0, 0); }
+          25% { transform: translate(15px, -15px); }
+          50% { transform: translate(-10px, 20px); }
+          75% { transform: translate(10px, -10px); }
+        }
+        
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulseGlow {
+          0%, 100% { box-shadow: 0 10px 25px rgba(11,59,47,0.2); transform: scale(1); }
+          50% { box-shadow: 0 15px 35px rgba(249,199,79,0.4); transform: scale(1.05); }
+        }
+        
+        @keyframes starPop {
+          0% { opacity: 0; transform: scale(0); }
+          80% { transform: scale(1.2); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes textReveal {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes floatParticle {
+          0%, 100% { transform: translate(0, 0) rotate(0deg); }
+          25% { transform: translate(10px, -10px) rotate(5deg); }
+          50% { transform: translate(-5px, 15px) rotate(-3deg); }
+          75% { transform: translate(5px, -5px) rotate(2deg); }
+        }
+        
+        @keyframes borderGlow {
+          0%, 100% { border-color: #F9C74F; }
+          50% { border-color: #0B3B2F; }
+        }
+        
+        @keyframes bounceIn {
+          0% { opacity: 0; transform: scale(0.3); }
+          50% { opacity: 1; transform: scale(1.05); }
+          70% { transform: scale(0.9); }
+          100% { transform: scale(1); }
+        }
+        
+        @keyframes shimmer {
+          0% { background-position: -1000px 0; }
+          100% { background-position: 1000px 0; }
+        }
+        
+        .shimmer-text {
+          background: linear-gradient(90deg, #0B3B2F 25%, #F9C74F 50%, #0B3B2F 75%);
+          background-size: 200% auto;
+          background-clip: text;
+          -webkit-background-clip: text;
+          color: transparent;
+          animation: shimmer 3s linear infinite;
+        }
+      `}</style>
+
       {/* Decorative Background Elements */}
       <div style={{
         position: 'absolute',
@@ -202,6 +357,25 @@ const Testimonials = () => {
         pointerEvents: 'none',
         animation: 'float 10s ease-in-out infinite reverse'
       }} />
+      
+      {/* Floating particles */}
+      {[...Array(6)].map((_, i) => (
+        <div
+          key={i}
+          style={{
+            position: 'absolute',
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            width: `${Math.random() * 10 + 5}px`,
+            height: `${Math.random() * 10 + 5}px`,
+            background: `rgba(249,199,79,${Math.random() * 0.1 + 0.05})`,
+            borderRadius: '50%',
+            pointerEvents: 'none',
+            animation: `floatParticle ${Math.random() * 10 + 10}s ease-in-out infinite`,
+            animationDelay: `${Math.random() * 5}s`
+          }}
+        />
+      ))}
 
       {/* Section Header */}
       <div style={{
@@ -216,7 +390,8 @@ const Testimonials = () => {
           background: 'rgba(249,199,79,0.15)',
           padding: '0.3rem 1rem',
           borderRadius: '50px',
-          marginBottom: '0.8rem'
+          marginBottom: '0.8rem',
+          animation: isVisible ? 'bounceIn 0.6s ease' : 'none'
         }}>
           <span style={{ color: '#F9C74F', fontWeight: 600, fontSize: '0.75rem' }}>
             <i className="fas fa-star" style={{ marginRight: '0.5rem' }}></i>
@@ -294,7 +469,7 @@ const Testimonials = () => {
             overflow: 'hidden',
             boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
             position: 'relative',
-            minHeight: '380px'
+            minHeight: '400px'
           }}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
@@ -328,7 +503,20 @@ const Testimonials = () => {
                   <i className="fas fa-quote-left"></i>
                 </div>
                 
-                {/* Profile Image and Info */}
+                {/* Quote Icon Right */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: '1rem',
+                  right: '1rem',
+                  opacity: 0.1,
+                  fontSize: '4rem',
+                  color: '#0B3B2F',
+                  transform: 'rotate(180deg)'
+                }}>
+                  <i className="fas fa-quote-right"></i>
+                </div>
+                
+                {/* Avatar with Initials - No Image */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -340,35 +528,43 @@ const Testimonials = () => {
                     width: '80px',
                     height: '80px',
                     borderRadius: '50%',
-                    overflow: 'hidden',
-                    border: '3px solid #F9C74F',
+                    background: `linear-gradient(135deg, ${getAvatarColor(testimonial.author)}, ${getAvatarColor(testimonial.author)}aa)`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     marginBottom: '1rem',
-                    boxShadow: '0 5px 15px rgba(0,0,0,0.1)'
+                    boxShadow: '0 10px 25px rgba(11,59,47,0.2)',
+                    animation: 'pulseGlow 2s ease-in-out infinite',
+                    position: 'relative',
+                    border: '3px solid #F9C74F'
                   }}>
-                    <img
-                      src={testimonial.image}
-                      alt={testimonial.author}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover'
-                      }}
-                    />
+                    <span style={{
+                      fontSize: '2.5rem',
+                      fontWeight: 'bold',
+                      color: 'white',
+                      textShadow: '2px 2px 4px rgba(0,0,0,0.2)'
+                    }}>
+                      {getInitials(testimonial.author)}
+                    </span>
                   </div>
                   
-                  {/* Rating Stars */}
+                  {/* Rating Stars with animation */}
                   <div style={{
                     display: 'flex',
-                    gap: '0.2rem',
+                    gap: '0.3rem',
                     marginBottom: '0.5rem'
                   }}>
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <i key={i} className="fas fa-star" style={{ color: '#F9C74F', fontSize: '0.8rem' }}></i>
+                    {[...Array(testimonial.rating || 5)].map((_, i) => (
+                      <i key={i} className="fas fa-star" style={{ 
+                        color: '#F9C74F', 
+                        fontSize: '0.9rem',
+                        animation: `starPop 0.3s ease ${i * 0.1}s both`
+                      }}></i>
                     ))}
                   </div>
                 </div>
 
-                {/* Testimonial Text */}
+                {/* Testimonial Text with fade-in animation */}
                 <p style={{
                   fontSize: 'clamp(0.9rem, 4vw, 1rem)',
                   lineHeight: '1.6',
@@ -377,37 +573,59 @@ const Testimonials = () => {
                   marginBottom: '1.5rem',
                   fontStyle: 'italic',
                   position: 'relative',
-                  zIndex: 1
+                  zIndex: 1,
+                  animation: 'textReveal 0.6s ease'
                 }}>
                   "{testimonial.text}"
                 </p>
 
                 {/* Author Info */}
-                <div style={{ textAlign: 'center' }}>
+                <div style={{ textAlign: 'center', opacity: 0, animation: 'slideUp 0.5s ease 0.2s forwards' }}>
                   <h4 style={{
                     fontSize: '1.1rem',
                     fontWeight: 700,
-                    color: '#0B3B2F',
-                    marginBottom: '0.2rem'
+                    marginBottom: '0.2rem',
+                    display: 'inline-block',
+                    background: 'linear-gradient(135deg, #0B3B2F, #2b7a5c)',
+                    WebkitBackgroundClip: 'text',
+                    backgroundClip: 'text',
+                    color: 'transparent'
                   }}>
                     {testimonial.author}
                   </h4>
-                  <p style={{
-                    fontSize: '0.8rem',
-                    color: '#F9C74F',
-                    fontWeight: 600,
-                    marginBottom: '0.3rem'
-                  }}>
-                    {testimonial.role}
-                  </p>
-                  <p style={{
-                    fontSize: '0.7rem',
-                    color: '#999'
-                  }}>
-                    <i className="fas fa-calendar-alt" style={{ marginRight: '0.3rem' }}></i>
-                    {testimonial.date}
-                  </p>
+                  {testimonial.role && (
+                    <p style={{
+                      fontSize: '0.8rem',
+                      color: '#F9C74F',
+                      fontWeight: 600,
+                      marginBottom: '0.3rem'
+                    }}>
+                      <i className="fas fa-briefcase" style={{ marginRight: '0.3rem', fontSize: '0.7rem' }}></i>
+                      {testimonial.role}
+                    </p>
+                  )}
+                  {testimonial.date && (
+                    <p style={{
+                      fontSize: '0.7rem',
+                      color: '#999'
+                    }}>
+                      <i className="fas fa-calendar-alt" style={{ marginRight: '0.3rem' }}></i>
+                      {testimonial.date}
+                    </p>
+                  )}
                 </div>
+
+                {/* Decorative Line at Bottom */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: '1rem',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '60px',
+                  height: '2px',
+                  background: 'linear-gradient(90deg, transparent, #F9C74F, #0B3B2F, #F9C74F, transparent)',
+                  borderRadius: '2px'
+                }} />
               </div>
             ))}
           </div>
@@ -515,7 +733,7 @@ const Testimonials = () => {
         }}>
           <div
             style={{
-              width: isPlaying ? '100%' : '0%',
+              width: isPlaying && testimonials.length > 0 ? '100%' : '0%',
               height: '100%',
               background: 'linear-gradient(90deg, #F9C74F, #f6b83e)',
               borderRadius: '2px',
@@ -525,7 +743,7 @@ const Testimonials = () => {
         </div>
       </div>
 
-      {/* Stats Bar */}
+      {/* Stats Bar - Static or can be fetched from API */}
       <div style={{
         maxWidth: '800px',
         margin: '2rem auto 0',
@@ -536,92 +754,52 @@ const Testimonials = () => {
         justifyContent: 'space-around',
         flexWrap: 'wrap',
         gap: '1rem',
-        textAlign: 'center'
+        textAlign: 'center',
+        animation: isVisible ? 'slideUp 0.6s ease 0.4s both' : 'none'
       }}>
-        <div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#F9C74F' }}>100+</div>
-          <div style={{ fontSize: '0.7rem', color: '#666' }}>Happy Participants</div>
+        <div style={{ 
+          transform: 'scale(1)', 
+          transition: 'transform 0.3s ease', 
+          cursor: 'default' 
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
+          <div style={{ 
+            fontSize: '1.5rem', 
+            fontWeight: 800, 
+            color: '#F9C74F'
+          }}>{testimonials.length}+</div>
+          <div style={{ fontSize: '0.7rem', color: '#666' }}>Happy Clients</div>
         </div>
-        <div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#F9C74F' }}>50+</div>
-          <div style={{ fontSize: '0.7rem', color: '#666' }}>Success Stories</div>
-        </div>
-        <div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#F9C74F' }}>4.9</div>
+        <div style={{ 
+          transform: 'scale(1)', 
+          transition: 'transform 0.3s ease', 
+          cursor: 'default' 
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
+          <div style={{ 
+            fontSize: '1.5rem', 
+            fontWeight: 800, 
+            color: '#F9C74F'
+          }}>
+            {Math.round(testimonials.reduce((sum, t) => sum + (t.rating || 5), 0) / testimonials.length * 10) / 10}
+          </div>
           <div style={{ fontSize: '0.7rem', color: '#666' }}>Average Rating</div>
         </div>
+        <div style={{ 
+          transform: 'scale(1)', 
+          transition: 'transform 0.3s ease', 
+          cursor: 'default' 
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#F9C74F' }}>
+            {new Date().getFullYear()}
+          </div>
+          <div style={{ fontSize: '0.7rem', color: '#666' }}>Active Year</div>
+        </div>
       </div>
-
-      {/* CSS Animations */}
-      <style>{`
-        @keyframes float {
-          0%, 100% {
-            transform: translate(0, 0);
-          }
-          25% {
-            transform: translate(15px, -15px);
-          }
-          50% {
-            transform: translate(-10px, 20px);
-          }
-          75% {
-            transform: translate(10px, -10px);
-          }
-        }
-        
-        @keyframes slideInRight {
-          from {
-            opacity: 0;
-            transform: translateX(50px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        
-        @keyframes progressBar {
-          from {
-            width: 0%;
-          }
-          to {
-            width: 100%;
-          }
-        }
-        
-        @media (max-width: 768px) {
-          .testimonial-section {
-            padding: 2rem 0.5rem;
-          }
-          
-          .carousel-container {
-            padding: 0 0.5rem;
-          }
-          
-          button {
-            width: 35px !important;
-            height: 35px !important;
-          }
-          
-          button:first-of-type {
-            left: -5px !important;
-          }
-          
-          button:last-of-type {
-            right: -5px !important;
-          }
-        }
-        
-        @media (max-width: 480px) {
-          .testimonial-card {
-            padding: 1rem !important;
-          }
-          
-          .stats-bar {
-            margin-top: 1rem !important;
-          }
-        }
-      `}</style>
     </div>
   );
 };

@@ -50,10 +50,10 @@ export const projects = [
     description: "Tech skills for climate solutions"
   },
   { 
-    title: "Women in Tech Leadership", 
+    title: "VUMA president in Tech Leadership", 
     cat: "leadership", 
     img: eventg,
-    description: "Empowering women in technology sectors"
+    description: "Empowering VUMA in technology sectors"
   },
   { 
     title: "Zero Waste Initiative", 

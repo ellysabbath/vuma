@@ -48,7 +48,7 @@ const Blog = () => {
   const fetchNews = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://192.168.137.83:8000/api/news/');
+      const response = await fetch('https://vuma.pythonanywhere.com/api/news/');
       const data = await response.json();
       if (data.success) {
         setNews(data.data);

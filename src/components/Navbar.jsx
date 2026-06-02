@@ -540,7 +540,7 @@ const Navbar = () => {
               Contact
             </Link>
 
-            <Link 
+            {/* <Link 
               to="/donate"
               className="donate-btn"
               style={{
@@ -569,7 +569,7 @@ const Navbar = () => {
             >
               <i className="fas fa-heart" style={{ fontSize: '0.8rem' }}></i>
               Donate
-            </Link>
+            </Link> */}
           </div>
 
           <div style={{ position: 'relative' }} ref={userMenuRef}>
@@ -731,7 +731,7 @@ const Navbar = () => {
                   <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
                 </Link>
                 
-                {user.role === 'admin' && (
+                {user.role === 'Admin' && (
                   <Link
                     to="/admin"
                     onClick={() => setIsUserMenuOpen(false)}

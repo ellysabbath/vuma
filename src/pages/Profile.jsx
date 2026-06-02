@@ -15,6 +15,8 @@ const Profile = () => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const fileInputRef = useRef(null);
 
+  const API_BASE_URL = 'https://vuma.pythonanywhere.com/api';
+
   useEffect(() => {
     AOS.init({ duration: 800, once: false });
     fetchUserProfile();
@@ -28,8 +30,20 @@ const Profile = () => {
       return;
     }
 
+    setIsLoading(true);
+    setError('');
+
     try {
-      const response = await fetch('http://192.168.137.83:8000/api/auth/profile/', {
+      // First, get the user ID from the token or stored user
+      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const userId = storedUser.id;
+      
+      if (!userId) {
+        throw new Error('User ID not found');
+      }
+
+      // Fetch user profile from the users endpoint
+      const response = await fetch(`${API_BASE_URL}/users/${userId}/`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -39,17 +53,32 @@ const Profile = () => {
 
       if (response.ok) {
         const data = await response.json();
-        setUser(data);
-        setEditedUser(data);
+        // Handle response format: { success: true, data: {...} }
+        let userData = null;
+        if (data.success && data.data) {
+          userData = data.data;
+        } else if (data.data) {
+          userData = data.data;
+        } else {
+          userData = data;
+        }
+        
+        setUser(userData);
+        setEditedUser(userData);
+        
+        // Update localStorage with latest user data
+        localStorage.setItem('user', JSON.stringify(userData));
       } else if (response.status === 401) {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('user');
         navigate('/login');
       } else {
-        setError('Failed to load profile');
+        const errorData = await response.json();
+        setError(errorData.error || 'Failed to load profile');
       }
     } catch (error) {
+      console.error('Error fetching profile:', error);
       setError('Network error. Please check your connection.');
     } finally {
       setIsLoading(false);
@@ -63,32 +92,54 @@ const Profile = () => {
     setError('');
 
     try {
-      const response = await fetch('http://192.168.137.83:8000/api/auth/profile/', {
+      const response = await fetch(`${API_BASE_URL}/users/${user.id}/`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(editedUser),
+        body: JSON.stringify({
+          username: editedUser.username,
+          email: editedUser.email,
+          first_name: editedUser.first_name || '',
+          last_name: editedUser.last_name || '',
+          phone: editedUser.phone || '',
+          city: editedUser.city || '',
+          region: editedUser.region || '',
+          bio: editedUser.bio || '',
+          skills: editedUser.skills || '',
+          role: editedUser.role,
+          is_verified: editedUser.is_verified,
+          profile_picture: editedUser.profile_picture || null
+        }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        setUser(data);
-        setEditedUser(data);
+        let userData = null;
+        if (data.success && data.data) {
+          userData = data.data;
+        } else if (data.data) {
+          userData = data.data;
+        } else {
+          userData = data;
+        }
+        
+        setUser(userData);
+        setEditedUser(userData);
         setIsEditing(false);
         setSuccessMessage('Profile updated successfully!');
         setShowSuccess(true);
         setTimeout(() => setShowSuccess(false), 3000);
         
-        const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-        const updatedUser = { ...storedUser, ...data };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
+        // Update localStorage
+        localStorage.setItem('user', JSON.stringify(userData));
       } else {
         const errorData = await response.json();
-        setError(errorData.message || 'Failed to update profile');
+        setError(errorData.error || 'Failed to update profile');
       }
     } catch (error) {
+      console.error('Error updating profile:', error);
       setError('Network error. Please try again.');
     } finally {
       setIsLoading(false);
@@ -125,30 +176,42 @@ const Profile = () => {
       const base64String = await fileToBase64(file);
       const token = localStorage.getItem('access_token');
 
-      const response = await fetch('http://192.168.137.83:8000/api/auth/profile/', {
+      const response = await fetch(`${API_BASE_URL}/users/${user.id}/`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...editedUser, profile_picture: base64String }),
+        body: JSON.stringify({ 
+          ...editedUser, 
+          profile_picture: base64String 
+        }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        setUser(data);
-        setEditedUser(data);
+        let userData = null;
+        if (data.success && data.data) {
+          userData = data.data;
+        } else if (data.data) {
+          userData = data.data;
+        } else {
+          userData = data;
+        }
+        
+        setUser(userData);
+        setEditedUser(userData);
         setSuccessMessage('Profile picture updated successfully!');
         setShowSuccess(true);
         setTimeout(() => setShowSuccess(false), 3000);
 
-        const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-        const updatedUser = { ...storedUser, ...data };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
+        // Update localStorage
+        localStorage.setItem('user', JSON.stringify(userData));
       } else {
         setError('Failed to upload profile picture');
       }
     } catch (error) {
+      console.error('Error uploading profile picture:', error);
       setError('Network error. Please try again.');
     } finally {
       setUploadingImage(false);
@@ -164,26 +227,42 @@ const Profile = () => {
     try {
       const token = localStorage.getItem('access_token');
 
-      const response = await fetch('http://192.168.137.83:8000/api/auth/profile/', {
+      const response = await fetch(`${API_BASE_URL}/users/${user.id}/`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...editedUser, profile_picture: null }),
+        body: JSON.stringify({ 
+          ...editedUser, 
+          profile_picture: null 
+        }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        setUser(data);
-        setEditedUser(data);
+        let userData = null;
+        if (data.success && data.data) {
+          userData = data.data;
+        } else if (data.data) {
+          userData = data.data;
+        } else {
+          userData = data;
+        }
+        
+        setUser(userData);
+        setEditedUser(userData);
         setSuccessMessage('Profile picture removed successfully!');
         setShowSuccess(true);
         setTimeout(() => setShowSuccess(false), 3000);
+        
+        // Update localStorage
+        localStorage.setItem('user', JSON.stringify(userData));
       } else {
         setError('Failed to remove profile picture');
       }
     } catch (error) {
+      console.error('Error removing profile picture:', error);
       setError('Network error. Please try again.');
     } finally {
       setUploadingImage(false);
@@ -215,16 +294,6 @@ const Profile = () => {
     }
   };
 
-  const getGenderLabel = (genderCode) => {
-    const genders = {
-      'M': 'Male',
-      'F': 'Female',
-      'O': 'Other',
-      'P': 'Prefer not to say'
-    };
-    return genders[genderCode] || 'Not specified';
-  };
-
   const getRoleIcon = (role) => {
     switch(role) {
       case 'admin':
@@ -235,6 +304,8 @@ const Profile = () => {
         return 'fas fa-lightbulb';
       case 'partner':
         return 'fas fa-handshake';
+      case 'youth_leader':
+        return 'fas fa-chalkboard-user';
       default:
         return 'fas fa-user';
     }
@@ -250,9 +321,29 @@ const Profile = () => {
         return '#2196F3';
       case 'partner':
         return '#ff9800';
+      case 'youth_leader':
+        return '#9C27B0';
       default:
         return '#757575';
     }
+  };
+
+  const getRoleLabel = (role) => {
+    const labels = {
+      'admin': 'Admin',
+      'innovator': 'Innovator',
+      'volunteer': 'Volunteer',
+      'partner': 'Partner',
+      'youth_leader': 'Youth Leader'
+    };
+    return labels[role] || role?.charAt(0).toUpperCase() + role?.slice(1) || 'User';
+  };
+
+  const getFullName = () => {
+    if (user?.first_name || user?.last_name) {
+      return `${user.first_name || ''} ${user.last_name || ''}`.trim();
+    }
+    return user?.username || 'User';
   };
 
   if (isLoading) {
@@ -266,7 +357,15 @@ const Profile = () => {
         justifyContent: 'center'
       }}>
         <div style={{ textAlign: 'center' }}>
-          <i className="fas fa-spinner fa-spin" style={{ fontSize: '3rem', color: '#0B3B2F' }}></i>
+          <div style={{
+            width: '60px',
+            height: '60px',
+            border: '3px solid #F9C74F',
+            borderTopColor: '#0B3B2F',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 1rem'
+          }} />
           <p style={{ marginTop: '1rem', color: '#666' }}>Loading profile...</p>
         </div>
       </div>
@@ -294,6 +393,37 @@ const Profile = () => {
       minHeight: '100vh', 
       background: 'linear-gradient(135deg, #f9fbf7 0%, #f0f5ee 100%)'
     }}>
+      <style>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes fadeInScale {
+          from {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+          }
+        }
+        @keyframes scaleIn {
+          from {
+            transform: scale(0);
+          }
+          to {
+            transform: scale(1);
+          }
+        }
+        
+        @media (max-width: 768px) {
+          div[style*="grid-template-columns"] {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
+
       <div style={{ background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)', color: 'white', padding: '2rem' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
@@ -421,7 +551,6 @@ const Profile = () => {
                   )}
                 </div>
                 
-                {/* Camera Icon Overlay */}
                 <div style={{
                   position: 'absolute',
                   bottom: '10px',
@@ -444,7 +573,6 @@ const Profile = () => {
                   <i className="fas fa-camera" style={{ color: 'white', fontSize: '1.2rem' }}></i>
                 </div>
 
-                {/* Remove Icon Overlay (only if picture exists) */}
                 {user.profile_picture && (
                   <div style={{
                     position: 'absolute',
@@ -479,7 +607,7 @@ const Profile = () => {
               />
             </div>
 
-            <h2 style={{ color: '#0B3B2F', marginBottom: '0.5rem', fontSize: '1.5rem' }}>{user.first_name || user.username} {user.last_name || ''}</h2>
+            <h2 style={{ color: '#0B3B2F', marginBottom: '0.5rem', fontSize: '1.5rem' }}>{getFullName()}</h2>
             <p style={{ color: '#666', marginBottom: '0.5rem', fontSize: '0.9rem' }}>{user.email}</p>
             <p style={{ color: '#F9C74F', fontWeight: 600, fontSize: '0.9rem', marginBottom: '1rem' }}>@{user.username}</p>
             
@@ -497,7 +625,7 @@ const Profile = () => {
                 gap: '0.5rem'
               }}>
                 <i className={getRoleIcon(user.role)}></i>
-                {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'User'}
+                {getRoleLabel(user.role)}
               </span>
             </div>
             
@@ -523,7 +651,6 @@ const Profile = () => {
               </p>
             </div>
             
-            {/* Logout Icon */}
             <div style={{ marginTop: '1.5rem' }}>
               <div onClick={handleLogout} style={{
                 display: 'inline-flex',
@@ -558,7 +685,9 @@ const Profile = () => {
                   color: '#F9C74F',
                   cursor: 'pointer',
                   transition: 'transform 0.3s ease'
-                }}>
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
                   <i className="fas fa-edit" style={{ fontSize: '1.2rem' }}></i>
                 </div>
               )}
@@ -627,12 +756,12 @@ const Profile = () => {
                   />
                 </div>
                 <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                  <div onClick={() => setIsEditing(false)} style={{ flex: 1, background: '#f0f0f0', padding: '0.7rem', borderRadius: '50px', textAlign: 'center', cursor: 'pointer', fontWeight: 600 }}>
+                  <button onClick={() => setIsEditing(false)} style={{ flex: 1, background: '#f0f0f0', border: 'none', padding: '0.7rem', borderRadius: '50px', cursor: 'pointer', fontWeight: 600 }}>
                     Cancel
-                  </div>
-                  <div onClick={handleUpdateProfile} style={{ flex: 1, background: '#0B3B2F', color: 'white', padding: '0.7rem', borderRadius: '50px', textAlign: 'center', cursor: 'pointer', fontWeight: 600 }}>
+                  </button>
+                  <button onClick={handleUpdateProfile} style={{ flex: 1, background: '#0B3B2F', color: 'white', border: 'none', padding: '0.7rem', borderRadius: '50px', cursor: 'pointer', fontWeight: 600 }}>
                     Save Changes
-                  </div>
+                  </button>
                 </div>
               </div>
             ) : (
@@ -643,7 +772,7 @@ const Profile = () => {
                 </div>
                 <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f0f0f0', paddingBottom: '0.7rem' }}>
                   <span style={{ color: '#666' }}>Full Name:</span>
-                  <span style={{ color: '#333', fontWeight: 500 }}>{user.first_name || ''} {user.last_name || ''}</span>
+                  <span style={{ color: '#333', fontWeight: 500 }}>{getFullName()}</span>
                 </div>
                 <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f0f0f0', paddingBottom: '0.7rem' }}>
                   <span style={{ color: '#666' }}>Email:</span>
@@ -676,44 +805,59 @@ const Profile = () => {
               <i className="fas fa-file-alt"></i> Bio & Skills
             </h3>
             
-            <div style={{ marginBottom: '1.5rem' }}>
-              <span style={{ color: '#666', display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Bio</span>
-              <p style={{ color: '#333', lineHeight: '1.6' }}>{user.bio || 'No bio added yet.'}</p>
-            </div>
-            
-            <div style={{ marginBottom: '1.5rem' }}>
-              <span style={{ color: '#666', display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Skills</span>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                {user.skills ? (
-                  user.skills.split(',').map((skill, index) => (
-                    <span key={index} style={{
-                      background: '#e8f5e9',
-                      color: '#0B3B2F',
-                      padding: '0.4rem 1rem',
-                      borderRadius: '20px',
-                      fontSize: '0.85rem',
-                      fontWeight: 500
-                    }}>{skill.trim()}</span>
-                  ))
-                ) : (
-                  <span style={{ color: '#999' }}>No skills added yet.</span>
-                )}
-              </div>
-            </div>
-            
-            <div>
-              <span style={{ color: '#666', display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Availability</span>
-              <div style={{
-                background: '#f0f5ee',
-                padding: '0.7rem',
-                borderRadius: '10px',
-                color: '#0B3B2F',
-                fontWeight: 500
-              }}>
-                <i className="fas fa-clock" style={{ marginRight: '0.5rem' }}></i>
-                {user.availability || 'Not specified'}
-              </div>
-            </div>
+            {isEditing ? (
+              <>
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.85rem' }}>Bio</label>
+                  <textarea
+                    name="bio"
+                    value={editedUser.bio || ''}
+                    onChange={handleInputChange}
+                    rows="4"
+                    style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid #ddd' }}
+                    placeholder="Tell us about yourself"
+                  />
+                </div>
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.85rem' }}>Skills (comma separated)</label>
+                  <textarea
+                    name="skills"
+                    value={editedUser.skills || ''}
+                    onChange={handleInputChange}
+                    rows="3"
+                    style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid #ddd' }}
+                    placeholder="e.g., Leadership, Communication, Project Management"
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <span style={{ color: '#666', display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Bio</span>
+                  <p style={{ color: '#333', lineHeight: '1.6' }}>{user.bio || 'No bio added yet.'}</p>
+                </div>
+                
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <span style={{ color: '#666', display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Skills</span>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    {user.skills ? (
+                      user.skills.split(',').map((skill, index) => (
+                        <span key={index} style={{
+                          background: '#e8f5e9',
+                          color: '#0B3B2F',
+                          padding: '0.4rem 1rem',
+                          borderRadius: '20px',
+                          fontSize: '0.85rem',
+                          fontWeight: 500
+                        }}>{skill.trim()}</span>
+                      ))
+                    ) : (
+                      <span style={{ color: '#999' }}>No skills added yet.</span>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
 
             {user.role === 'volunteer' && user.total_hours > 0 && (
               <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid #f0f0f0' }}>
@@ -729,37 +873,20 @@ const Profile = () => {
                 </div>
               </div>
             )}
+
+            {isEditing && (
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                <button onClick={() => setIsEditing(false)} style={{ flex: 1, background: '#f0f0f0', border: 'none', padding: '0.7rem', borderRadius: '50px', cursor: 'pointer', fontWeight: 600 }}>
+                  Cancel
+                </button>
+                <button onClick={handleUpdateProfile} style={{ flex: 1, background: '#0B3B2F', color: 'white', border: 'none', padding: '0.7rem', borderRadius: '50px', cursor: 'pointer', fontWeight: 600 }}>
+                  Save Changes
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
-
-      <style>{`
-        @keyframes fadeInScale {
-          from {
-            opacity: 0;
-            transform: translate(-50%, -50%) scale(0.9);
-          }
-          to {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-          }
-        }
-        
-        @keyframes scaleIn {
-          from {
-            transform: scale(0);
-          }
-          to {
-            transform: scale(1);
-          }
-        }
-        
-        @media (max-width: 768px) {
-          div[style*="grid-template-columns"] {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
     </div>
   );
 };

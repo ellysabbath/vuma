@@ -47,7 +47,7 @@ const AdminProjects = () => {
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://192.168.137.83:8000/api/projects/');
+      const response = await fetch('https://vuma.pythonanywhere.com/api/projects/');
       const data = await response.json();
       if (data.success) {
         setProjects(data.data);
@@ -101,7 +101,7 @@ const AdminProjects = () => {
     const token = localStorage.getItem('access_token');
     
     try {
-      const response = await fetch(`http://192.168.137.83:8000/api/projects/${editingProject.id}/`, {
+      const response = await fetch(`https://vuma.pythonanywhere.com/api/projects/${editingProject.id}/`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -155,7 +155,7 @@ const AdminProjects = () => {
     const token = localStorage.getItem('access_token');
     
     try {
-      const response = await fetch('http://192.168.137.83:8000/api/projects/', {
+      const response = await fetch('https://vuma.pythonanywhere.com/api/projects/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -184,7 +184,7 @@ const AdminProjects = () => {
       const token = localStorage.getItem('access_token');
       
       try {
-        const response = await fetch(`http://192.168.137.83:8000/api/projects/${id}/`, {
+        const response = await fetch(`https://vuma.pythonanywhere.com/api/projects/${id}/`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${token}`

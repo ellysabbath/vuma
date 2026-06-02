@@ -26,7 +26,7 @@ const VolunteerDetails = () => {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch(`http://192.168.137.83:8000/api/volunteers/${id}/`);
+      const response = await fetch(`https://vuma.pythonanywhere.com/api/volunteers/${id}/`);
       const data = await response.json();
       if (data.success) {
         setVolunteer(data.data);
@@ -63,7 +63,7 @@ const VolunteerDetails = () => {
   const handleDelete = async () => {
     const token = localStorage.getItem('access_token');
     try {
-      const response = await fetch(`http://192.168.137.83:8000/api/volunteers/${volunteer.id}/`, {
+      const response = await fetch(`https://vuma.pythonanywhere.com/api/volunteers/${volunteer.id}/`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -135,7 +135,7 @@ const VolunteerDetails = () => {
     const token = localStorage.getItem('access_token');
     
     try {
-      const response = await fetch(`http://192.168.137.83:8000/api/volunteers/${editingVolunteer.id}/`, {
+      const response = await fetch(`https://vuma.pythonanywhere.com/api/volunteers/${editingVolunteer.id}/`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -20,7 +20,7 @@ const Volunteers = () => {
   const fetchVolunteers = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://192.168.137.83:8000/api/volunteers/');
+      const response = await fetch('https://vuma.pythonanywhere.com/api/volunteers/');
       const data = await response.json();
       if (data.success) {
         setVolunteers(data.data);

@@ -83,7 +83,7 @@ const VerifyOTP = () => {
     setError('');
     
     try {
-      const response = await fetch('http://192.168.137.1:8000/api/auth/verify-otp/', {
+      const response = await fetch('https://vuma.pythonanywhere.com/api/auth/verify-otp/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -118,7 +118,7 @@ const VerifyOTP = () => {
     setIsLoading(true);
     
     try {
-      const response = await fetch('http://192.168.137.1:8000/api/auth/resend-otp/', {
+      const response = await fetch('https://vuma.pythonanywhere.com/api/auth/resend-otp/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

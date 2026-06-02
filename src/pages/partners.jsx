@@ -20,7 +20,7 @@ const Partners = () => {
   const fetchPartners = async () => {
     setLoading(true);
     try {
-      let url = 'http://192.168.137.83:8000/api/partners/';
+      let url = 'https://vuma.pythonanywhere.com/api/partners/';
       if (activeFilter !== 'all') {
         url += `?status=${activeFilter}`;
       }

@@ -452,35 +452,7 @@ const InnovationShowcase = () => {
                   <i className="fas fa-times" style={{ marginRight: '0.5rem' }}></i>
                   Close
                 </button>
-                <button
-                  onClick={() => handleGetInvolved(selectedProject.title)}
-                  style={{
-                    flex: 2,
-                    background: '#F9C74F',
-                    border: 'none',
-                    padding: '0.8rem',
-                    borderRadius: '50px',
-                    color: '#0B3B2F',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'scale(1.02)';
-                    e.currentTarget.style.boxShadow = '0 5px 20px rgba(249,199,79,0.4)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'scale(1)';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}
-                >
-                  <i className="fas fa-handshake"></i>
-                  Get Involved
-                </button>
+               
               </div>
             </div>
           </div>

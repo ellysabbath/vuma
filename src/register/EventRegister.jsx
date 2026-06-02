@@ -64,7 +64,7 @@ const EventRegister = () => {
   const fetchEventDetails = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`http://192.168.137.83:8000/api/events/${id}/`);
+      const response = await fetch(`https://vuma.pythonanywhere.com/api/events/${id}/`);
       const data = await response.json();
       if (data.success) {
         setEvent(data.data);
@@ -131,7 +131,7 @@ const EventRegister = () => {
     setSubmitting(true);
     
     try {
-      const response = await fetch(`http://192.168.137.83:8000/api/events/${id}/register/`, {
+      const response = await fetch(`https://vuma.pythonanywhere.com/api/events/${id}/register/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

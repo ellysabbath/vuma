@@ -41,7 +41,7 @@ const AdminNews = () => {
   const fetchNews = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://192.168.137.83:8000/api/news/');
+      const response = await fetch('https://vuma.pythonanywhere.com/api/news/');
       const data = await response.json();
       if (data.success) {
         setNews(data.data);
@@ -115,8 +115,8 @@ const AdminNews = () => {
     setSubmitting(true);
     
     const url = editingNews 
-      ? `http://192.168.137.83:8000/api/news/${editingNews.id}/`
-      : 'http://192.168.137.83:8000/api/news/';
+      ? `https://vuma.pythonanywhere.com/api/news/${editingNews.id}/`
+      : `https://vuma.pythonanywhere.com/api/news/`;
     
     const method = editingNews ? 'PUT' : 'POST';
     
@@ -151,7 +151,7 @@ const AdminNews = () => {
     showAlert('confirm', 'Delete News', `Are you sure you want to delete "${title}"? This action cannot be undone.`,
       async () => {
         try {
-          const response = await fetch(`http://192.168.137.83:8000/api/news/${id}/`, {
+          const response = await fetch(`https://vuma.pythonanywhere.com/api/news/${id}/`, {
             method: 'DELETE',
           });
           

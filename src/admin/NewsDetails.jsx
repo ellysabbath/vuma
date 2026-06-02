@@ -52,13 +52,13 @@ const NewsDetails = () => {
   const fetchNewsDetails = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`http://192.168.137.83:8000/api/news/${id}/`);
+      const response = await fetch(`https://vuma.pythonanywhere.com/api/news/${id}/`);
       const data = await response.json();
       
       if (data.success) {
         setNews(data.data);
         
-        const allNewsResponse = await fetch('http://192.168.137.83:8000/api/news/');
+        const allNewsResponse = await fetch('https://vuma.pythonanywhere.com/api/news/');
         const allNewsData = await allNewsResponse.json();
         
         if (allNewsData.success) {
@@ -78,7 +78,7 @@ const NewsDetails = () => {
   const handleLike = async () => {
     setLiking(true);
     try {
-      const response = await fetch(`http://192.168.137.83:8000/api/news/${id}/like/`, {
+      const response = await fetch(`https://vuma.pythonanywhere.com/api/news/${id}/like/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

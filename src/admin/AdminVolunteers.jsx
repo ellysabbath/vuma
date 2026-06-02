@@ -52,7 +52,7 @@ const AdminVolunteers = () => {
     setLoading(true);
     try {
       // Remove Authorization header since backend has permission_classes = []
-      const response = await fetch('http://192.168.137.83:8000/api/volunteers/');
+      const response = await fetch('https://vuma.pythonanywhere.com/api/volunteers/');
       const data = await response.json();
       if (data.success) {
         setVolunteers(data.data);
@@ -156,7 +156,7 @@ const AdminVolunteers = () => {
     
     // Remove Authorization header for update
     try {
-      const response = await fetch(`http://192.168.137.83:8000/api/volunteers/${editingVolunteer.id}/`, {
+      const response = await fetch(`https://vuma.pythonanywhere.com/api/volunteers/${editingVolunteer.id}/`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -211,7 +211,7 @@ const AdminVolunteers = () => {
     
     // Remove Authorization header for add
     try {
-      const response = await fetch('http://192.168.137.83:8000/api/volunteers/', {
+      const response = await fetch('https://vuma.pythonanywhere.com/api/volunteers/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -238,7 +238,7 @@ const AdminVolunteers = () => {
     if (window.confirm('Are you sure you want to delete this volunteer?')) {
       // Remove Authorization header for delete
       try {
-        const response = await fetch(`http://192.168.137.83:8000/api/volunteers/${id}/`, {
+        const response = await fetch(`https://vuma.pythonanywhere.com/api/volunteers/${id}/`, {
           method: 'DELETE',
         });
         

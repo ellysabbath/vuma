@@ -26,7 +26,7 @@ const PartnerDetails = () => {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch(`http://192.168.137.83:8000/api/partners/${id}/`);
+      const response = await fetch(`https://vuma.pythonanywhere.com/api/partners/${id}/`);
       const data = await response.json();
       if (data.success) {
         setPartner(data.data);
@@ -62,7 +62,7 @@ const PartnerDetails = () => {
 
   const handleDelete = async () => {
     try {
-      const response = await fetch(`http://192.168.137.83:8000/api/partners/${partner.id}/`, {
+      const response = await fetch(`https://vuma.pythonanywhere.com/api/partners/${partner.id}/`, {
         method: 'DELETE',
       });
       const data = await response.json();
@@ -119,7 +119,7 @@ const PartnerDetails = () => {
     }
     
     try {
-      const response = await fetch(`http://192.168.137.83:8000/api/partners/${editingPartner.id}/`, {
+      const response = await fetch(`https://vuma.pythonanywhere.com/api/partners/${editingPartner.id}/`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
