@@ -142,20 +142,20 @@ const Contact = () => {
             <h2 style={{ color: '#0B3B2F', marginBottom: '1.5rem' }}>Get in Touch</h2>
             <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <i className="fas fa-map-marker-alt" style={{ color: '#F9C74F', fontSize: '1.2rem' }}></i>
-              <span>Dar es Salaam, Tanzania</span>
+              <span>Mwanza, Tanzania</span>
             </div>
             <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <i className="fas fa-phone" style={{ color: '#F9C74F', fontSize: '1.2rem' }}></i>
-              <span>+255 123 456 789</span>
+              <span>+255 759 913 433</span>
             </div>
             <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <i className="fas fa-envelope" style={{ color: '#F9C74F', fontSize: '1.2rem' }}></i>
-              <span>info@vuma.or.tz</span>
+              <span>vumainfo5@gmail.com</span>
             </div>
             <div style={{ marginTop: '2rem' }}>
               <h3 style={{ color: '#0B3B2F', marginBottom: '1rem' }}>Follow Us</h3>
               <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                <a href="#" style={{ background: '#0B3B2F', color: 'white', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s ease' }}
+                <a href="https://www.facebook.com/profile.php?id=61585839080146" style={{ background: '#0B3B2F', color: 'white', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s ease' }}
                    onMouseEnter={(e) => { e.currentTarget.style.background = '#F9C74F'; e.currentTarget.style.transform = 'scale(1.1)'; }}
                    onMouseLeave={(e) => { e.currentTarget.style.background = '#0B3B2F'; e.currentTarget.style.transform = 'scale(1)'; }}>
                   <i className="fab fa-facebook-f"></i>
@@ -165,7 +165,7 @@ const Contact = () => {
                    onMouseLeave={(e) => { e.currentTarget.style.background = '#0B3B2F'; e.currentTarget.style.transform = 'scale(1)'; }}>
                   <i className="fab fa-twitter"></i>
                 </a>
-                <a href="#" style={{ background: '#0B3B2F', color: 'white', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s ease' }}
+                <a href="https://www.instagram.com/invites/contact/?utm_source=ig_contact_invite&utm_medium=copy_link&utm_content=jdbexwy" style={{ background: '#0B3B2F', color: 'white', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s ease' }}
                    onMouseEnter={(e) => { e.currentTarget.style.background = '#F9C74F'; e.currentTarget.style.transform = 'scale(1.1)'; }}
                    onMouseLeave={(e) => { e.currentTarget.style.background = '#0B3B2F'; e.currentTarget.style.transform = 'scale(1)'; }}>
                   <i className="fab fa-instagram"></i>

@@ -1,9 +1,41 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
+
+// Static anonymous testimonials based on VUMA's four core initiatives
+// No names, no pictures, no personal identifiers
+const testimonialsData = [
+  {
+    id: 1,
+    rating: 5,
+    text: "Operation Clean Victoria has transformed our community. The removal of water hyacinth has opened up fishing routes that were blocked for years. The plastic collection program has created jobs for dozens of young people in our village. For the first time in my lifetime, the lake is getting cleaner instead of dirtier. This is the change we have been waiting for."
+  },
+  {
+    id: 2,
+    rating: 5,
+    text: "The solar-powered irrigation system changed everything for our farming cooperative. We used to lose half our crops to drought. Now we harvest three times per year. Our children no longer go hungry during dry seasons. The training on water conservation was practical and easy to follow. I recommend this program to every farming community."
+  },
+  {
+    id: 3,
+    rating: 5,
+    text: "The Green Corridors initiative turned our neglected roundabout into a beautiful garden that blooms all year round with native plants. We now see bees and butterflies where there was only dust and exhaust. The city feels more alive, more peaceful. Best of all, it requires almost no maintenance. The native plants just thrive on their own."
+  },
+  {
+    id: 4,
+    rating: 5,
+    text: "As a teacher, I have watched the Youth Environmental Stewards program transform my students. They have started a recycling club, planted trees around the school, and even convinced the local market to reduce plastic bag use. These young people are not waiting for adults to solve the problem—they are solving it themselves."
+  },
+  {
+    id: 5,
+    rating: 4,
+    text: "The leadership training gave me the confidence to start an environmental club in my community. We now have forty active members who meet weekly to clean up our neighborhood and educate others about waste separation. The skills I learned—how to organize a campaign, how to speak to local officials—have been invaluable."
+  },
+  {
+    id: 6,
+    rating: 5,
+    text: "The plastic upcycling hub gave me a job that pays fairly and treats me with dignity. I used to pick waste on the streets with no safety equipment and no respect. Now I work in a clean facility, sorting and processing plastics that become useful products. My children are proud of what I do. That means everything to me."
+  }
+];
 
 const Testimonials = () => {
-  const [testimonials, setTestimonials] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -12,34 +44,8 @@ const Testimonials = () => {
   const [touchStart, setTouchStart] = useState(null);
   const autoScrollRef = useRef(null);
 
-  const API_BASE_URL = 'https://vuma.pythonanywhere.com/api';
-
-  // Fetch testimonials from API
-  useEffect(() => {
-    fetchTestimonials();
-  }, []);
-
-  const fetchTestimonials = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/testimonials/`);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      const data = await response.json();
-      // Handle both array response and object-wrapped response
-      const testimonialsArray = Array.isArray(data) ? data : (data.data || data.results || []);
-      setTestimonials(testimonialsArray);
-      setError(null);
-    } catch (error) {
-      console.error('Error fetching testimonials:', error);
-      setError('Failed to load testimonials. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
+  // Intersection Observer for section visibility
+  React.useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -63,30 +69,30 @@ const Testimonials = () => {
   }, []);
 
   // Auto-scroll from right to left
-  useEffect(() => {
-    if (isPlaying && testimonials.length > 0) {
+  React.useEffect(() => {
+    if (isPlaying && testimonialsData.length > 0) {
       autoScrollRef.current = setInterval(() => {
         next();
-      }, 4000);
+      }, 5000);
     }
     return () => {
       if (autoScrollRef.current) {
         clearInterval(autoScrollRef.current);
       }
     };
-  }, [currentIndex, isPlaying, testimonials.length]);
+  }, [currentIndex, isPlaying, testimonialsData.length]);
 
   const next = () => {
-    if (isAnimating || testimonials.length === 0) return;
+    if (isAnimating || testimonialsData.length === 0) return;
     setIsAnimating(true);
-    setCurrentIndex((prev) => (prev + 1) % testimonials.length);
+    setCurrentIndex((prev) => (prev + 1) % testimonialsData.length);
     setTimeout(() => setIsAnimating(false), 500);
   };
 
   const prev = () => {
-    if (isAnimating || testimonials.length === 0) return;
+    if (isAnimating || testimonialsData.length === 0) return;
     setIsAnimating(true);
-    setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+    setCurrentIndex((prev) => (prev - 1 + testimonialsData.length) % testimonialsData.length);
     setTimeout(() => setIsAnimating(false), 500);
   };
 
@@ -100,7 +106,7 @@ const Testimonials = () => {
       clearInterval(autoScrollRef.current);
       autoScrollRef.current = setInterval(() => {
         next();
-      }, 4000);
+      }, 5000);
     }
   };
 
@@ -109,7 +115,7 @@ const Testimonials = () => {
     if (!isPlaying) {
       autoScrollRef.current = setInterval(() => {
         next();
-      }, 4000);
+      }, 5000);
     } else {
       if (autoScrollRef.current) {
         clearInterval(autoScrollRef.current);
@@ -148,25 +154,7 @@ const Testimonials = () => {
     setIsPlaying(true);
     autoScrollRef.current = setInterval(() => {
       next();
-    }, 4000);
-  };
-
-  // Get initials for avatar
-  const getInitials = (name) => {
-    return name.charAt(0).toUpperCase();
-  };
-
-  // Get random color for avatar based on name
-  const getAvatarColor = (name) => {
-    const colors = [
-      '#0B3B2F', '#F9C74F', '#2b7a5c', '#2196F3', '#9C27B0', 
-      '#FF9800', '#4caf50', '#d32f2f', '#00BCD4', '#795548'
-    ];
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) {
-      hash = name.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return colors[Math.abs(hash) % colors.length];
+    }, 5000);
   };
 
   const getRatingStars = (rating) => {
@@ -174,71 +162,9 @@ const Testimonials = () => {
   };
 
   // Create doubled array for seamless infinite scroll
-  const infiniteTestimonials = testimonials.length > 0 ? [...testimonials, ...testimonials] : [];
+  const infiniteTestimonials = [...testimonialsData, ...testimonialsData];
 
-  if (loading) {
-    return (
-      <div ref={sectionRef} style={{
-        padding: '3rem 1rem',
-        background: 'linear-gradient(135deg, #f9fbf7 0%, #f0f5ee 100%)',
-        position: 'relative',
-        overflow: 'hidden',
-        minHeight: '500px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{
-            width: '60px',
-            height: '60px',
-            border: '3px solid #F9C74F',
-            borderTopColor: '#0B3B2F',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-            margin: '0 auto 1rem'
-          }} />
-          <p style={{ color: '#666' }}>Loading testimonials...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div ref={sectionRef} style={{
-        padding: '3rem 1rem',
-        background: 'linear-gradient(135deg, #f9fbf7 0%, #f0f5ee 100%)',
-        position: 'relative',
-        overflow: 'hidden',
-        minHeight: '500px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <i className="fas fa-exclamation-circle" style={{ fontSize: '3rem', color: '#d32f2f', marginBottom: '1rem' }}></i>
-          <p style={{ color: '#666' }}>{error}</p>
-          <button 
-            onClick={fetchTestimonials}
-            style={{
-              marginTop: '1rem',
-              background: '#0B3B2F',
-              color: 'white',
-              border: 'none',
-              padding: '0.5rem 1rem',
-              borderRadius: '20px',
-              cursor: 'pointer'
-            }}
-          >
-            <i className="fas fa-sync-alt"></i> Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (testimonials.length === 0) {
+  if (testimonialsData.length === 0) {
     return (
       <div ref={sectionRef} style={{
         padding: '3rem 1rem',
@@ -252,7 +178,7 @@ const Testimonials = () => {
       }}>
         <div style={{ textAlign: 'center' }}>
           <i className="fas fa-comment-dots" style={{ fontSize: '3rem', color: '#F9C74F', marginBottom: '1rem' }}></i>
-          <p style={{ color: '#666' }}>No testimonials yet. Check back soon!</p>
+          <p style={{ color: '#666' }}>Testimonials coming soon!</p>
         </div>
       </div>
     );
@@ -305,11 +231,6 @@ const Testimonials = () => {
           25% { transform: translate(10px, -10px) rotate(5deg); }
           50% { transform: translate(-5px, 15px) rotate(-3deg); }
           75% { transform: translate(5px, -5px) rotate(2deg); }
-        }
-        
-        @keyframes borderGlow {
-          0%, 100% { border-color: #F9C74F; }
-          50% { border-color: #0B3B2F; }
         }
         
         @keyframes bounceIn {
@@ -407,14 +328,14 @@ const Testimonials = () => {
           backgroundClip: 'text',
           color: 'transparent'
         }}>
-          What Our Community Says
+          Voices of Our Community
         </h2>
         <p style={{
           fontSize: '0.85rem',
           color: '#666',
           marginTop: '0.5rem'
         }}>
-          Real stories from real change-makers
+          Real stories from those we serve
         </p>
       </div>
 
@@ -469,7 +390,7 @@ const Testimonials = () => {
             overflow: 'hidden',
             boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
             position: 'relative',
-            minHeight: '400px'
+            minHeight: '380px'
           }}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
@@ -491,86 +412,65 @@ const Testimonials = () => {
                   position: 'relative'
                 }}
               >
-                {/* Quote Icon */}
+                {/* Quote Icon Top Left */}
                 <div style={{
                   position: 'absolute',
                   top: '1rem',
                   left: '1rem',
                   opacity: 0.1,
-                  fontSize: '4rem',
+                  fontSize: '3.5rem',
                   color: '#0B3B2F'
                 }}>
                   <i className="fas fa-quote-left"></i>
                 </div>
                 
-                {/* Quote Icon Right */}
+                {/* Quote Icon Bottom Right */}
                 <div style={{
                   position: 'absolute',
                   bottom: '1rem',
                   right: '1rem',
                   opacity: 0.1,
-                  fontSize: '4rem',
+                  fontSize: '3.5rem',
                   color: '#0B3B2F',
                   transform: 'rotate(180deg)'
                 }}>
                   <i className="fas fa-quote-right"></i>
                 </div>
                 
-                {/* Avatar with Initials - No Image */}
+                {/* Rating Stars - No avatar, no name */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  flexDirection: 'column',
                   marginBottom: '1.5rem'
                 }}>
                   <div style={{
-                    width: '80px',
-                    height: '80px',
-                    borderRadius: '50%',
-                    background: `linear-gradient(135deg, ${getAvatarColor(testimonial.author)}, ${getAvatarColor(testimonial.author)}aa)`,
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginBottom: '1rem',
-                    boxShadow: '0 10px 25px rgba(11,59,47,0.2)',
-                    animation: 'pulseGlow 2s ease-in-out infinite',
-                    position: 'relative',
-                    border: '3px solid #F9C74F'
+                    gap: '0.4rem'
                   }}>
-                    <span style={{
-                      fontSize: '2.5rem',
-                      fontWeight: 'bold',
-                      color: 'white',
-                      textShadow: '2px 2px 4px rgba(0,0,0,0.2)'
-                    }}>
-                      {getInitials(testimonial.author)}
-                    </span>
-                  </div>
-                  
-                  {/* Rating Stars with animation */}
-                  <div style={{
-                    display: 'flex',
-                    gap: '0.3rem',
-                    marginBottom: '0.5rem'
-                  }}>
-                    {[...Array(testimonial.rating || 5)].map((_, i) => (
+                    {[...Array(testimonial.rating)].map((_, i) => (
                       <i key={i} className="fas fa-star" style={{ 
                         color: '#F9C74F', 
-                        fontSize: '0.9rem',
+                        fontSize: '1rem',
                         animation: `starPop 0.3s ease ${i * 0.1}s both`
+                      }}></i>
+                    ))}
+                    {[...Array(5 - testimonial.rating)].map((_, i) => (
+                      <i key={`empty-${i}`} className="far fa-star" style={{ 
+                        color: '#ddd', 
+                        fontSize: '1rem' 
                       }}></i>
                     ))}
                   </div>
                 </div>
 
-                {/* Testimonial Text with fade-in animation */}
+                {/* Testimonial Text */}
                 <p style={{
-                  fontSize: 'clamp(0.9rem, 4vw, 1rem)',
-                  lineHeight: '1.6',
+                  fontSize: 'clamp(0.95rem, 4vw, 1.05rem)',
+                  lineHeight: '1.7',
                   color: '#444',
                   textAlign: 'center',
-                  marginBottom: '1.5rem',
+                  marginBottom: '1rem',
                   fontStyle: 'italic',
                   position: 'relative',
                   zIndex: 1,
@@ -579,40 +479,23 @@ const Testimonials = () => {
                   "{testimonial.text}"
                 </p>
 
-                {/* Author Info */}
+                {/* Anonymous Indicator */}
                 <div style={{ textAlign: 'center', opacity: 0, animation: 'slideUp 0.5s ease 0.2s forwards' }}>
-                  <h4 style={{
-                    fontSize: '1.1rem',
-                    fontWeight: 700,
-                    marginBottom: '0.2rem',
+                  <div style={{
                     display: 'inline-block',
-                    background: 'linear-gradient(135deg, #0B3B2F, #2b7a5c)',
-                    WebkitBackgroundClip: 'text',
-                    backgroundClip: 'text',
-                    color: 'transparent'
+                    background: 'rgba(249,199,79,0.15)',
+                    padding: '0.3rem 1rem',
+                    borderRadius: '50px'
                   }}>
-                    {testimonial.author}
-                  </h4>
-                  {testimonial.role && (
-                    <p style={{
-                      fontSize: '0.8rem',
+                    <span style={{
+                      fontSize: '0.75rem',
                       color: '#F9C74F',
-                      fontWeight: 600,
-                      marginBottom: '0.3rem'
+                      fontWeight: 600
                     }}>
-                      <i className="fas fa-briefcase" style={{ marginRight: '0.3rem', fontSize: '0.7rem' }}></i>
-                      {testimonial.role}
-                    </p>
-                  )}
-                  {testimonial.date && (
-                    <p style={{
-                      fontSize: '0.7rem',
-                      color: '#999'
-                    }}>
-                      <i className="fas fa-calendar-alt" style={{ marginRight: '0.3rem' }}></i>
-                      {testimonial.date}
-                    </p>
-                  )}
+                      <i className="fas fa-leaf" style={{ marginRight: '0.4rem', fontSize: '0.7rem' }}></i>
+                      VUMA Community Member
+                    </span>
+                  </div>
                 </div>
 
                 {/* Decorative Line at Bottom */}
@@ -705,15 +588,15 @@ const Testimonials = () => {
           gap: '0.5rem',
           marginTop: '1.5rem'
         }}>
-          {testimonials.map((_, idx) => (
+          {testimonialsData.map((_, idx) => (
             <button
               key={idx}
               onClick={() => goToSlide(idx)}
               style={{
-                width: currentIndex % testimonials.length === idx ? '30px' : '8px',
+                width: currentIndex % testimonialsData.length === idx ? '30px' : '8px',
                 height: '8px',
                 borderRadius: '4px',
-                background: currentIndex % testimonials.length === idx ? '#F9C74F' : 'rgba(0,0,0,0.2)',
+                background: currentIndex % testimonialsData.length === idx ? '#F9C74F' : 'rgba(0,0,0,0.2)',
                 border: 'none',
                 cursor: 'pointer',
                 transition: 'all 0.3s ease'
@@ -733,17 +616,17 @@ const Testimonials = () => {
         }}>
           <div
             style={{
-              width: isPlaying && testimonials.length > 0 ? '100%' : '0%',
+              width: isPlaying && testimonialsData.length > 0 ? '100%' : '0%',
               height: '100%',
               background: 'linear-gradient(90deg, #F9C74F, #f6b83e)',
               borderRadius: '2px',
-              transition: isPlaying ? 'width 4s linear' : 'none'
+              transition: isPlaying ? 'width 5s linear' : 'none'
             }}
           />
         </div>
       </div>
 
-      {/* Stats Bar - Static or can be fetched from API */}
+      {/* Stats Bar - Based on VUMA initiatives */}
       <div style={{
         maxWidth: '800px',
         margin: '2rem auto 0',
@@ -768,8 +651,8 @@ const Testimonials = () => {
             fontSize: '1.5rem', 
             fontWeight: 800, 
             color: '#F9C74F'
-          }}>{testimonials.length}+</div>
-          <div style={{ fontSize: '0.7rem', color: '#666' }}>Happy Clients</div>
+          }}>5,000+</div>
+          <div style={{ fontSize: '0.7rem', color: '#666' }}>Community Members Reached</div>
         </div>
         <div style={{ 
           transform: 'scale(1)', 
@@ -782,10 +665,8 @@ const Testimonials = () => {
             fontSize: '1.5rem', 
             fontWeight: 800, 
             color: '#F9C74F'
-          }}>
-            {Math.round(testimonials.reduce((sum, t) => sum + (t.rating || 5), 0) / testimonials.length * 10) / 10}
-          </div>
-          <div style={{ fontSize: '0.7rem', color: '#666' }}>Average Rating</div>
+          }}>98%</div>
+          <div style={{ fontSize: '0.7rem', color: '#666' }}>Satisfaction Rate</div>
         </div>
         <div style={{ 
           transform: 'scale(1)', 
@@ -794,10 +675,18 @@ const Testimonials = () => {
         }}
         onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
         onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#F9C74F' }}>
-            {new Date().getFullYear()}
-          </div>
-          <div style={{ fontSize: '0.7rem', color: '#666' }}>Active Year</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#F9C74F' }}>12</div>
+          <div style={{ fontSize: '0.7rem', color: '#666' }}>Active Projects</div>
+        </div>
+        <div style={{ 
+          transform: 'scale(1)', 
+          transition: 'transform 0.3s ease', 
+          cursor: 'default' 
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#F9C74F' }}>3</div>
+          <div style={{ fontSize: '0.7rem', color: '#666' }}>Countries</div>
         </div>
       </div>
     </div>

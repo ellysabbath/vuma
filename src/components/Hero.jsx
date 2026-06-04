@@ -105,10 +105,10 @@ const Hero = ({ onLoginClick }) => {
           padding: '0 0.5rem',
           lineHeight: '1.6'
         }}>
-          VUMA Tanzania is a youth-led non-governmental organization dedicated
+          VUMA Tanzania is a youth-led non-profit organization dedicated
           to empowering young people and communities through leadership, innovation, environmental action
           and sustainable community development across Tanzania. Registered in the United Republic of
-          Tanzania as Non-Governmental Organization
+          Tanzania as Non-profit Organization
           <strong style={{ color: '#F9C74F', display: 'inline-block' }}> (Reg. No. 00NGO/R/9522)</strong>.
         </p>
 

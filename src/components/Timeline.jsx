@@ -1,91 +1,70 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+// Import local images from assets folder
+import eventa from '../assets/eventa.jpg';
+import eventb from '../assets/event.jpg';
+import eventc from '../assets/eventc.jpg';
+import eventd from '../assets/eventd.jpg';
+
+// Static projects data based on the four initiatives
+const projects = [
+  { 
+    id: 1,
+    title: "OPERATION CLEAN VICTORIA", 
+    type: "In-Person",
+    location: "Lake Victoria Basin (Kenya, Uganda, Tanzania)",
+    date: "Monthly - First Saturday",
+    time: "8:00 AM - 4:00 PM",
+    capacity: 500,
+    registered: 342,
+    img: eventa,
+    description: "A comprehensive initiative dedicated to restoring the ecosystem of Lake Victoria by removing invasive weeds, plastic wastes, and industrial debris to ensure water quality and aquatic health. This operation mobilizes local communities, fishermen, and volunteers to physically extract water hyacinth, collect floating plastics, and identify industrial pollution sources along the shoreline."
+  },
+  { 
+    id: 2,
+    title: "GREEN CORRIDORS & URBAN BLOOMS", 
+    type: "In-Person",
+    location: "Urban Centers Nationwide",
+    date: "Ongoing - Weekly",
+    time: "9:00 AM - 1:00 PM",
+    capacity: 200,
+    registered: 156,
+    img: eventb,
+    description: "Enhancing urban aesthetics and biodiversity by landscaping road corridors, public roundabouts, and open spaces with native flora and sustainable greenery. This initiative transforms neglected city spaces into vibrant habitats for pollinators, reduces urban heat, and creates beautiful, low-maintenance green spaces that require minimal watering while supporting local ecosystems."
+  },
+  { 
+    id: 3,
+    title: "SOLAR-AGRI EMPOWERMENT", 
+    type: "Hybrid",
+    location: "Rural Farming Communities",
+    date: "Weekly Training Sessions",
+    time: "10:00 AM - 3:00 PM",
+    capacity: 300,
+    registered: 278,
+    img: eventc,
+    description: "Empowering smallholder farmers through the implementation of solar-powered irrigation systems, promoting climate-smart agriculture and year-round food security. Farmers receive hands-on training in installing and maintaining solar pumps, water-efficient farming techniques, and crop planning that ensures multiple harvest cycles even during dry seasons."
+  },
+  { 
+    id: 4,
+    title: "OPERATION CLEAN VICTORIA - Youth Leadership", 
+    type: "Hybrid",
+    location: "Lakeside Schools & Community Centers",
+    date: "Monthly",
+    time: "9:00 AM - 2:00 PM",
+    capacity: 150,
+    registered: 98,
+    img: eventd,
+    description: "Nurturing the next generation of environmental stewards through leadership training and innovation workshops across primary, secondary, and institutions. Young participants learn to identify local environmental problems, design innovative solutions using low-cost materials, and lead community action projects. The program includes hands-on workshops, mentorship from environmental professionals, and seed funding for student-led initiatives."
+  }
+];
 
 const Timeline = () => {
   const navigate = useNavigate();
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [isVisible, setIsVisible] = useState(false);
   const [activeEvent, setActiveEvent] = useState(null);
   const [isRegisterHovered, setIsRegisterHovered] = useState(false);
   const [isViewHovered, setIsViewHovered] = useState(false);
   const sectionRef = useRef(null);
-  
-  // Custom alert states
-  const [customAlert, setCustomAlert] = useState({
-    show: false,
-    type: 'success',
-    title: '',
-    message: ''
-  });
-
-  useEffect(() => {
-    fetchEvents();
-    
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setIsVisible(true);
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    return () => {
-      if (sectionRef.current) {
-        observer.unobserve(sectionRef.current);
-      }
-    };
-  }, []);
-
-  const showAlert = (type, title, message) => {
-    setCustomAlert({
-      show: true,
-      type,
-      title,
-      message
-    });
-    if (type === 'success') {
-      setTimeout(() => {
-        closeAlert();
-      }, 2000);
-    }
-  };
-
-  const closeAlert = () => {
-    setCustomAlert({
-      show: false,
-      type: 'success',
-      title: '',
-      message: ''
-    });
-  };
-
-  const fetchEvents = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('https://vuma.pythonanywhere.com/api/events/');
-      const data = await response.json();
-      if (data.success) {
-        setEvents(data.data);
-      } else {
-        setError('Failed to load events');
-        showAlert('error', 'Error!', 'Failed to load events');
-      }
-    } catch (error) {
-      setError('Network error. Please check your connection.');
-      showAlert('error', 'Network Error', 'Please check your connection and try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const getEventIcon = (type) => {
     switch(type) {
@@ -125,89 +104,8 @@ const Timeline = () => {
     navigate('/events');
   };
 
-  if (loading) {
-    return (
-      <div ref={sectionRef} style={{
-        maxWidth: '900px',
-        margin: '0 auto',
-        padding: '2rem 1rem',
-        textAlign: 'center'
-      }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '400px'
-        }}>
-          <div style={{ textAlign: 'center' }}>
-            <i className="fas fa-spinner fa-spin" style={{ fontSize: '3rem', color: '#0B3B2F' }}></i>
-            <p style={{ marginTop: '1rem', color: '#666' }}>Loading upcoming events...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div ref={sectionRef} style={{
-        maxWidth: '900px',
-        margin: '0 auto',
-        padding: '2rem 1rem',
-        textAlign: 'center'
-      }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '400px'
-        }}>
-          <div style={{ textAlign: 'center' }}>
-            <i className="fas fa-exclamation-circle" style={{ fontSize: '3rem', color: '#d32f2f' }}></i>
-            <p style={{ marginTop: '1rem', color: '#666' }}>{error}</p>
-            <button 
-              onClick={fetchEvents} 
-              style={{ 
-                marginTop: '1rem', 
-                background: '#F9C74F', 
-                border: 'none', 
-                padding: '0.5rem 1rem', 
-                borderRadius: '20px', 
-                cursor: 'pointer',
-                color: '#0B3B2F',
-                fontWeight: 600
-              }}
-            >
-              Try Again
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Show only upcoming events (you can filter by date if needed)
-  const upcomingEvents = events.filter(event => event.registered < event.capacity).slice(0, 3);
-
-  if (upcomingEvents.length === 0) {
-    return (
-      <div ref={sectionRef} style={{
-        maxWidth: '900px',
-        margin: '0 auto',
-        padding: '2rem 1rem',
-        textAlign: 'center'
-      }}>
-        <div style={{
-          textAlign: 'center',
-          padding: '3rem'
-        }}>
-          <i className="fas fa-calendar-check" style={{ fontSize: '3rem', color: '#F9C74F' }}></i>
-          <h3 style={{ color: '#0B3B2F', marginTop: '1rem' }}>No Upcoming Events</h3>
-          <p style={{ color: '#666' }}>Check back soon for exciting events!</p>
-        </div>
-      </div>
-    );
-  }
+  // Use all projects as upcoming events (static data, no filtering needed)
+  const upcomingEvents = projects;
 
   return (
     <div ref={sectionRef} style={{
@@ -216,102 +114,6 @@ const Timeline = () => {
       padding: '2rem 1rem',
       position: 'relative'
     }}>
-      {/* Custom Alert Modal */}
-      {customAlert.show && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0,0,0,0.5)',
-          backdropFilter: 'blur(4px)',
-          zIndex: 9999,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          animation: 'fadeIn 0.3s ease'
-        }}>
-          <div style={{
-            background: 'white',
-            borderRadius: '20px',
-            maxWidth: '400px',
-            width: '90%',
-            padding: '2rem',
-            textAlign: 'center',
-            animation: 'slideInUp 0.3s ease',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
-          }}>
-            <div style={{ marginBottom: '1rem' }}>
-              {customAlert.type === 'success' && (
-                <div style={{
-                  width: '70px',
-                  height: '70px',
-                  background: '#4caf50',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto'
-                }}>
-                  <i className="fas fa-check" style={{ fontSize: '2rem', color: 'white' }}></i>
-                </div>
-              )}
-              {customAlert.type === 'error' && (
-                <div style={{
-                  width: '70px',
-                  height: '70px',
-                  background: '#d32f2f',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto'
-                }}>
-                  <i className="fas fa-times" style={{ fontSize: '2rem', color: 'white' }}></i>
-                </div>
-              )}
-            </div>
-            
-            <h3 style={{
-              color: customAlert.type === 'error' ? '#d32f2f' : '#0B3B2F',
-              marginBottom: '0.5rem',
-              fontSize: '1.5rem'
-            }}>
-              {customAlert.title}
-            </h3>
-            
-            <p style={{ color: '#666', marginBottom: '1.5rem', lineHeight: '1.5' }}>
-              {customAlert.message}
-            </p>
-            
-            {customAlert.type === 'error' && (
-              <button
-                onClick={closeAlert}
-                style={{
-                  padding: '0.6rem 2rem',
-                  background: '#d32f2f',
-                  border: 'none',
-                  borderRadius: '50px',
-                  color: 'white',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.05)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                }}
-              >
-                OK
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* Decorative Background */}
       <div style={{
         position: 'absolute',
@@ -331,10 +133,7 @@ const Timeline = () => {
         textAlign: 'center',
         marginBottom: '2rem',
         position: 'relative',
-        zIndex: 1,
-        opacity: isVisible ? 1 : 0,
-        transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
-        transition: 'all 0.6s ease'
+        zIndex: 1
       }}>
         <div style={{
           display: 'inline-block',
@@ -357,14 +156,14 @@ const Timeline = () => {
           backgroundClip: 'text',
           color: 'transparent'
         }}>
-          Upcoming Events
+          Our Initiatives
         </h3>
         <p style={{
           fontSize: '0.85rem',
           color: '#666',
           marginTop: '0.5rem'
         }}>
-          Don't miss out on these exciting opportunities
+          Join us in building a sustainable future
         </p>
       </div>
 
@@ -390,10 +189,7 @@ const Timeline = () => {
             key={event.id}
             style={{
               position: 'relative',
-              marginBottom: '1.5rem',
-              opacity: isVisible ? 1 : 0,
-              transform: isVisible ? 'translateX(0)' : 'translateX(-20px)',
-              transition: `all 0.5s ease ${idx * 0.15}s`
+              marginBottom: '1.5rem'
             }}
           >
             {/* Timeline Event Card */}
@@ -514,7 +310,7 @@ const Timeline = () => {
                 </div>
               </div>
 
-              {/* Expanded Content */}
+              {/* Expanded Content with Explanation */}
               {activeEvent === event.id && (
                 <div style={{
                   padding: '1rem 1.2rem',
@@ -580,10 +376,9 @@ const Timeline = () => {
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '0.5rem',
-                      cursor: event.registered >= event.capacity ? 'not-allowed' : 'pointer',
+                      cursor: 'pointer',
                       padding: '0.5rem 0',
-                      transition: 'all 0.3s ease',
-                      opacity: event.registered >= event.capacity ? 0.5 : 1
+                      transition: 'all 0.3s ease'
                     }}
                   >
                     <span style={{
@@ -592,20 +387,18 @@ const Timeline = () => {
                       fontSize: '0.8rem',
                       transition: 'color 0.3s ease'
                     }}>
-                      {event.registered >= event.capacity ? 'Fully Booked' : 'Register Now'}
+                      Learn More & Register
                     </span>
-                    {event.registered < event.capacity && (
-                      <i 
-                        className="fas fa-arrow-right" 
-                        style={{
-                          fontSize: '0.8rem',
-                          color: '#F9C74F',
-                          transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                          transform: isRegisterHovered ? 'translateX(8px)' : 'translateX(0)',
-                          animation: isRegisterHovered ? 'none' : 'bounceArrow 1.5s ease-in-out infinite'
-                        }}
-                      ></i>
-                    )}
+                    <i 
+                      className="fas fa-arrow-right" 
+                      style={{
+                        fontSize: '0.8rem',
+                        color: '#F9C74F',
+                        transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                        transform: isRegisterHovered ? 'translateX(8px)' : 'translateX(0)',
+                        animation: isRegisterHovered ? 'none' : 'bounceArrow 1.5s ease-in-out infinite'
+                      }}
+                    ></i>
                   </div>
                 </div>
               )}
@@ -615,15 +408,12 @@ const Timeline = () => {
       </div>
 
       {/* View All Events - Eye icon link */}
-      {events.length > 3 && (
+      {projects.length > 3 && (
         <div style={{
           textAlign: 'center',
           marginTop: '2rem',
           position: 'relative',
-          zIndex: 1,
-          opacity: isVisible ? 1 : 0,
-          transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
-          transition: 'all 0.5s ease 0.45s'
+          zIndex: 1
         }}>
           <div
             onClick={handleViewAllEvents}
@@ -654,7 +444,7 @@ const Timeline = () => {
               fontSize: '0.85rem',
               transition: 'color 0.3s ease'
             }}>
-              View All Events
+              View All Initiatives
             </span>
           </div>
         </div>
@@ -679,22 +469,6 @@ const Timeline = () => {
           }
           50% {
             transform: translateX(5px);
-          }
-        }
-        
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        
-        @keyframes slideInUp {
-          from {
-            opacity: 0;
-            transform: translateY(50px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
           }
         }
         

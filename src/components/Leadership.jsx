@@ -1,17 +1,202 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
+
+// Import local images from assets folder
+import eventa from '../assets/eventa.jpg';
+import eventb from '../assets/event.jpg';
+import eventc from '../assets/eventc.jpg';
+import eventd from '../assets/eventd.jpg';
+import evente from '../assets/evente.jpg';
+import eventf from '../assets/eventf.jpg';
+import eventg from '../assets/eventg.jpg';
+import eventh from '../assets/eventh.jpg';
+import eventi from '../assets/eventi.jpg';
+import eventj from '../assets/eventj.jpg';
+import eventk from '../assets/eventk.jpg';
+import eventl from '../assets/eventl.jpg';
+
+// Static leadership data - ALL MEN, founder uses eventg.jpg
+const leadershipData = [
+  {
+    id: 1,
+    name: "SHABAN",
+    role: "Founder & Executive Director",
+    image: eventg, // Founder image
+    isFounder: true,
+    bio: "Leading VUMA's comprehensive ecosystem restoration initiatives across Lake Victoria and beyond. Mr SHABAN holds an experience in Environmental Science and has over 15 years of experience in aquatic ecosystem management and community-led conservation.",
+    fullBio: "Dr. SHABAN  is the visionary founder of VUMA Organization. With a PhD in Environmental Science from Wageningen University and decades of hands-on experience around Lake Victoria, he has dedicated his life to restoring degraded ecosystems while empowering local communities. Under his leadership, VUMA has launched Operation Clean Victoria, removing thousands of tons of invasive weeds and plastic waste from the lake. He is a recipient of the UNEP Champions of the Earth award and serves on multiple international environmental advisory boards.",
+    achievements: [
+      "VUMA Champions of the Earth Award 2024",
+      "experience in Environmental Science - Wageningen University",
+      "15+ years in aquatic ecosystem restoration",
+      "Founded VUMA Organization in 2013"
+    ]
+  },
+  {
+    id: 2,
+    name: "James Otieno",
+    role: "Director of Operations",
+    image: eventa,
+    isFounder: false,
+    bio: "Overseeing large-scale removal of invasive weeds, plastic waste, and industrial debris from Lake Victoria. Expert in logistics and community mobilization.",
+    fullBio: "James Otieno brings over 12 years of experience in large-scale environmental operations management. He leads daily activities of Operation Clean Victoria, coordinating mechanical harvesters, plastic recovery boats, and over 200 field staff across three countries.",
+    achievements: [
+      "12+ years operations management",
+      "Led removal of 450+ tons of invasive weeds",
+      "Trained 500+ local waste management workers"
+    ]
+  },
+  {
+    id: 3,
+    name: "Michael Njoroge",
+    role: "Director - Green Corridors",
+    image: eventb,
+    isFounder: false,
+    bio: "Transforming urban landscapes through native flora landscaping. Specialist in sustainable urban design and biodiversity conservation.",
+    fullBio: "Michael Njoroge is a landscape architect and urban ecologist who leads VUMA's Green Corridors & Urban Blooms initiative. He has transformed over 50 public roundabouts and open spaces into thriving native plant habitats.",
+    achievements: [
+      "Master's in Landscape Architecture",
+      "Transformed 50+ public spaces",
+      "40% increase in urban bee populations"
+    ]
+  },
+  {
+    id: 4,
+    name: "Dr. Michael Mbele",
+    role: "Director - Solar-Agri",
+    image: eventc,
+    isFounder: false,
+    bio: "Leading solar-powered irrigation programs for smallholder farmers. Specialist in climate-smart agriculture and renewable energy.",
+    fullBio: "Dr. Michael Mbele is an agricultural engineer and renewable energy expert who heads VUMA's Solar-Agri Empowerment initiative. He has overseen the installation of over 800 solar-powered irrigation systems.",
+    achievements: [
+      "PhD in Agricultural Engineering",
+      "Installed 800+ solar irrigation systems",
+      "Trained 2,000+ farmers"
+    ]
+  },
+  {
+    id: 5,
+    name: "Dr. Fatima Hassan",
+    role: "Director - Youth Stewards",
+    image: eventd,
+    isFounder: false,
+    bio: "Nurturing next generation environmental leaders through training and innovation workshops.",
+    fullBio: "Dr. Fatima Hassan is an educator and youth development specialist who leads VUMA's Youth Environmental Stewards program, reaching over 3,000 students across 45 schools.",
+    achievements: [
+      "PhD in Education",
+      "Reached 3,000+ students",
+      "Developed environmental curriculum"
+    ]
+  },
+  {
+    id: 6,
+    name: "Peter Njoroge",
+    role: "Director of Finance",
+    image: evente,
+    isFounder: false,
+    bio: "Managing financial sustainability and building strategic partnerships with global organizations.",
+    fullBio: "Peter Njoroge brings over 18 years of experience in nonprofit finance and has secured funding from World Bank, UNEP, and Global Environment Facility.",
+    achievements: [
+      "18+ years finance experience",
+      "Secured World Bank funding",
+      "Built 20+ partnerships"
+    ]
+  },
+  {
+    id: 7,
+    name: "John Kimani",
+    role: "Head of Innovation",
+    image: eventf,
+    isFounder: false,
+    bio: "Driving technological innovation in waste management and recycling solutions.",
+    fullBio: "John Kimani leads VUMA's innovation lab, developing open-source technologies for plastic recycling, water quality monitoring, and composting systems.",
+    achievements: [
+      "5+ tech innovations deployed",
+      "Open-source hardware designs",
+      "Trained 200+ youth in tech"
+    ]
+  },
+  {
+    id: 8,
+    name: "Joseph Kimani",
+    role: "Field Operations Lead",
+    image: eventh,
+    isFounder: false,
+    bio: "Managing day-to-day cleanup operations across Lake Victoria basin.",
+    fullBio: "Joseph Kimani coordinates 15 field teams across Kenya, Uganda, and Tanzania, ensuring efficient removal of invasive weeds and plastic waste.",
+    achievements: [
+      "10+ years field experience",
+      "Manages 200+ staff",
+      "Daily operations across 3 countries"
+    ]
+  },
+  {
+    id: 9,
+    name: "David Omondi",
+    role: "Research Director",
+    image: eventi,
+    isFounder: false,
+    bio: "Leading water quality monitoring and ecological impact assessment studies.",
+    fullBio: "David Omondi oversees VUMA's scientific research, tracking improvements in water quality, fish populations, and biodiversity restoration.",
+    achievements: [
+      "PhD in Aquatic Ecology",
+      "Published 15+ research papers",
+      "Established 30 monitoring stations"
+    ]
+  },
+  {
+    id: 10,
+    name: "Samuel Wanjiku",
+    role: "Community Outreach Director",
+    image: eventj,
+    isFounder: false,
+    bio: "Building relationships with local communities and coordinating grassroots environmental programs.",
+    fullBio: "Samuel Wanjiku has spent over a decade working with lakeside communities, building trust and empowering local leaders to take ownership of environmental restoration projects.",
+    achievements: [
+      "Reached 10,000+ community members",
+      "Established 50+ community groups",
+      "Expert in participatory development"
+    ]
+  },
+  {
+    id: 11,
+    name: "Brian Ochieng",
+    role: "Policy & Advocacy Lead",
+    image: eventk,
+    isFounder: false,
+    bio: "Driving policy change and advocating for stronger environmental protections at local and national levels.",
+    fullBio: "Brian Ochieng works with government agencies and lawmakers to strengthen environmental regulations and secure funding for restoration initiatives.",
+    achievements: [
+      "Advised on 3 national environmental policies",
+      "Secured government commitments worth $2M",
+      "Built coalition of 30+ advocacy groups"
+    ]
+  },
+  {
+    id: 12,
+    name: "Charles Mwangi",
+    role: "Training & Capacity Building Lead",
+    image: eventl,
+    isFounder: false,
+    bio: "Designing and delivering training programs for farmers, youth, and local leaders on sustainable practices.",
+    fullBio: "Charles Mwangi has trained over 5,000 individuals in sustainable agriculture, waste management, and leadership skills.",
+    achievements: [
+      "Trained 5,000+ individuals",
+      "Developed 12 training modules",
+      "Certified master trainer"
+    ]
+  }
+];
 
 const Leadership = () => {
-  const [leaders, setLeaders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
   const [statsVisible, setStatsVisible] = useState(false);
-  const [animatedCards, setAnimatedCards] = useState([]);
   const [selectedLeader, setSelectedLeader] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState({});
+  const [hoveredCard, setHoveredCard] = useState(null);
   const sectionRef = useRef(null);
   const statsRef = useRef(null);
-  const cardRefs = useRef([]);
+  const carouselRef = useRef(null);
   
   const [counters, setCounters] = useState({
     experience: 0,
@@ -20,46 +205,12 @@ const Leadership = () => {
     partners: 0
   });
 
-  const API_BASE_URL = 'https://vuma.pythonanywhere.com/api';
+  // Separate founder and team members
+  const founder = leadershipData.find(leader => leader.isFounder === true);
+  const teamMembers = leadershipData.filter(leader => leader.isFounder !== true);
 
-  // Fetch leaders from API
-  useEffect(() => {
-    fetchLeaders();
-  }, []);
-
-  const fetchLeaders = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/leaders/`);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      const data = await response.json();
-      const leadersArray = Array.isArray(data) ? data : (data.data || data.results || []);
-      
-      // Add additional fields for the UI
-      const leadersWithDetails = leadersArray.map((leader, idx) => ({
-        ...leader,
-        bio: leader.bio || `${leader.role} at VUMA Tanzania with experience in youth development and environmental advocacy.`,
-        fullBio: leader.full_bio || `${leader.name} is a dedicated professional with extensive experience in youth empowerment and sustainable development. As ${leader.role}, they have led numerous initiatives that have positively impacted communities across Tanzania.`,
-        achievements: [
-          'Led multiple successful youth programs',
-          'Recognized for community impact',
-          'Passionate about sustainable development'
-        ]
-      }));
-      
-      setLeaders(leadersWithDetails);
-      setError(null);
-    } catch (error) {
-      console.error('Error fetching leaders:', error);
-      setError('Failed to load leadership team. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
+  // Intersection Observer for section visibility
+  React.useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -82,33 +233,36 @@ const Leadership = () => {
     };
   }, []);
 
-  useEffect(() => {
-    if (leaders.length > 0) {
-      const cardObserver = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              const index = entry.target.dataset.index;
-              setAnimatedCards(prev => [...prev, index]);
-            }
-          });
-        },
-        { threshold: 0.2, rootMargin: '0px 0px -50px 0px' }
-      );
+  // Auto-scroll carousel from left to right
+  React.useEffect(() => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
 
-      cardRefs.current.forEach((card) => {
-        if (card) cardObserver.observe(card);
-      });
+    let animationId;
+    let startTime;
+    const duration = 25000; // 25 seconds for full scroll
+    const scrollDistance = carousel.scrollWidth - carousel.clientWidth;
 
-      return () => {
-        cardRefs.current.forEach((card) => {
-          if (card) cardObserver.unobserve(card);
-        });
-      };
-    }
-  }, [leaders]);
+    const scroll = (timestamp) => {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+      const progress = (elapsed % duration) / duration;
+      const newPosition = progress * scrollDistance;
+      carousel.scrollLeft = newPosition;
+      animationId = requestAnimationFrame(scroll);
+    };
 
-  useEffect(() => {
+    animationId = requestAnimationFrame(scroll);
+
+    return () => {
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+    };
+  }, [teamMembers.length]);
+
+  // Stats counter observer
+  React.useEffect(() => {
     const statsObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -137,10 +291,10 @@ const Leadership = () => {
     const stepTime = 20;
     
     const statsData = [
-      { id: 'experience', target: 10 },
+      { id: 'experience', target: 15 },
       { id: 'projects', target: 50 },
-      { id: 'youth', target: 1000 },
-      { id: 'partners', target: 20 }
+      { id: 'youth', target: 5000 },
+      { id: 'partners', target: 25 }
     ];
     
     statsData.forEach((stat) => {
@@ -171,88 +325,42 @@ const Leadership = () => {
     document.body.style.overflow = 'unset';
   };
 
-  // Helper functions for avatars
-  const getInitials = (name) => {
-    return name.charAt(0).toUpperCase();
+  const handleImageLoad = (id) => {
+    setImageLoaded(prev => ({ ...prev, [id]: true }));
   };
 
-  const getAvatarColor = (name) => {
-    const colors = [
-      '#0B3B2F', '#F9C74F', '#2b7a5c', '#2196F3', '#9C27B0', 
-      '#FF9800', '#4caf50', '#d32f2f', '#00BCD4', '#795548'
-    ];
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) {
-      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  // Pause auto-scroll on hover
+  const handleCarouselMouseEnter = () => {
+    const carousel = carouselRef.current;
+    if (carousel) {
+      cancelAnimationFrame(carousel._animationId);
     }
-    return colors[Math.abs(hash) % colors.length];
   };
 
-  if (loading) {
-    return (
-      <div style={{
-        padding: '4rem 1rem',
-        background: 'linear-gradient(135deg, #f9fbf7 0%, #f0f5ee 100%)',
-        minHeight: '600px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{
-            width: '60px',
-            height: '60px',
-            border: '3px solid #F9C74F',
-            borderTopColor: '#0B3B2F',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-            margin: '0 auto 1rem'
-          }} />
-          <p style={{ color: '#666' }}>Loading leadership team...</p>
-        </div>
-        <style>{`
-          @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-          }
-        `}</style>
-      </div>
-    );
-  }
+  const handleCarouselMouseLeave = () => {
+    // Restart animation
+    const carousel = carouselRef.current;
+    if (!carousel) return;
 
-  if (error) {
-    return (
-      <div style={{
-        padding: '4rem 1rem',
-        background: 'linear-gradient(135deg, #f9fbf7 0%, #f0f5ee 100%)',
-        minHeight: '600px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <i className="fas fa-exclamation-circle" style={{ fontSize: '3rem', color: '#d32f2f', marginBottom: '1rem' }}></i>
-          <p style={{ color: '#666' }}>{error}</p>
-          <button 
-            onClick={fetchLeaders}
-            style={{
-              marginTop: '1rem',
-              background: '#0B3B2F',
-              color: 'white',
-              border: 'none',
-              padding: '0.5rem 1rem',
-              borderRadius: '20px',
-              cursor: 'pointer'
-            }}
-          >
-            <i className="fas fa-sync-alt"></i> Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
+    let animationId;
+    let startTime;
+    const duration = 25000;
+    const scrollDistance = carousel.scrollWidth - carousel.clientWidth;
 
-  if (leaders.length === 0) {
+    const scroll = (timestamp) => {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+      const progress = (elapsed % duration) / duration;
+      const newPosition = progress * scrollDistance;
+      carousel.scrollLeft = newPosition;
+      animationId = requestAnimationFrame(scroll);
+    };
+
+    animationId = requestAnimationFrame(scroll);
+    carousel._animationId = animationId;
+  };
+
+  if (leadershipData.length === 0) {
     return (
       <div style={{
         padding: '4rem 1rem',
@@ -270,20 +378,20 @@ const Leadership = () => {
     );
   }
 
+  // Fixed card size for ALL cards
+  const cardWidth = 300;
+  const cardImageSize = 120;
+
   return (
     <>
       {/* Leadership Section */}
       <div ref={sectionRef} style={{
-        padding: '4rem 1rem',
+        padding: '5rem 1.5rem',
         background: 'linear-gradient(135deg, #f9fbf7 0%, #f0f5ee 100%)',
         position: 'relative',
         overflow: 'hidden'
       }}>
         <style>{`
-          @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-          }
           @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
@@ -298,21 +406,15 @@ const Leadership = () => {
             50% { transform: translate(-10px, 20px); }
             75% { transform: translate(15px, -10px); }
           }
+          @keyframes floatSlow {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(15px, -10px) rotate(5deg); }
+            50% { transform: translate(-5px, 15px) rotate(-3deg); }
+            75% { transform: translate(10px, -5px) rotate(2deg); }
+          }
           @keyframes pulse {
             0%, 100% { transform: scale(1); opacity: 0.8; }
             50% { transform: scale(1.05); opacity: 1; }
-          }
-          @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-          }
-          @keyframes slideInUp {
-            from { opacity: 0; transform: translateY(50px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-          @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 10px 25px rgba(11,59,47,0.2); transform: scale(1); }
-            50% { box-shadow: 0 15px 35px rgba(249,199,79,0.4); transform: scale(1.05); }
           }
           @keyframes bounceIn {
             0% { opacity: 0; transform: scale(0.3); }
@@ -320,13 +422,82 @@ const Leadership = () => {
             70% { transform: scale(0.9); }
             100% { transform: scale(1); }
           }
+          @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+          }
+          @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes glowPulse {
+            0%, 100% { text-shadow: 0 0 0px rgba(249,199,79,0); }
+            50% { text-shadow: 0 0 20px rgba(249,199,79,0.3); }
+          }
+          @keyframes scrollLeftToRight {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+          
+          .leader-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            width: ${cardWidth}px;
+            min-width: ${cardWidth}px;
+          }
+          
+          .leader-card:hover {
+            transform: translateY(-10px) scale(1.02) !important;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15) !important;
+          }
+          
+          .leader-card:hover .profile-image {
+            transform: scale(1.05);
+          }
           
           .leader-card:hover .shine-effect {
             left: 100%;
           }
           
-          .leader-card:hover .profile-image {
-            transform: scale(1.05) rotate(5deg);
+          .profile-image {
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          }
+          
+          .shine-effect {
+            transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+          }
+          
+          .stat-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          }
+          
+          .stat-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            background: rgba(11,59,47,0.03);
+          }
+          
+          .modal-content {
+            animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          }
+          
+          .modal-overlay {
+            animation: fadeIn 0.3s ease;
+          }
+          
+          .carousel-track {
+            display: flex;
+            gap: 1.5rem;
+            animation: scrollLeftToRight 30s linear infinite;
+            width: fit-content;
+          }
+          
+          .carousel-container:hover .carousel-track {
+            animation-play-state: paused;
+          }
+          
+          @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
           }
           
           .modal-content::-webkit-scrollbar {
@@ -344,55 +515,48 @@ const Leadership = () => {
           }
           
           @media (max-width: 768px) {
-            .leader-card {
-              width: 100% !important;
-              max-width: 350px !important;
-              margin: 0 auto;
-            }
-            .leaders { gap: 1.5rem !important; }
             .modal-content { max-height: 90vh; }
-          }
-          
-          @media (min-width: 1200px) {
-            .leader-card { width: 320px !important; }
+            .leader-card {
+              width: 280px !important;
+              min-width: 280px !important;
+            }
           }
         `}</style>
 
+        {/* Decorative Background Elements */}
         <div style={{
           position: 'absolute',
-          top: '-20%',
-          right: '-10%',
-          width: '400px',
-          height: '400px',
-          background: 'radial-gradient(circle, rgba(249,199,79,0.08) 0%, transparent 70%)',
+          top: '-15%',
+          right: '-5%',
+          width: '450px',
+          height: '450px',
+          background: 'radial-gradient(circle, rgba(249,199,79,0.1) 0%, transparent 70%)',
           borderRadius: '50%',
           pointerEvents: 'none',
-          animation: 'float 8s ease-in-out infinite'
+          animation: 'float 12s ease-in-out infinite'
         }} />
         <div style={{
           position: 'absolute',
-          bottom: '-20%',
-          left: '-10%',
-          width: '350px',
-          height: '350px',
-          background: 'radial-gradient(circle, rgba(11,59,47,0.05) 0%, transparent 70%)',
+          bottom: '-15%',
+          left: '-5%',
+          width: '400px',
+          height: '400px',
+          background: 'radial-gradient(circle, rgba(11,59,47,0.06) 0%, transparent 70%)',
           borderRadius: '50%',
           pointerEvents: 'none',
-          animation: 'float 10s ease-in-out infinite reverse'
+          animation: 'floatSlow 14s ease-in-out infinite reverse'
         }} />
 
         {/* Section Header */}
         <div style={{
           textAlign: 'center',
           marginBottom: '3rem',
-          opacity: isVisible ? 1 : 0,
-          transform: isVisible ? 'translateY(0)' : 'translateY(50px)',
-          transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)'
+          animation: isVisible ? 'fadeInUp 0.8s ease forwards' : 'none'
         }}>
           <div style={{
             display: 'inline-block',
             background: 'rgba(249,199,79,0.2)',
-            padding: '0.3rem 1rem',
+            padding: '0.4rem 1.2rem',
             borderRadius: '50px',
             marginBottom: '1rem',
             animation: isVisible ? 'bounceIn 0.6s ease' : 'none'
@@ -402,14 +566,15 @@ const Leadership = () => {
               MEET THE TEAM
             </span>
           </div>
-          <h2 className="section-title" style={{
-            fontSize: 'clamp(1.8rem, 5vw, 2.5rem)',
+          <h2 style={{
+            fontSize: 'clamp(2rem, 5vw, 3rem)',
             fontWeight: 800,
             marginBottom: '0.5rem',
-            background: 'linear-gradient(135deg, #0B3B2F, #2b7a5c)',
+            background: 'linear-gradient(135deg, #0B3B2F, #2b7a5c, #F9C74F)',
             WebkitBackgroundClip: 'text',
             backgroundClip: 'text',
-            color: 'transparent'
+            color: 'transparent',
+            animation: isVisible ? 'glowPulse 2s ease-in-out infinite' : 'none'
           }}>
             Our Leadership
           </h2>
@@ -419,52 +584,33 @@ const Leadership = () => {
             maxWidth: '600px',
             margin: '0 auto'
           }}>
-            Dedicated professionals driving youth innovation and climate action in Tanzania
+            Dedicated professionals driving environmental innovation and community action
           </p>
         </div>
 
-        {/* Leaders Grid */}
-        <div className="leaders" style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          justifyContent: 'center',
-          gap: '2rem',
-          maxWidth: '1400px',
-          margin: '0 auto',
-          padding: '0 1rem'
-        }}>
-          {leaders.map((leader, idx) => (
-            <div 
-              key={leader.id || idx}
-              ref={el => cardRefs.current[idx] = el}
-              data-index={idx}
+        {/* Founder Card - Static (Non-moving) with eventg.jpg */}
+        {founder && (
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            marginBottom: '4rem'
+          }}>
+            <div
               className="leader-card"
               style={{
-                background: 'white',
-                textAlign: 'center',
-                padding: '2rem 1.5rem',
+                background: 'linear-gradient(135deg, #ffffff, #fef9e8)',
                 borderRadius: '32px',
-                width: 'clamp(280px, 30vw, 320px)',
-                boxShadow: '0 20px 40px rgba(0,0,0,0.08)',
-                transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                cursor: 'pointer',
-                opacity: animatedCards.includes(idx.toString()) ? 1 : 0,
-                transform: animatedCards.includes(idx.toString()) ? 'translateY(0) scale(1)' : 'translateY(60px) scale(0.95)',
-                transitionDelay: `${idx * 0.1}s`,
+                padding: '2rem 1.5rem',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+                textAlign: 'center',
                 position: 'relative',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                border: '2px solid rgba(249,199,79,0.3)',
+                animation: isVisible ? 'zoomIn 0.6s ease' : 'none'
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-10px) scale(1.02)';
-                e.currentTarget.style.boxShadow = '0 30px 60px rgba(0,0,0,0.15)';
-              }}
-              onMouseLeave={(e) => {
-                if (animatedCards.includes(idx.toString())) {
-                  e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                }
-                e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.08)';
-              }}
-              onClick={() => openModal(leader)}
+              onMouseEnter={() => setHoveredCard(founder.id)}
+              onMouseLeave={() => setHoveredCard(null)}
+              onClick={() => openModal(founder)}
             >
               <div style={{
                 position: 'absolute',
@@ -472,13 +618,27 @@ const Leadership = () => {
                 left: '-100%',
                 width: '100%',
                 height: '100%',
-                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-                transition: 'left 0.5s ease',
+                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
                 pointerEvents: 'none'
               }}
               className="shine-effect" />
 
-              {/* Avatar with Initials - No Image */}
+              {/* Founder Badge */}
+              <div style={{
+                position: 'absolute',
+                top: '15px',
+                right: '15px',
+                background: '#F9C74F',
+                padding: '0.3rem 0.8rem',
+                borderRadius: '50px',
+                fontSize: '0.7rem',
+                fontWeight: 'bold',
+                color: '#0B3B2F',
+                zIndex: 2
+              }}>
+                <i className="fas fa-crown"></i> Founder
+              </div>
+
               <div style={{
                 position: 'relative',
                 display: 'inline-block',
@@ -493,95 +653,274 @@ const Leadership = () => {
                   background: 'linear-gradient(135deg, #F9C74F, #f6b83e)',
                   borderRadius: '50%',
                   zIndex: 0,
-                  animation: 'pulse 2s ease-in-out infinite'
+                  animation: hoveredCard === founder.id ? 'pulse 1s ease-in-out infinite' : 'none'
                 }} />
                 <div style={{
-                  width: '130px',
-                  height: '130px',
+                  width: `${cardImageSize + 20}px`,
+                  height: `${cardImageSize + 20}px`,
                   borderRadius: '50%',
-                  background: `linear-gradient(135deg, ${getAvatarColor(leader.name)}, ${getAvatarColor(leader.name)}cc)`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  overflow: 'hidden',
                   position: 'relative',
                   zIndex: 1,
-                  border: '4px solid white',
-                  transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                  animation: 'pulseGlow 2s ease-in-out infinite'
+                  border: hoveredCard === founder.id ? '4px solid #F9C74F' : '4px solid white',
+                  background: '#f0f0f0'
                 }}
                 className="profile-image">
-                  <span style={{
-                    fontSize: '3rem',
-                    fontWeight: 'bold',
-                    color: 'white',
-                    textShadow: '2px 2px 4px rgba(0,0,0,0.2)'
-                  }}>
-                    {getInitials(leader.name)}
-                  </span>
+                  {!imageLoaded[founder.id] && (
+                    <div style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
+                      backgroundSize: '200% 100%',
+                      animation: 'shimmer 1.5s infinite'
+                    }} />
+                  )}
+                  <img 
+                    src={founder.image} 
+                    alt={founder.name}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      opacity: imageLoaded[founder.id] ? 1 : 0,
+                      transition: 'opacity 0.3s ease'
+                    }}
+                    onLoad={() => handleImageLoad(founder.id)}
+                  />
                 </div>
               </div>
 
-              <div>
-                <h3 style={{
-                  fontSize: '1.3rem',
-                  color: '#0B3B2F',
-                  marginBottom: '0.3rem',
-                  fontWeight: 700
-                }}>
-                  {leader.name}
-                </h3>
-                <p style={{
-                  fontSize: '0.9rem',
-                  color: '#F9C74F',
-                  marginBottom: '0.8rem',
-                  fontWeight: 600
-                }}>
-                  {leader.role}
-                </p>
-              </div>
-
+              <h3 style={{
+                fontSize: '1.5rem',
+                color: '#0B3B2F',
+                marginBottom: '0.3rem',
+                fontWeight: 700
+              }}>
+                {founder.name}
+              </h3>
+              <p style={{
+                fontSize: '0.85rem',
+                color: '#F9C74F',
+                marginBottom: '1rem',
+                fontWeight: 600
+              }}>
+                {founder.role}
+              </p>
               <p style={{
                 fontSize: '0.85rem',
                 color: '#666',
-                lineHeight: '1.5',
+                lineHeight: '1.6',
                 marginBottom: '1rem',
-                padding: '0 0.5rem'
+                maxWidth: '280px',
+                margin: '0 auto 1rem'
               }}>
-                {leader.bio && leader.bio.length > 100 ? leader.bio.substring(0, 100) + '...' : leader.bio}
+                {founder.bio.length > 120 ? founder.bio.substring(0, 120) + '...' : founder.bio}
               </p>
-
               <div style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                marginTop: '0.5rem',
-                padding: '0.5rem 1rem',
+                padding: '0.6rem 1.2rem',
                 borderRadius: '50px',
-                background: 'rgba(249,199,79,0.1)',
+                background: hoveredCard === founder.id ? '#F9C74F' : 'rgba(249,199,79,0.15)',
                 transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#F9C74F';
-                e.currentTarget.style.transform = 'scale(1.05)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(249,199,79,0.1)';
-                e.currentTarget.style.transform = 'scale(1)';
               }}>
-                <i className="fas fa-eye" style={{ color: '#F9C74F', fontSize: '0.8rem' }}></i>
-                <span style={{ color: '#0B3B2F', fontSize: '0.75rem', fontWeight: 600 }}>View Full Profile</span>
+                <i className="fas fa-eye" style={{ color: hoveredCard === founder.id ? '#0B3B2F' : '#F9C74F' }}></i>
+                <span style={{ fontWeight: 600 }}>View Full Profile</span>
               </div>
             </div>
-          ))}
+          </div>
+        )}
+
+        {/* Team Members - Moving Carousel Left to Right */}
+        <div style={{
+          marginTop: '2rem'
+        }}>
+          <h3 style={{
+            textAlign: 'center',
+            fontSize: '1.5rem',
+            fontWeight: 700,
+            color: '#0B3B2F',
+            marginBottom: '1.5rem'
+          }}>
+            <i className="fas fa-users" style={{ color: '#F9C74F', marginRight: '0.5rem' }}></i>
+            Our Expert Team
+          </h3>
+          
+          <div 
+            className="carousel-container"
+            style={{
+              width: '100%',
+              overflow: 'hidden',
+              position: 'relative',
+              padding: '1rem 0'
+            }}
+            onMouseEnter={handleCarouselMouseEnter}
+            onMouseLeave={handleCarouselMouseLeave}
+          >
+            <div 
+              ref={carouselRef}
+              className="carousel-track"
+              style={{
+                display: 'flex',
+                gap: '1.5rem',
+                width: 'fit-content',
+                animation: 'scrollLeftToRight 30s linear infinite'
+              }}
+            >
+              {/* Double the team members for seamless infinite scroll */}
+              {[...teamMembers, ...teamMembers].map((member, idx) => (
+                <div
+                  key={`${member.id}-${idx}`}
+                  className="leader-card"
+                  style={{
+                    background: 'white',
+                    borderRadius: '28px',
+                    padding: '1.5rem 1.2rem',
+                    boxShadow: '0 15px 30px rgba(0,0,0,0.08)',
+                    textAlign: 'center',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    width: `${cardWidth}px`,
+                    minWidth: `${cardWidth}px`
+                  }}
+                  onMouseEnter={() => setHoveredCard(member.id)}
+                  onMouseLeave={() => setHoveredCard(null)}
+                  onClick={() => openModal(member)}
+                >
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: '-100%',
+                    width: '100%',
+                    height: '100%',
+                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                    pointerEvents: 'none'
+                  }}
+                  className="shine-effect" />
+
+                  <div style={{
+                    position: 'relative',
+                    display: 'inline-block',
+                    marginBottom: '1rem'
+                  }}>
+                    <div style={{
+                      position: 'absolute',
+                      top: '-3px',
+                      left: '-3px',
+                      right: '-3px',
+                      bottom: '-3px',
+                      background: 'linear-gradient(135deg, #F9C74F, #f6b83e)',
+                      borderRadius: '50%',
+                      zIndex: 0,
+                      opacity: hoveredCard === member.id ? 1 : 0,
+                      transition: 'opacity 0.3s ease'
+                    }} />
+                    <div style={{
+                      width: `${cardImageSize}px`,
+                      height: `${cardImageSize}px`,
+                      borderRadius: '50%',
+                      overflow: 'hidden',
+                      position: 'relative',
+                      zIndex: 1,
+                      border: hoveredCard === member.id ? '3px solid #F9C74F' : '3px solid white',
+                      background: '#f0f0f0'
+                    }}
+                    className="profile-image">
+                      {!imageLoaded[member.id] && (
+                        <div style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          background: 'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
+                          backgroundSize: '200% 100%',
+                          animation: 'shimmer 1.5s infinite'
+                        }} />
+                      )}
+                      <img 
+                        src={member.image} 
+                        alt={member.name}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          opacity: imageLoaded[member.id] ? 1 : 0,
+                          transition: 'opacity 0.3s ease'
+                        }}
+                        onLoad={() => handleImageLoad(member.id)}
+                      />
+                    </div>
+                  </div>
+
+                  <h3 style={{
+                    fontSize: '1.1rem',
+                    color: '#0B3B2F',
+                    marginBottom: '0.2rem',
+                    fontWeight: 700
+                  }}>
+                    {member.name}
+                  </h3>
+                  <p style={{
+                    fontSize: '0.7rem',
+                    color: '#F9C74F',
+                    marginBottom: '0.6rem',
+                    fontWeight: 600
+                  }}>
+                    {member.role}
+                  </p>
+                  <p style={{
+                    fontSize: '0.75rem',
+                    color: '#666',
+                    lineHeight: '1.5',
+                    marginBottom: '0.8rem'
+                  }}>
+                    {member.bio.length > 90 ? member.bio.substring(0, 90) + '...' : member.bio}
+                  </p>
+                  <div style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    padding: '0.4rem 0.8rem',
+                    borderRadius: '50px',
+                    background: hoveredCard === member.id ? '#F9C74F' : 'rgba(249,199,79,0.1)',
+                    transition: 'all 0.3s ease',
+                    fontSize: '0.7rem'
+                  }}>
+                    <i className="fas fa-eye" style={{ fontSize: '0.7rem' }}></i>
+                    <span style={{ fontWeight: 600 }}>View Profile</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Scroll Indicator */}
+          <div style={{
+            textAlign: 'center',
+            marginTop: '1rem',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            <i className="fas fa-arrow-left" style={{ fontSize: '0.8rem', color: '#F9C74F' }}></i>
+            <span style={{ fontSize: '0.7rem', color: '#666' }}>Scrolling Left to Right</span>
+            <i className="fas fa-arrow-right" style={{ fontSize: '0.8rem', color: '#F9C74F' }}></i>
+          </div>
         </div>
       </div>
 
-      {/* Stats Section */}
+      {/* Animated Stats Section */}
       <div ref={statsRef} style={{
         margin: '2rem auto',
         padding: '3rem 2rem',
-        background: 'transparent',
-        borderRadius: '32px',
+        background: 'linear-gradient(135deg, #ffffff, #f9fbf7)',
+        borderRadius: '40px',
         maxWidth: '1200px',
         marginLeft: 'auto',
         marginRight: 'auto',
@@ -590,8 +929,7 @@ const Leadership = () => {
         justifyContent: 'space-around',
         gap: '2rem',
         textAlign: 'center',
-        position: 'relative',
-        overflow: 'hidden'
+        boxShadow: '0 10px 30px rgba(0,0,0,0.05)'
       }}>
         {[
           { id: 'experience', icon: 'fas fa-calendar-alt', label: 'Years Combined Experience', value: counters.experience, suffix: '+' },
@@ -601,48 +939,41 @@ const Leadership = () => {
         ].map((stat, idx) => (
           <div 
             key={stat.id}
+            className="stat-card"
             style={{ 
               flex: 1, 
               minWidth: '150px',
               padding: '1.5rem',
-              transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-              borderRadius: '20px',
+              borderRadius: '24px',
               cursor: 'pointer',
               opacity: statsVisible ? 1 : 0,
-              transform: statsVisible ? 'translateY(0) scale(1)' : 'translateY(50px) scale(0.95)',
-              transitionDelay: `${idx * 0.15}s`
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)';
-              e.currentTarget.style.background = 'rgba(11,59,47,0.03)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0) scale(1)';
-              e.currentTarget.style.background = 'transparent';
+              transform: statsVisible ? 'translateY(0) scale(1)' : 'translateY(50px) scale(0.9)',
+              transition: `all 0.5s cubic-bezier(0.4, 0, 0.2, 1) ${idx * 0.1}s`
             }}
           >
+            <div style={{
+              width: '50px',
+              height: '50px',
+              background: 'rgba(249,199,79,0.15)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 0.8rem'
+            }}>
+              <i className={stat.icon} style={{ fontSize: '1.3rem', color: '#F9C74F' }}></i>
+            </div>
             <div style={{ 
-              fontSize: 'clamp(2rem, 5vw, 3rem)', 
+              fontSize: 'clamp(1.8rem, 5vw, 2.5rem)', 
               fontWeight: 800, 
               color: '#0B3B2F',
               fontFamily: 'monospace'
             }}>
               {stat.value}{stat.suffix}
             </div>
-            <div style={{ color: '#555', fontSize: '0.85rem', fontWeight: 500, marginTop: '0.5rem' }}>
-              <i className={stat.icon} style={{ marginRight: '0.5rem', color: '#F9C74F' }}></i>
+            <div style={{ color: '#555', fontSize: '0.8rem', fontWeight: 500 }}>
               {stat.label}
             </div>
-            <div style={{
-              width: '40px',
-              height: '2px',
-              background: '#F9C74F',
-              margin: '0.75rem auto 0',
-              borderRadius: '1px',
-              transition: 'width 0.4s ease'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.width = '80px'}
-            onMouseLeave={(e) => e.currentTarget.style.width = '40px'} />
           </div>
         ))}
       </div>
@@ -661,18 +992,16 @@ const Leadership = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '16px',
-          animation: 'fadeIn 0.3s ease'
+          padding: '16px'
         }}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{
             background: 'white',
-            borderRadius: '28px',
+            borderRadius: '32px',
             maxWidth: '600px',
             width: '100%',
             maxHeight: '85vh',
             overflowY: 'auto',
-            position: 'relative',
-            animation: 'slideInUp 0.3s ease'
+            position: 'relative'
           }}>
             <button
               onClick={closeModal}
@@ -705,109 +1034,82 @@ const Leadership = () => {
               padding: '2rem',
               textAlign: 'center'
             }}>
-              {/* Avatar in Modal */}
               <div style={{
-                width: '100px',
-                height: '100px',
+                width: '120px',
+                height: '120px',
                 margin: '0 auto',
                 borderRadius: '50%',
-                background: `linear-gradient(135deg, ${getAvatarColor(selectedLeader.name)}, ${getAvatarColor(selectedLeader.name)}cc)`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                overflow: 'hidden',
                 border: '4px solid #F9C74F'
               }}>
-                <span style={{
-                  fontSize: '2.5rem',
-                  fontWeight: 'bold',
-                  color: 'white'
-                }}>
-                  {getInitials(selectedLeader.name)}
-                </span>
+                <img 
+                  src={selectedLeader.image} 
+                  alt={selectedLeader.name}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
+                  }}
+                />
               </div>
               <h2 style={{ color: 'white', marginTop: '1rem', marginBottom: '0.3rem' }}>{selectedLeader.name}</h2>
               <p style={{ color: '#F9C74F', fontWeight: 600 }}>{selectedLeader.role}</p>
             </div>
 
             <div style={{ padding: '1.5rem' }}>
-              {selectedLeader.bio && (
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem' }}>
-                    <i className="fas fa-user-circle" style={{ marginRight: '0.5rem', color: '#F9C74F' }}></i>
-                    Biography
-                  </h3>
-                  <p style={{ color: '#555', lineHeight: '1.6' }}>{selectedLeader.fullBio || selectedLeader.bio}</p>
-                </div>
-              )}
-
-              {selectedLeader.linkedin && (
-                <div style={{ marginBottom: '1rem' }}>
-                  <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem' }}>
-                    <i className="fab fa-linkedin" style={{ marginRight: '0.5rem', color: '#0077B5' }}></i>
-                    Connect
-                  </h3>
-                  <a 
-                    href={selectedLeader.linkedin} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    style={{
-                      color: '#0077B5',
-                      textDecoration: 'none',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.5rem'
-                    }}
-                  >
-                    <i className="fab fa-linkedin"></i> LinkedIn Profile
-                  </a>
-                </div>
-              )}
-
-              {selectedLeader.twitter && (
-                <div style={{ marginBottom: '1rem' }}>
-                  <a 
-                    href={selectedLeader.twitter} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    style={{
-                      color: '#1DA1F2',
-                      textDecoration: 'none',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.5rem'
-                    }}
-                  >
-                    <i className="fab fa-twitter"></i> Twitter Profile
-                  </a>
-                </div>
-              )}
-
-              <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                <button
-                  onClick={closeModal}
-                  style={{
-                    flex: 1,
-                    background: 'transparent',
-                    border: '2px solid #ddd',
-                    padding: '0.7rem',
-                    borderRadius: '50px',
-                    color: '#666',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = '#F9C74F';
-                    e.currentTarget.style.color = '#0B3B2F';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = '#ddd';
-                    e.currentTarget.style.color = '#666';
-                  }}
-                >
-                  Close
-                </button>
+              <div style={{ marginBottom: '1.5rem' }}>
+                <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem' }}>
+                  <i className="fas fa-user-circle" style={{ marginRight: '0.5rem', color: '#F9C74F' }}></i>
+                  Biography
+                </h3>
+                <p style={{ color: '#555', lineHeight: '1.6' }}>{selectedLeader.fullBio}</p>
               </div>
+
+              <div style={{ marginBottom: '1.5rem' }}>
+                <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem' }}>
+                  <i className="fas fa-trophy" style={{ marginRight: '0.5rem', color: '#F9C74F' }}></i>
+                  Key Achievements
+                </h3>
+                <ul style={{ listStyle: 'none', padding: 0 }}>
+                  {selectedLeader.achievements.map((achievement, idx) => (
+                    <li key={idx} style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      marginBottom: '0.5rem',
+                      color: '#555'
+                    }}>
+                      <i className="fas fa-check-circle" style={{ color: '#2b7a5c' }}></i>
+                      {achievement}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <button
+                onClick={closeModal}
+                style={{
+                  width: '100%',
+                  background: '#F9C74F',
+                  border: 'none',
+                  padding: '0.8rem',
+                  borderRadius: '50px',
+                  color: '#0B3B2F',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.02)';
+                  e.currentTarget.style.boxShadow = '0 5px 20px rgba(249,199,79,0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>

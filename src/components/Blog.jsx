@@ -1,10 +1,323 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
+
+// Import local images from assets folder
+import eventa from '../assets/eventa.jpg';
+import eventb from '../assets/event.jpg';
+import eventc from '../assets/eventc.jpg';
+import eventd from '../assets/eventd.jpg';
+import evente from '../assets/evente.jpg';
+import eventf from '../assets/eventf.jpg';
+import eventg from '../assets/eventg.jpg';
+import eventh from '../assets/eventh.jpg';
+import eventi from '../assets/eventi.jpg';
+import eventj from '../assets/eventj.jpg';
+import eventk from '../assets/eventk.jpg';
+import eventl from '../assets/eventl.jpg';
+
+// Static news data based on the four initiatives
+const newsData = [
+  {
+    id: 1,
+    title: "OPERATION CLEAN VICTORIA",
+    date: "March 15, 2026",
+    read_time: "5 min read",
+    views: 1247,
+    likes: 342,
+    image: eventa,
+    excerpt: "A comprehensive initiative restoring Lake Victoria by removing invasive weeds, plastic wastes, and industrial debris to ensure water quality and aquatic health.",
+    content: `Lake Victoria, Africa's largest freshwater lake, has been choking under the weight of water hyacinth, plastic pollution, and industrial runoff for decades. Operation Clean Victoria is changing that narrative.
+
+Launched in early 2025, this ambitious initiative has already removed over 450 tons of invasive water hyacinth from critical waterways near Mwanza, Kisumu, and Entebbe. Working with local fishing communities, the operation deploys specialized harvesting boats that cut, collect, and transport the weeds to processing centers where they are converted into biogas and organic fertilizer.
+
+Plastic waste is another major focus. Over 12,000 kilograms of plastic debris—bottles, fishing nets, and bags—have been extracted from the lake's surface using floating barriers and skimmer boats. The recovered plastics are sorted, cleaned, and sent to recycling partners who transform them into construction materials and household products.
+
+Perhaps most critically, the initiative has identified 47 industrial discharge points around the lake. Through partnership with environmental regulators, 23 factories have installed preliminary wastewater treatment systems, significantly reducing the flow of heavy metals and chemical pollutants into the water.
+
+The results are promising. Early water quality monitoring shows improved oxygen levels in previously hypoxic zones, and local fishermen report the return of native fish species to areas that were once barren. Operation Clean Victoria proves that with sustained effort and community involvement, even the most degraded ecosystems can begin to heal.`,
+    key_highlights: [
+      "450+ tons of invasive water hyacinth removed",
+      "12,000+ kg of plastic waste extracted and recycled",
+      "47 industrial discharge points identified and mapped",
+      "23 factories now treating wastewater before release",
+      "Return of native fish species observed in key zones"
+    ]
+  },
+  {
+    id: 2,
+    title: "GREEN CORRIDORS & URBAN BLOOMS",
+    date: "March 10, 2026",
+    read_time: "4 min read",
+    views: 892,
+    likes: 267,
+    image: eventb,
+    excerpt: "Transforming city roadsides, roundabouts, and open spaces into vibrant habitats using native plants that require minimal water and maintenance.",
+    content: `Cities across the region are turning grey to green. The Green Corridors & Urban Blooms initiative is landscaping road corridors, public roundabouts, and neglected open spaces with native flora that does more than just look beautiful.
+
+Unlike traditional ornamental gardening that demands constant watering, fertilizing, and mowing, this approach uses indigenous plants adapted to local rainfall patterns and soil conditions. Species like African tulip trees, desert roses, and native grasses thrive with minimal intervention while providing essential habitat for urban wildlife.
+
+The results are striking. In the capital city alone, 14 major roundabouts have been transformed into mini-ecosystems. Bee populations have increased by an estimated 40% in these areas, and residents report seeing butterflies, birds, and beneficial insects where once there was only concrete and exhaust.
+
+Road corridors now function as wildlife highways, connecting isolated parks and green spaces. The deep root systems of native grasses and shrubs also capture stormwater runoff, reducing flooding and filtering pollutants before they reach waterways.
+
+Maintenance costs have dropped significantly—some sites require mowing only twice per year compared to monthly for traditional turf. The initiative is now expanding to school grounds, hospital campuses, and industrial parks, proving that sustainability and beauty can go hand in hand.`,
+    key_highlights: [
+      "14 major roundabouts transformed into native plant habitats",
+      "40% increase in urban bee populations observed",
+      "70% reduction in watering requirements vs ornamental gardens",
+      "Stormwater capture improved by 35% along planted corridors",
+      "Maintenance costs reduced by 60% annually"
+    ]
+  },
+  {
+    id: 3,
+    title: "SOLAR-AGRI EMPOWERMENT",
+    date: "March 5, 2026",
+    read_time: "6 min read",
+    views: 1567,
+    likes: 489,
+    image: eventc,
+    excerpt: "Smallholder farmers gain energy independence with solar-powered irrigation, enabling year-round growing seasons and protection against drought.",
+    content: `For generations, smallholder farmers in rural communities have lived at the mercy of unpredictable rainfall. A late monsoon or an early dry spell could mean total crop failure and months of hunger. The Solar-Agri Empowerment initiative is breaking that cycle.
+
+Through a combination of subsidized solar pump systems, hands-on training, and microfinance options, over 800 farming households have gained access to reliable, fossil-fuel-free irrigation. Solar panels power water pumps that draw from wells, rivers, and ponds, delivering consistent moisture to crops even during extended dry periods.
+
+The impact on food security has been transformative. Farmers who previously harvested once per year are now producing two or even three crop cycles annually. Maize yields have doubled, vegetable gardens produce year-round, and families no longer face the seasonal "hunger gap" between harvests.
+
+Climate-smart agriculture training accompanies every solar installation. Farmers learn water-efficient techniques like drip irrigation, mulching to retain soil moisture, and crop rotation that preserves soil health. Many have also begun producing compost from crop residues, reducing the need for expensive chemical fertilizers.
+
+The economic benefits ripple outward. Surplus produce is sold at local markets, generating income that families use for school fees, healthcare, and home improvements. Some villages have formed cooperatives to pool their harvests and negotiate better prices. One farmer put it simply: "Now I decide when to plant, not the sky."`,
+    key_highlights: [
+      "800+ farming households equipped with solar irrigation systems",
+      "2-3 crop cycles per year vs 1 previously",
+      "Maize yields increased by 100% on average",
+      "Zero carbon emissions from irrigation",
+      "Farmers report 70% reduction in seasonal food insecurity"
+    ]
+  },
+  {
+    id: 4,
+    title: "YOUTH ENVIRONMENTAL STEWARDS",
+    date: "February 28, 2026",
+    read_time: "5 min read",
+    views: 1134,
+    likes: 421,
+    image: eventd,
+    excerpt: "Leadership training and innovation workshops in schools cultivate the next generation of environmental champions across primary, secondary, and tertiary institutions.",
+    content: `The most sustainable environmental solution is the one that outlives its founders. That's the philosophy behind the Youth Environmental Stewards program, which is embedding environmental leadership into school curricula at every level.
+
+In primary schools, children learn through hands-on activities: planting trees, maintaining school gardens, sorting waste for recycling, and conducting simple water quality tests. These foundational experiences create lifelong habits of environmental responsibility.
+
+Secondary school students participate in leadership training that teaches them to identify local environmental problems, mobilize their peers, and run campaigns. Recent student-led projects include a plastic bottle collection drive that kept 5,000 bottles out of landfills, and a "green audit" of their school's energy and water use that led to 20% savings on utility bills.
+
+At colleges and universities, innovation workshops challenge young people to design and prototype solutions using local materials. A student team recently developed a low-cost water filter made from charcoal and sand that removes 95% of sediment and bacteria. Another group created a biogas digester from recycled drums that turns cafeteria waste into cooking fuel.
+
+The program has reached 45 schools and trained over 3,000 students as certified Environmental Stewards. Graduates have gone on to start green businesses, pursue environmental science degrees, and advocate for policy changes in their communities. They are not just learning about the environment—they are becoming its protectors.`,
+    key_highlights: [
+      "45 schools participating across the region",
+      "3,000+ students trained as certified Environmental Stewards",
+      "Student projects diverted 5,000+ plastic bottles from landfills",
+      "School utility costs reduced by 20% through student-led audits",
+      "3 student-designed innovations now being piloted for community use"
+    ]
+  },
+  {
+    id: 5,
+    title: "ZERO WASTE COMMUNITIES",
+    date: "February 20, 2026",
+    read_time: "4 min read",
+    views: 978,
+    likes: 312,
+    image: evente,
+    excerpt: "Neighborhoods across the region are adopting zero-waste practices, turning trash into resources and reducing landfill pressure.",
+    content: `The concept of "waste" is being redefined in communities embracing the Zero Waste Initiative. What was once thrown away is now seen as a resource awaiting transformation.
+
+In pilot neighborhoods, residents have been trained to separate waste into organic, recyclable, and residual streams. Organic waste—food scraps, yard trimmings—goes to community composting sites that produce rich soil for gardens and tree planting. Recyclables like plastics, glass, and metals are collected by local cooperatives and sold to recycling facilities, creating income for participating families.
+
+The results are measurable. Participating households have reduced their waste sent to landfills by an average of 65%. Community composting has produced over 12 tons of organic fertilizer used in school and home gardens. And the recycling program has generated over $8,000 in collective income for waste pickers who were previously working in unsafe, informal conditions.
+
+The initiative is now expanding to include "repair cafes" where residents learn to fix broken appliances and clothing instead of discarding them, and bulk-buying cooperatives that reduce packaging waste. Zero waste is proving that environmental action can also be economic opportunity.`,
+    key_highlights: [
+      "65% average reduction in landfill waste per household",
+      "12+ tons of compost produced from organic waste",
+      "$8,000+ income generated for waste picker cooperatives",
+      "3 community repair cafes established",
+      "Model expanding to 15 additional neighborhoods"
+    ]
+  },
+  {
+    id: 6,
+    title: "CLIMATE TECH BOOTCAMP",
+    date: "February 12, 2026",
+    read_time: "3 min read",
+    views: 2103,
+    likes: 567,
+    image: eventf,
+    excerpt: "Young technologists learn to build climate solutions—from air quality sensors to smart irrigation controllers—in an intensive hands-on program.",
+    content: `Technology and environmental action are converging at the Climate Tech Bootcamp, where young innovators learn to build tools that address pressing environmental challenges.
+
+The intensive 8-week program combines coding, electronics, and environmental science. Participants learn to assemble air quality monitors using low-cost sensors, program automated irrigation controllers, and build mobile apps for citizen science data collection.
+
+Graduates have gone on to launch startups: one team created a smart composter that uses temperature sensors to optimize decomposition; another developed a blockchain-based system for tracking plastic recycling credits. Several alumni now work with environmental agencies, helping to modernize data collection and analysis.
+
+The bootcamp emphasizes accessible, repairable technology—no expensive proprietary components. All designs are open-source, allowing communities to adapt and improve them locally. This democratization of climate tech ensures that solutions are not just invented but owned by the communities that use them.`,
+    key_highlights: [
+      "150+ young technologists trained",
+      "8 climate-tech prototypes developed",
+      "5 startups launched by program graduates",
+      "All designs released as open-source",
+      "75% of graduates now working in climate-related fields"
+    ]
+  },
+  {
+    id: 7,
+    title: "URBAN VERTICAL FARMING",
+    date: "February 5, 2026",
+    read_time: "4 min read",
+    views: 845,
+    likes: 234,
+    image: eventg,
+    excerpt: "Empty walls and rooftops become food-producing gardens, bringing fresh vegetables to crowded city neighborhoods.",
+    content: `In dense urban areas where land is scarce and expensive, traditional farming is impossible. Vertical farming offers a solution: growing food upwards instead of outwards.
+
+The Urban Vertical Farming initiative has transformed abandoned walls, building facades, and rooftop spaces into productive gardens. Using hydroponic towers and pocket planters, residents grow leafy greens, herbs, and even small vegetables in spaces as small as a balcony.
+
+Each tower uses 90% less water than conventional soil farming and produces harvests in half the time. No soil contamination is a concern because plants grow in nutrient-rich water solutions, making vertical farms ideal for former industrial areas where soil may be polluted.
+
+Community members—often women and youth—are trained to maintain the systems and sell the produce at local markets. One project on the roof of a public market now supplies fresh lettuce and herbs to vendors downstairs, eliminating transport costs and ensuring maximum freshness.
+
+Vertical farming is proving that even the most concrete-bound neighborhoods can be food-secure.`,
+    key_highlights: [
+      "35 vertical farming systems installed",
+      "90% less water than conventional farming",
+      "50% faster crop cycles",
+      "200+ urban farmers trained",
+      "Fresh produce now available in 12 food-desert neighborhoods"
+    ]
+  },
+  {
+    id: 8,
+    title: "GREEN ENERGY SOLUTIONS",
+    date: "January 28, 2026",
+    read_time: "5 min read",
+    views: 1432,
+    likes: 398,
+    image: eventh,
+    excerpt: "Rural communities gain access to clean, affordable energy through solar micro-grids and improved cookstoves.",
+    content: `Energy poverty and environmental degradation are linked. Communities without electricity burn kerosene for light and charcoal for cooking—both expensive and highly polluting. Green Energy Solutions is breaking that link.
+
+Solar micro-grids now power entire village clusters, providing clean electricity for lighting, phone charging, and small businesses. Each system is managed by a local cooperative that collects small fees for maintenance, ensuring long-term sustainability.
+
+Improved cookstoves reduce charcoal consumption by 60% and cut indoor air pollution by 80%. Women report fewer respiratory illnesses and less time gathering fuelwood—time now spent on income-generating activities.
+
+The environmental benefits are clear: deforestation rates have slowed, and carbon emissions have dropped significantly. Families save money on fuel and electricity, money that goes to food, school fees, and healthcare. Clean energy is proving to be a catalyst for broader community development.`,
+    key_highlights: [
+      "12 solar micro-grids installed",
+      "1,500 households now have clean electricity",
+      "3,000 improved cookstoves distributed",
+      "60% reduction in charcoal use per household",
+      "80% reduction in indoor air pollution"
+    ]
+  },
+  {
+    id: 9,
+    title: "YOUTH ENTREPRENEURSHIP PROGRAM",
+    date: "January 20, 2026",
+    read_time: "4 min read",
+    views: 1102,
+    likes: 445,
+    image: eventi,
+    excerpt: "Young environmental entrepreneurs receive mentorship, seed funding, and business training to turn green ideas into sustainable enterprises.",
+    content: `Good environmental ideas need good business plans to survive. The Youth Entrepreneurship Program bridges that gap, helping young people turn their environmental innovations into viable enterprises.
+
+Participants receive 12 weeks of business training covering market analysis, financial management, marketing, and impact measurement. Each participant is matched with an experienced mentor from their sector—solar energy, waste management, sustainable agriculture, or eco-tourism.
+
+At the end of the program, participants pitch their business plans for seed funding. Past winners have launched a solar phone-charging kiosk network, a composting service for restaurants, and a line of bags made from recycled billboard vinyl.
+
+The program emphasizes that environmental action can be economically self-sustaining. A project that pays for itself lasts longer than one dependent on donations.`,
+    key_highlights: [
+      "250 young entrepreneurs trained",
+      "35 new green businesses launched",
+      "80% of businesses still operating after 2 years",
+      "$50,000 in seed funding distributed",
+      "150+ jobs created across green sectors"
+    ]
+  },
+  {
+    id: 10,
+    title: "CLIMATE ADVOCACY TRAINING",
+    date: "January 15, 2026",
+    read_time: "3 min read",
+    views: 967,
+    likes: 301,
+    image: eventj,
+    excerpt: "Citizens learn to advocate for climate action at local, regional, and national levels through strategic communication and coalition-building.",
+    content: `Technical solutions alone cannot solve the climate crisis. Policy change is essential, and policy change requires skilled advocacy. The Climate Advocacy Training program equips citizens to be effective voices for environmental action.
+
+Participants learn to analyze proposed policies, write position papers, meet with elected officials, organize public campaigns, and work with media. Role-playing exercises simulate legislative hearings and negotiation sessions, building confidence for real-world advocacy.
+
+Graduates have successfully advocated for plastic bag bans, increased funding for public transit, and stricter industrial emissions standards. Several have been appointed to government environmental advisory committees. The program is building a network of informed, articulate advocates who can make the case for climate action in any room.`,
+    key_highlights: [
+      "500 advocates trained across 4 regions",
+      "3 successful policy campaigns led by graduates",
+      "12 graduates appointed to government advisory roles",
+      "Network of 50+ partner organizations established",
+      "Annual advocacy day now brings 1,000+ citizens to capital"
+    ]
+  },
+  {
+    id: 11,
+    title: "COMMUNITY RECYCLING PROJECT",
+    date: "January 8, 2026",
+    read_time: "4 min read",
+    views: 789,
+    likes: 223,
+    image: eventk,
+    excerpt: "Neighborhood-based recycling hubs make it easy for residents to recycle while creating local jobs in waste management.",
+    content: `Recycling works best when it is convenient. The Community Recycling Project establishes small, neighborhood-based collection hubs where residents can drop off sorted recyclables without traveling to distant facilities.
+
+Each hub is staffed by local residents trained in sorting, cleaning, and basic recycling processes. Some hubs include small-scale equipment—baling machines, shredders, and plastic extruders—that process materials into semi-finished goods for sale to manufacturers.
+
+The hubs accept plastics, glass, metals, paper, and electronics. Hazardous materials like batteries and paints are collected separately for safe disposal. Outreach workers visit nearby homes to provide training on sorting and to answer questions.
+
+The project has created stable, dignified employment for over 100 people who previously worked as informal waste pickers. Hubs are managed by community cooperatives, ensuring that profits stay in the neighborhood.`,
+    key_highlights: [
+      "25 community recycling hubs established",
+      "100+ formal jobs created in waste management",
+      "500 tons of material processed annually",
+      "90% resident satisfaction rate",
+      "Model being replicated in 3 additional cities"
+    ]
+  },
+  {
+    id: 12,
+    title: "VUMA PRESIDENT ON TECH LEADERSHIP",
+    date: "January 5, 2026",
+    read_time: "6 min read",
+    views: 3456,
+    likes: 892,
+    image: eventl,
+    excerpt: "An exclusive interview with VUMA's president on the role of technology in environmental restoration and the organization's five-year vision.",
+    content: `In this exclusive interview, VUMA's President shares her vision for integrating technology into every aspect of environmental restoration, from satellite monitoring of deforestation to AI-powered waste sorting.
+
+"The environmental challenges we face are unprecedented in scale," she explains. "Traditional methods alone cannot keep pace. Technology gives us leverage—the ability to monitor vast areas, predict problems before they become crises, and engage citizens in solutions."
+
+She highlights the organization's investment in open-source environmental monitoring tools, citizen science platforms, and data literacy training. "We want communities to not just experience environmental problems but to measure them, understand them, and advocate for solutions based on evidence."
+
+Looking ahead, she describes a five-year vision: a continent-wide network of environmental data hubs, a fellowship program for young climate technologists, and partnerships with universities to embed environmental data science into curricula.
+
+"Technology is a tool, not a solution by itself," she concludes. "But when combined with community knowledge and political will, it is an extraordinarily powerful tool."`,
+    key_highlights: [
+      "Satellite monitoring now covers 80% of project areas",
+      "AI-powered waste sorting pilot achieving 95% accuracy",
+      "Open-source data platform launched with 50+ datasets",
+      "500 citizens trained in data collection and analysis",
+      "5-year vision includes 30 new technology hubs"
+    ]
+  }
+];
 
 const Blog = () => {
-  const [news, setNews] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [visibleCount, setVisibleCount] = useState(3);
+  const [visibleCount, setVisibleCount] = useState(6);
   const [isLoading, setIsLoading] = useState(false);
   const [isViewMoreHovered, setIsViewMoreHovered] = useState(false);
   const [selectedNews, setSelectedNews] = useState(null);
@@ -17,10 +330,6 @@ const Blog = () => {
     title: '',
     message: ''
   });
-
-  useEffect(() => {
-    fetchNews();
-  }, []);
 
   const showAlert = (type, title, message) => {
     setCustomAlert({
@@ -45,42 +354,17 @@ const Blog = () => {
     });
   };
 
-  const fetchNews = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('https://vuma.pythonanywhere.com/api/news/');
-      const data = await response.json();
-      if (data.success) {
-        setNews(data.data);
-      } else {
-        setError('Failed to load news');
-        showAlert('error', 'Error!', 'Failed to load news articles');
-      }
-    } catch (error) {
-      setError('Network error. Please check your connection.');
-      showAlert('error', 'Network Error', 'Please check your connection and try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const getNewsImage = (newsItem) => {
-    if (newsItem && newsItem.image_base64) {
-      if (newsItem.image_base64.startsWith('data:image')) {
-        return newsItem.image_base64;
-      }
-      return `data:image/jpeg;base64,${newsItem.image_base64}`;
-    }
-    return 'https://via.placeholder.com/400x250?text=No+Image';
+    return newsItem.image;
   };
 
-  const displayedNews = news.slice(0, visibleCount);
-  const hasMore = visibleCount < news.length;
+  const displayedNews = newsData.slice(0, visibleCount);
+  const hasMore = visibleCount < newsData.length;
 
   const loadMore = () => {
     setIsLoading(true);
     setTimeout(() => {
-      setVisibleCount(prev => Math.min(prev + 3, news.length));
+      setVisibleCount(prev => Math.min(prev + 3, newsData.length));
       setIsLoading(false);
     }, 500);
   };
@@ -100,81 +384,6 @@ const Blog = () => {
   const handleSubscribe = () => {
     showAlert('success', 'Thank You!', 'Thanks for subscribing to our newsletter!');
   };
-
-  if (loading) {
-    return (
-      <>
-        <h2 className="section-title" style={{
-          textAlign: 'center',
-          fontSize: 'clamp(1.5rem, 5vw, 2rem)',
-          fontWeight: 800,
-          margin: '2rem 0 1rem',
-          background: 'linear-gradient(135deg, #0B3B2F, #2b7a5c)',
-          WebkitBackgroundClip: 'text',
-          backgroundClip: 'text',
-          color: 'transparent'
-        }}>
-          News & Stories
-        </h2>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '400px'
-        }}>
-          <div style={{ textAlign: 'center' }}>
-            <i className="fas fa-spinner fa-spin" style={{ fontSize: '3rem', color: '#0B3B2F' }}></i>
-            <p style={{ marginTop: '1rem', color: '#666' }}>Loading amazing stories...</p>
-          </div>
-        </div>
-      </>
-    );
-  }
-
-  if (error) {
-    return (
-      <>
-        <h2 className="section-title" style={{
-          textAlign: 'center',
-          fontSize: 'clamp(1.5rem, 5vw, 2rem)',
-          fontWeight: 800,
-          margin: '2rem 0 1rem',
-          background: 'linear-gradient(135deg, #0B3B2F, #2b7a5c)',
-          WebkitBackgroundClip: 'text',
-          backgroundClip: 'text',
-          color: 'transparent'
-        }}>
-          News & Stories
-        </h2>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '400px'
-        }}>
-          <div style={{ textAlign: 'center' }}>
-            <i className="fas fa-exclamation-circle" style={{ fontSize: '3rem', color: '#d32f2f' }}></i>
-            <p style={{ marginTop: '1rem', color: '#666' }}>{error}</p>
-            <button 
-              onClick={fetchNews} 
-              style={{ 
-                marginTop: '1rem', 
-                background: '#F9C74F', 
-                border: 'none', 
-                padding: '0.5rem 1rem', 
-                borderRadius: '20px', 
-                cursor: 'pointer',
-                color: '#0B3B2F',
-                fontWeight: 600
-              }}
-            >
-              Try Again
-            </button>
-          </div>
-        </div>
-      </>
-    );
-  }
 
   return (
     <>
@@ -376,7 +585,7 @@ const Blog = () => {
       )}
 
       {/* Show all message */}
-      {!hasMore && news.length > 3 && (
+      {!hasMore && newsData.length > 3 && (
         <div style={{
           textAlign: 'center',
           marginTop: '2rem',
@@ -391,7 +600,7 @@ const Blog = () => {
           marginRight: 'auto'
         }}>
           <i className="fas fa-check-circle" style={{ color: '#F9C74F', marginRight: '0.5rem' }}></i>
-          You've seen all {news.length} amazing stories!
+          You've seen all {newsData.length} amazing stories!
         </div>
       )}
 
@@ -750,7 +959,7 @@ const BlogCard = ({ news, index, onCardClick, getNewsImage }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const cardRef = useRef(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -777,7 +986,7 @@ const BlogCard = ({ news, index, onCardClick, getNewsImage }) => {
     };
   }, [hasAnimated]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const img = new Image();
     img.src = getNewsImage(news);
     img.onload = () => setImageLoaded(true);
@@ -945,7 +1154,7 @@ const BlogCard = ({ news, index, onCardClick, getNewsImage }) => {
           lineHeight: '1.5',
           marginBottom: '1rem'
         }}>
-          {news.excerpt || news.content.substring(0, 100)}...
+          {news.excerpt}
         </p>
         
         <div style={{
