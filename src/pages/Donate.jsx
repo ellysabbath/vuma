@@ -1646,9 +1646,9 @@ VUMA Organization - www.vuma.org
           <h2 data-aos="fade-up" style={{ color: '#0B3B2F', marginBottom: '2rem' }}>What Donors Say</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
             {[
-              { text: "I've seen firsthand how VUMA transforms communities around Lake Victoria. My donation is making a real difference.", author: "Sarah M.", location: "United States" },
-              { text: "Supporting VUMA is the best investment I've made in Africa's environmental future.", author: "James K.", location: "United Kingdom" },
-              { text: "The payment confirmation process was very easy. I just entered my transaction code and got confirmation instantly.", author: "Maria G.", location: "Germany" }
+              { text: "I've seen firsthand how VUMA transforms communities around Lake Victoria. My donation is making a real difference.", author: "Mr. Johnbosco", location: "United Republic of Tanzania" },
+              { text: "Supporting VUMA is the best investment I've made in Africa's environmental future.", author: "Mr.Laban ", location: "United Republic of Tanzania" },
+              { text: "The payment confirmation process was very easy. I just entered my transaction code and got confirmation instantly.", author: "Grace A.", location: "United Republic of Tanzania" }
             ].map((testimonial, idx) => (
               <div key={idx} data-aos="fade-up" data-aos-delay={idx * 100} style={{
                 background: 'white',
