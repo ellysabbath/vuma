@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const Footer = () => {
-  const [email, setEmail] = useState('');
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -28,16 +27,6 @@ const Footer = () => {
       }
     };
   }, []);
-
-  const handleNewsletterSubmit = (e) => {
-    e.preventDefault();
-    if (email) {
-      alert(`Thank you for subscribing with ${email}! You'll receive our newsletter.`);
-      setEmail('');
-    } else {
-      alert('Please enter your email address');
-    }
-  };
 
   const footerCards = [
     {
@@ -74,12 +63,6 @@ const Footer = () => {
         { icon: 'fas fa-clock', text: 'Mon-Fri: 9AM - 5PM' },
         { icon: 'fab fa-whatsapp', text: '+255 123 456 789', link: 'https://wa.me/255123456789' }
       ]
-    },
-    {
-      id: 4,
-      title: 'Newsletter',
-      icon: 'fas fa-envelope-open-text',
-      isNewsletter: true
     }
   ];
 
@@ -401,112 +384,6 @@ const Footer = () => {
               ))}
             </div>
           </div>
-
-          {/* Card 4: Newsletter */}
-          <div style={{
-            background: 'rgba(255,255,255,0.05)',
-            backdropFilter: 'blur(10px)',
-            borderRadius: '20px',
-            padding: '1.5rem',
-            transition: 'all 0.3s ease',
-            border: '1px solid rgba(255,255,255,0.1)',
-            animation: isVisible ? 'fadeInUp 0.5s ease 0.3s' : 'none'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-5px)';
-            e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
-            e.currentTarget.style.borderColor = '#F9C74F';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              marginBottom: '1rem'
-            }}>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '50%',
-                background: '#F9C74F',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <i className="fas fa-envelope-open-text" style={{ color: '#07261e', fontSize: '1.2rem' }}></i>
-              </div>
-              <h3 style={{
-                fontSize: '1.2rem',
-                fontWeight: 700,
-                margin: 0,
-                color: '#F9C74F'
-              }}>
-                Newsletter
-              </h3>
-            </div>
-            <p style={{ fontSize: '0.8rem', opacity: 0.8, marginBottom: '1rem' }}>
-              Subscribe to get updates on our programs and events.
-            </p>
-            <form onSubmit={handleNewsletterSubmit}>
-              <input
-                type="email"
-                placeholder="Your email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '0.8rem',
-                  borderRadius: '12px',
-                  border: 'none',
-                  background: 'rgba(255,255,255,0.1)',
-                  color: 'white',
-                  fontSize: '0.8rem',
-                  outline: 'none',
-                  marginBottom: '0.8rem'
-                }}
-                required
-              />
-              <button
-                type="submit"
-                style={{
-                  width: '100%',
-                  padding: '0.8rem',
-                  borderRadius: '12px',
-                  border: 'none',
-                  background: '#F9C74F',
-                  color: '#07261e',
-                  fontWeight: 600,
-                  fontSize: '0.85rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.02)';
-                  e.currentTarget.style.boxShadow = '0 5px 15px rgba(249,199,79,0.3)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
-                Subscribe Now
-              </button>
-            </form>
-            <div style={{
-              marginTop: '1rem',
-              padding: '0.6rem',
-              background: 'rgba(249,199,79,0.1)',
-              borderRadius: '10px',
-              textAlign: 'center'
-            }}>
-              <i className="fas fa-camera" style={{ color: '#F9C74F', fontSize: '0.7rem', marginRight: '0.3rem' }}></i>
-              <span style={{ fontSize: '0.7rem' }}>#VUMAYouth | Real-time updates</span>
-            </div>
-          </div>
         </div>
 
         {/* Partners Section */}
@@ -698,7 +575,7 @@ const Footer = () => {
           }
           
           div[style*="gridTemplateColumns"] {
-            grid-templateColumns: 1fr !important;
+            grid-template-columns: 1fr !important;
             gap: 1rem !important;
           }
           

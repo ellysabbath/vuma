@@ -38,7 +38,7 @@ const ProgramDetails = () => {
     order: 0
   });
 
-  const API_BASE_URL = 'http://localhost:8000/api';
+  const API_BASE_URL = 'https://vuma.pythonanywhere.com//api';
 
   useEffect(() => {
     AOS.init({ duration: 800, once: true });
@@ -63,7 +63,7 @@ const ProgramDetails = () => {
       setProgram(data);
     } catch (error) {
       console.error('Error fetching program:', error);
-      setError('Network error. Please check if the server is running on http://localhost:8000');
+      setError('Failed to load program details. Please try again later.');
     } finally {
       setLoading(false);
     }

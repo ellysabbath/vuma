@@ -24,6 +24,7 @@ import VerifyOTP from './auth/VerifyOTP';
 import Report from './pages/Report';
 import Apply from './pages/Apply';
 import EventRegister from './pages/EventRegister';
+import Leadership from './pages/Leadership';
 
 
 
@@ -46,6 +47,7 @@ import ProgramDetails from './admin/ProgramsDetails';
 import AdminNews from './admin/AdminNews';
 import NewsDetails from './admin/NewsDetails';
 import AdminLeadership from './admin/AdminLeaderShip';
+import AdminDonations from './admin/AdminDonations';
 // ScrollToTop component to reset scroll on page change
 
 
@@ -133,6 +135,7 @@ function App() {
             <Route path="/programs/apply" element={<Apply />} />
             <Route path="/events/register" element={<EventRegister />} />
             <Route path="/partners" element={<Partners />} />
+            <Route path="/leadership" element={<Leadership />} />
 
 
 
@@ -158,6 +161,7 @@ function App() {
 <Route path="/admin/programs/:id" element={<ProgramDetails />} />
 <Route path="/admin/news/:id" element={<NewsDetails />} />
 <Route path="/events/register/:id" element={<EventRegister />} />
+<Route path="/admin/donations" element={<AdminDonations />} />
           </Routes>
         </main>
         

@@ -20,15 +20,22 @@ const Donate = () => {
   const [copied, setCopied] = useState(false);
   const [apiError, setApiError] = useState('');
   const [paymentConfirmed, setPaymentConfirmed] = useState(false);
+  const [confirmError, setConfirmError] = useState('');
+  const [confirmSuccess, setConfirmSuccess] = useState('');
+  const [showPendingModal, setShowPendingModal] = useState(false);
+  const [pendingDonations, setPendingDonations] = useState([]);
+  const [loadingPending, setLoadingPending] = useState(false);
+  const [selectedPendingDonation, setSelectedPendingDonation] = useState(null);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [successAlertMessage, setSuccessAlertMessage] = useState('');
   
-  // Donation data state - BACKEND generates the reference number
-  const [referenceNumber, setReferenceNumber] = useState('');
-  const [submittedDonation, setSubmittedDonation] = useState(null);
+  // Donation data state - populated from backend response
+  const [currentDonation, setCurrentDonation] = useState(null);
   const [transactionCode, setTransactionCode] = useState('');
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
 
   // API Base URL
-  const API_BASE_URL = 'http://127.0.0.1:8000/api';
+  const API_BASE_URL = 'https://vuma.pythonanywhere.com/api';
 
   // M-PESA Number for donations
   const mpesaNumber = "+255 759 913 433";
@@ -42,6 +49,17 @@ const Donate = () => {
 
   useEffect(() => {
     AOS.init({ duration: 800, once: false });
+    
+    // Load user data from localStorage (from Profile page)
+    const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+    if (storedUser) {
+      if (storedUser.email) setEmail(storedUser.email);
+      if (storedUser.phone) setMobileNumber(storedUser.phone);
+      if (storedUser.first_name || storedUser.last_name) {
+        setFullName(`${storedUser.first_name || ''} ${storedUser.last_name || ''}`.trim());
+      }
+      if (storedUser.city) setLocation(storedUser.city);
+    }
   }, []);
 
   // Preset amounts in TZS
@@ -72,36 +90,126 @@ const Donate = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Generate Receipt - uses backend-generated reference number
+  // Fetch pending (unconfirmed) donations for the logged-in user
+  const fetchPendingDonations = async () => {
+    // Get user data from localStorage
+    const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const userEmail = storedUser.email || email;
+    const userMobile = storedUser.phone || mobileNumber;
+    
+    if (!userEmail && !userMobile) {
+      setConfirmError('Please login or enter your email/mobile number to fetch your pending donations');
+      return;
+    }
+    
+    setLoadingPending(true);
+    setConfirmError('');
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/donations/`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('All donations response:', data);
+        
+        let allDonations = [];
+        if (data.results && Array.isArray(data.results)) {
+          allDonations = data.results;
+        } else if (Array.isArray(data)) {
+          allDonations = data;
+        }
+        
+        // Filter donations by email or mobile number and status = pending
+        const userPendingDonations = allDonations.filter(donation => {
+          const matchesEmail = donation.email && donation.email.toLowerCase() === (userEmail || '').toLowerCase();
+          const matchesMobile = donation.mobile_number && donation.mobile_number === userMobile;
+          const isPending = donation.status === 'pending';
+          return (matchesEmail || matchesMobile) && isPending;
+        });
+        
+        console.log('User pending donations:', userPendingDonations);
+        setPendingDonations(userPendingDonations);
+        
+        if (userPendingDonations.length === 0) {
+          setConfirmError('No pending donations found for your account. Please make a donation first.');
+        } else {
+          setShowPendingModal(true);
+        }
+      } else {
+        throw new Error('Failed to fetch donations');
+      }
+    } catch (error) {
+      console.error('Error fetching pending donations:', error);
+      setConfirmError('Failed to fetch your pending donations. Please try again.');
+    } finally {
+      setLoadingPending(false);
+    }
+  };
+
+  // Select a pending donation to confirm
+  const selectPendingDonation = (donation) => {
+    setSelectedPendingDonation(donation);
+    setCurrentDonation(donation);
+    setShowPendingModal(false);
+    setShowInstructions(true);
+    
+    // Show a toast notification that donation is loaded
+    showTemporaryAlert(`✅ Donation ID ${donation.id} loaded! Enter your transaction code to confirm.`, 'info');
+    
+    // Scroll to instructions
+    setTimeout(() => {
+      const instructionsSection = document.getElementById('donation-instructions');
+      if (instructionsSection) {
+        instructionsSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
+  };
+
+  // Close modal
+  const closePendingModal = () => {
+    setShowPendingModal(false);
+    setPendingDonations([]);
+  };
+
+  // Show temporary alert/toast notification
+  const showTemporaryAlert = (message, type = 'success') => {
+    setSuccessAlertMessage(message);
+    setShowSuccessAlert(true);
+    
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+      setShowSuccessAlert(false);
+      setSuccessAlertMessage('');
+    }, 5000);
+  };
+
+  // Generate Receipt
   const generateReceipt = () => {
-    const currentRefNumber = referenceNumber || (submittedDonation?.referenceNumber) || 'N/A';
-    const currentAmount = (selectedAmount || customAmount) || (submittedDonation?.amount) || 0;
-    const currentFormattedAmount = formatCurrency(parseFloat(currentAmount));
-    const currentStatus = submittedDonation?.status || 'Pending Payment';
-    const currentDonationType = donationType;
+    if (!currentDonation) return;
     
     const receiptContent = `VUMA ORGANIZATION DONATION RECEIPT
 =================================
 
-Receipt No: ${currentRefNumber}
-Date: ${new Date().toLocaleString()}
-Transaction Code: ${transactionCode || 'Not yet provided'}
+Receipt No: ${currentDonation.reference_number}
+Donation ID: ${currentDonation.id}
+Date: ${currentDonation.created_at ? new Date(currentDonation.created_at).toLocaleString() : new Date().toLocaleString()}
+Transaction Code: ${transactionCode || currentDonation.transaction_code || 'Not yet provided'}
 
 =================================
 DONOR INFORMATION
 =================================
-Full Name: ${fullName}
-Email: ${email}
-Mobile Number: ${mobileNumber}
-Location: ${location}
+Full Name: ${currentDonation.full_name}
+Email: ${currentDonation.email}
+Mobile Number: ${currentDonation.mobile_number}
+Location: ${currentDonation.location}
 
 =================================
 DONATION DETAILS
 =================================
-Amount: ${currentFormattedAmount}
-Donation Type: ${currentDonationType === 'one-time' ? 'One-Time' : 'Monthly'}
-Status: ${currentStatus}
-Reference Number: ${currentRefNumber}
+Amount: ${currentDonation.formatted_amount || formatCurrency(parseFloat(currentDonation.amount))}
+Donation Type: ${currentDonation.donation_type === 'one-time' ? 'One-Time' : 'Monthly'}
+Status: ${currentDonation.status === 'completed' ? 'Completed ✓' : currentDonation.status}
+Reference Number: ${currentDonation.reference_number}
 
 =================================
 PAYMENT INSTRUCTIONS
@@ -114,67 +222,120 @@ Branch: ${bankDetails.branch}
 SWIFT Code: ${bankDetails.swiftCode}
 
 =================================
+PAYMENT LOGS
+=================================
+${currentDonation.logs?.map(log => `- ${new Date(log.created_at).toLocaleString()}: ${log.description}`).join('\n') || 'No logs available'}
+
+=================================
 Thank you for your support!
-VUMA Organization - www.vuma.or.tz
+VUMA Organization - www.vuma.org
 =================================`;
 
     const blob = new Blob([receiptContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `VUMA_Donation_Receipt_${currentRefNumber}_${new Date().toISOString().slice(0, 10)}.txt`;
+    a.download = `VUMA_Donation_Receipt_${currentDonation.reference_number}_${new Date().toISOString().slice(0, 10)}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    
+    showTemporaryAlert('📄 Receipt downloaded successfully!', 'info');
   };
 
-  // Save donation to backend API - BACKEND generates reference number
+  // Save donation to backend API
   const saveDonationToBackend = async (donationData) => {
     try {
+      const requestBody = {
+        donation_type: donationData.donationType,
+        amount: donationData.amount,
+        full_name: donationData.fullName,
+        email: donationData.email,
+        mobile_number: donationData.mobileNumber,
+        location: donationData.location,
+        message: donationData.message || '',
+      };
+      
+      console.log('Sending donation request:', requestBody);
+      
       const response = await fetch(`${API_BASE_URL}/donations/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          donation_type: donationData.donationType,
-          amount: donationData.amount,
-          full_name: donationData.fullName,
-          email: donationData.email,
-          mobile_number: donationData.mobileNumber,
-          location: donationData.location,
-          message: donationData.message || '',
-        }),
+        body: JSON.stringify(requestBody),
       });
 
+      console.log('Response status:', response.status);
+      
       if (!response.ok) {
         const errorData = await response.json();
         console.error('API Error Response:', errorData);
-        throw new Error(errorData.message || 'Failed to save donation');
+        throw new Error(errorData.message || errorData.error || 'Failed to save donation');
       }
 
       const data = await response.json();
-      console.log('Donation saved successfully. Backend generated reference:', data.reference_number);
-      return data;
+      console.log('Donation save response:', data);
+      
+      let donationObject = null;
+      
+      if (data.results && Array.isArray(data.results) && data.results.length > 0) {
+        donationObject = data.results[0];
+      } else if (Array.isArray(data) && data.length > 0) {
+        donationObject = data[0];
+      } else if (data.id) {
+        donationObject = data;
+      } else if (data.data && data.data.id) {
+        donationObject = data.data;
+      }
+      
+      if (!donationObject || !donationObject.id) {
+        console.error('Could not extract donation with ID from response:', data);
+        throw new Error('Donation created but could not retrieve ID. Please contact support.');
+      }
+      
+      console.log('Final donation object with ID:', donationObject);
+      return donationObject;
     } catch (error) {
       console.error('API Error:', error);
       throw error;
     }
   };
 
-  // Confirm payment with transaction code from M-PESA
-  const confirmPaymentAPI = async (refNumber, paymentMethod, transCode) => {
+  // Fetch single donation by ID
+  const fetchDonationById = async (donationId) => {
     try {
+      const response = await fetch(`${API_BASE_URL}/donations/${donationId}/`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Fetched donation by ID:', data);
+        return data;
+      }
+    } catch (error) {
+      console.error('Error fetching donation:', error);
+    }
+    return null;
+  };
+
+  // Confirm payment using the API
+  const confirmPaymentAPI = async (donationId, paymentMethod, transactionCode) => {
+    try {
+      const url = `${API_BASE_URL}/donations/${donationId}/confirm_payment/`;
       const payload = {
-        reference_number: refNumber,
         payment_method: paymentMethod,
-        transaction_code: transCode
+        transaction_code: transactionCode
       };
       
-      console.log('Sending payment confirmation payload:', payload);
+      console.log('Confirming payment with:', {
+        donationId,
+        paymentMethod,
+        transactionCode,
+        url,
+        payload
+      });
       
-      const response = await fetch(`${API_BASE_URL}/donations/status/`, {
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -187,7 +348,17 @@ VUMA Organization - www.vuma.or.tz
       if (!response.ok) {
         const errorData = await response.json();
         console.error('Payment confirmation error response:', errorData);
-        throw new Error(errorData.error || errorData.message || 'Failed to confirm payment');
+        
+        let errorMessage = 'Failed to confirm payment';
+        if (errorData.error) {
+          errorMessage = errorData.error;
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        } else if (errorData.detail) {
+          errorMessage = errorData.detail;
+        }
+        
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
@@ -231,20 +402,18 @@ VUMA Organization - www.vuma.or.tz
     };
     
     try {
-      // Save to backend - BACKEND generates reference number automatically
       const savedDonation = await saveDonationToBackend(donationData);
       
-      // Use the reference number generated by the backend
-      setReferenceNumber(savedDonation.reference_number);
-      setSubmittedDonation({
-        ...donationData,
-        referenceNumber: savedDonation.reference_number,
-        formattedAmount: formatCurrency(parseFloat(amount)),
-        status: savedDonation.status,
-        createdAt: savedDonation.created_at,
-      });
+      if (savedDonation && savedDonation.id) {
+        console.log('Donation saved with ID:', savedDonation.id);
+        setCurrentDonation(savedDonation);
+      } else {
+        throw new Error('Could not retrieve donation information. Please contact support.');
+      }
       
       setShowInstructions(true);
+      
+      showTemporaryAlert(`✅ Donation created successfully! Reference: ${savedDonation.reference_number}`, 'success');
       
       setTimeout(() => {
         const instructionsSection = document.getElementById('donation-instructions');
@@ -255,44 +424,91 @@ VUMA Organization - www.vuma.or.tz
       
     } catch (error) {
       setApiError(error.message || 'Failed to process donation. Please try again.');
-      alert('Error: ' + (error.message || 'Failed to process donation'));
+      showTemporaryAlert(`❌ Error: ${error.message || 'Failed to process donation'}`, 'error');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handlePaymentConfirmation = async () => {
+    setConfirmError('');
+    setConfirmSuccess('');
+    
     if (!selectedPaymentMethod) {
-      alert('Please select a payment method');
+      setConfirmError('Please select a payment method (M-PESA or Bank Transfer)');
+      showTemporaryAlert('⚠️ Please select a payment method', 'error');
       return;
     }
     if (!transactionCode) {
-      alert('Please enter your M-PESA transaction code (e.g., QRK7L9X2)');
+      setConfirmError('Please enter your transaction code');
+      showTemporaryAlert('⚠️ Please enter your transaction code', 'error');
       return;
     }
-    if (!referenceNumber) {
-      alert('Reference number is missing. Please refresh the page and try again.');
+    if (!currentDonation || !currentDonation.id) {
+      setConfirmError('Donation ID is missing. Please select a pending donation or create a new one.');
+      showTemporaryAlert('❌ Donation ID is missing. Please try again.', 'error');
+      return;
+    }
+    
+    if (transactionCode.trim().length < 4) {
+      setConfirmError('Transaction code should be at least 4 characters long');
+      showTemporaryAlert('⚠️ Transaction code should be at least 4 characters long', 'error');
       return;
     }
     
     setPaymentConfirmed(true);
     
+    // Show confirming status
+    showTemporaryAlert('⏳ Confirming your payment... Please wait.', 'info');
+    
     try {
-      await confirmPaymentAPI(referenceNumber, selectedPaymentMethod, transactionCode);
-      alert('✅ Payment confirmed successfully! Thank you for your donation.');
+      const result = await confirmPaymentAPI(currentDonation.id, selectedPaymentMethod, transactionCode.trim());
       
-      setSubmittedDonation(prev => ({
-        ...prev,
-        status: 'completed',
-        paymentMethod: selectedPaymentMethod,
-        transactionCode: transactionCode,
-      }));
+      // Fetch the updated donation data
+      const updatedDonation = await fetchDonationById(currentDonation.id);
+      if (updatedDonation) {
+        setCurrentDonation(updatedDonation);
+      }
       
+      const successMsg = `✅ Payment confirmed successfully! Amount: ${currentDonation.formatted_amount || formatCurrency(parseFloat(currentDonation.amount))} via ${selectedPaymentMethod === 'mpesa' ? 'M-PESA' : 'CRDB Bank'}`;
+      
+      setConfirmSuccess(successMsg);
+      
+      // Show success alert
+      showTemporaryAlert(successMsg, 'success');
+      
+      // Clear form
       setTransactionCode('');
       setSelectedPaymentMethod('');
       
+      // Auto-clear success message after 5 seconds
+      setTimeout(() => {
+        setConfirmSuccess('');
+      }, 5000);
+      
     } catch (error) {
-      alert('❌ Failed to confirm payment: ' + error.message);
+      console.error('Payment confirmation failed:', error);
+      
+      let userFriendlyMessage = error.message || 'Failed to confirm payment';
+      
+      if (error.message.includes('404')) {
+        userFriendlyMessage = `Donation not found. Please check your donation ID and try again.`;
+      } else if (error.message.includes('already confirmed')) {
+        userFriendlyMessage = '✅ This payment has already been confirmed. No further action needed.';
+        // Refresh donation data
+        const updatedDonation = await fetchDonationById(currentDonation.id);
+        if (updatedDonation) {
+          setCurrentDonation(updatedDonation);
+        }
+        showTemporaryAlert(userFriendlyMessage, 'success');
+      } else if (error.message.includes('invalid') || error.message.includes('Invalid')) {
+        userFriendlyMessage = '❌ Invalid transaction code or payment method. Please check and try again.';
+        showTemporaryAlert(userFriendlyMessage, 'error');
+      } else {
+        showTemporaryAlert(`❌ ${userFriendlyMessage}`, 'error');
+      }
+      
+      setConfirmError(userFriendlyMessage);
     } finally {
       setPaymentConfirmed(false);
     }
@@ -300,6 +516,17 @@ VUMA Organization - www.vuma.or.tz
 
   const closeInstructions = () => {
     setShowInstructions(false);
+    setSelectedPendingDonation(null);
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString();
+    } catch (e) {
+      return 'N/A';
+    }
   };
 
   const impactStats = [
@@ -330,13 +557,94 @@ VUMA Organization - www.vuma.or.tz
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
+        @keyframes modalFadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes modalSlideIn {
+          from { opacity: 0; transform: translateY(-50px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInRight {
+          from {
+            opacity: 0;
+            transform: translateX(100%);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        @keyframes fadeOut {
+          from {
+            opacity: 1;
+          }
+          to {
+            opacity: 0;
+            visibility: hidden;
+          }
+        }
         .instruction-card { animation: fadeInUp 0.5s ease forwards; }
         .copy-btn { transition: all 0.3s ease; }
         .copy-btn:hover { background: #F9C74F !important; color: #0B3B2F !important; }
         .reference-card { background: linear-gradient(135deg, #0B3B2F, #1a5c48); animation: fadeInUp 0.5s ease; }
         .stat-card { transition: all 0.3s ease; }
         .stat-card:hover { transform: translateY(-5px); background: rgba(11,59,47,0.03); }
+        .error-message { animation: fadeInUp 0.3s ease; }
+        .success-message { animation: fadeInUp 0.3s ease; }
+        .log-entry { transition: background 0.2s ease; }
+        .log-entry:hover { background: rgba(249,199,79,0.1); }
+        .donation-id-box { background: linear-gradient(135deg, #F9C74F, #f8b500); color: #0B3B2F; padding: 0.5rem 1rem; border-radius: 12px; font-weight: bold; font-size: 1.2rem; text-align: center; }
+        .modal-overlay { animation: modalFadeIn 0.3s ease; }
+        .modal-content { animation: modalSlideIn 0.3s ease; }
+        .pending-donation-item { transition: all 0.2s ease; cursor: pointer; }
+        .pending-donation-item:hover { background: rgba(249,199,79,0.1); transform: translateX(5px); }
+        .success-alert {
+          position: fixed;
+          top: 80px;
+          right: 20px;
+          z-index: 10000;
+          animation: slideInRight 0.3s ease;
+          max-width: 400px;
+          width: calc(100% - 40px);
+        }
+        .success-alert.fade-out {
+          animation: fadeOut 0.5s ease forwards;
+        }
       `}</style>
+
+      {/* Success Alert Toast Notification */}
+      {showSuccessAlert && (
+        <div className={`success-alert ${!showSuccessAlert ? 'fade-out' : ''}`} style={{
+          background: successAlertMessage.includes('✅') ? '#e8f5e9' : (successAlertMessage.includes('❌') ? '#ffebee' : (successAlertMessage.includes('⚠️') ? '#fff3e0' : '#e3f2fd')),
+          color: successAlertMessage.includes('✅') ? '#2e7d32' : (successAlertMessage.includes('❌') ? '#c62828' : (successAlertMessage.includes('⚠️') ? '#e65100' : '#1565c0')),
+          padding: '1rem',
+          borderRadius: '12px',
+          boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
+          borderLeft: `4px solid ${successAlertMessage.includes('✅') ? '#4caf50' : (successAlertMessage.includes('❌') ? '#d32f2f' : (successAlertMessage.includes('⚠️') ? '#ff9800' : '#2196f3'))}`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '1rem'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+            <i className="fas fa-bell" style={{ fontSize: '1.2rem' }}></i>
+            <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>{successAlertMessage}</span>
+          </div>
+          <button
+            onClick={() => setShowSuccessAlert(false)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'inherit',
+              fontSize: '1rem'
+            }}
+          >
+            <i className="fas fa-times"></i>
+          </button>
+        </div>
+      )}
 
       {/* Hero Section */}
       <div style={{
@@ -398,6 +706,51 @@ VUMA Organization - www.vuma.or.tz
               <div style={{ color: '#666', fontSize: '0.85rem' }}>{stat.label}</div>
             </div>
           ))}
+        </div>
+
+        {/* Button to View Pending Donations */}
+        <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
+          <button
+            onClick={fetchPendingDonations}
+            disabled={loadingPending}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.8rem',
+              padding: '0.8rem 1.5rem',
+              background: '#0B3B2F',
+              border: 'none',
+              borderRadius: '50px',
+              cursor: loadingPending ? 'not-allowed' : 'pointer',
+              fontSize: '0.9rem',
+              fontWeight: 600,
+              color: 'white',
+              transition: 'all 0.3s ease',
+              opacity: loadingPending ? 0.7 : 1
+            }}
+            onMouseEnter={(e) => {
+              if (!loadingPending) {
+                e.currentTarget.style.background = '#1a5c48';
+                e.currentTarget.style.transform = 'scale(1.02)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = '#0B3B2F';
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
+          >
+            {loadingPending ? (
+              <>
+                <i className="fas fa-spinner fa-spin"></i>
+                <span>Loading...</span>
+              </>
+            ) : (
+              <>
+                <i className="fas fa-clock"></i>
+                <span>View My Pending Donations</span>
+              </>
+            )}
+          </button>
         </div>
 
         {/* Donation Form */}
@@ -668,15 +1021,6 @@ VUMA Organization - www.vuma.or.tz
                   </>
                 )}
               </button>
-              <p style={{
-                fontSize: '0.7rem',
-                color: '#888',
-                textAlign: 'center',
-                marginTop: '1rem'
-              }}>
-                <i className="fas fa-cloud-upload-alt" style={{ marginRight: '0.3rem' }}></i>
-                Your donation will be securely saved to our database
-              </p>
             </form>
           </div>
 
@@ -730,8 +1074,8 @@ VUMA Organization - www.vuma.or.tz
           </div>
         </div>
 
-        {/* Donation Instructions Section */}
-        {showInstructions && submittedDonation && (
+        {/* Donation Instructions Card */}
+        {showInstructions && currentDonation && (
           <div id="donation-instructions" className="instruction-card" style={{
             marginTop: '3rem',
             background: 'white',
@@ -768,75 +1112,110 @@ VUMA Organization - www.vuma.or.tz
               </button>
             </div>
 
-            {/* Reference Number Card - Generated by Backend */}
+            {/* Donation Info Card */}
             <div className="reference-card" style={{
               borderRadius: '20px',
               padding: '1.5rem',
               marginBottom: '1.5rem',
-              textAlign: 'center',
               color: 'white'
             }}>
-              <p style={{ marginBottom: '0.5rem', opacity: 0.8 }}>Your Donation Reference Number</p>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '1rem',
-                flexWrap: 'wrap'
-              }}>
-                <code style={{
-                  fontSize: '1.4rem',
-                  fontWeight: 'bold',
-                  background: 'rgba(255,255,255,0.2)',
-                  padding: '0.5rem 1rem',
+              <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+                <p style={{ marginBottom: '0.3rem', opacity: 0.7, fontSize: '0.7rem' }}>DONATION ID (Use for Payment Confirmation)</p>
+                <div className="donation-id-box" style={{
+                  display: 'inline-block',
+                  background: '#F9C74F',
+                  color: '#0B3B2F',
+                  padding: '0.8rem 1.5rem',
                   borderRadius: '12px',
-                  letterSpacing: '1px'
+                  fontWeight: 'bold',
+                  fontSize: '1.3rem',
+                  textAlign: 'center'
                 }}>
-                  {referenceNumber}
-                </code>
-                <button
-                  onClick={() => copyToClipboard(referenceNumber)}
-                  className="copy-btn"
-                  style={{
-                    padding: '0.5rem 1rem',
-                    borderRadius: '8px',
-                    border: 'none',
-                    background: '#F9C74F',
-                    cursor: 'pointer',
-                    color: '#0B3B2F',
-                    fontWeight: 600
-                  }}
-                >
-                  <i className="fas fa-copy" style={{ marginRight: '0.3rem' }}></i>
-                  {copied ? 'Copied!' : 'Copy Reference'}
-                </button>
+                  <i className="fas fa-hashtag" style={{ marginRight: '0.5rem' }}></i>
+                  {currentDonation.id || 'ID not found'}
+                </div>
               </div>
-              <p style={{ fontSize: '0.75rem', marginTop: '0.5rem', opacity: 0.7 }}>
-                Please use this reference number when making your payment
-              </p>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                <div>
+                  <p style={{ marginBottom: '0.3rem', opacity: 0.7, fontSize: '0.7rem' }}>Reference Number</p>
+                  <code style={{ fontSize: '0.9rem', fontWeight: 'bold', background: 'rgba(255,255,255,0.2)', padding: '0.3rem 0.6rem', borderRadius: '8px', display: 'inline-block' }}>
+                    {currentDonation.reference_number || 'N/A'}
+                  </code>
+                </div>
+                <div>
+                  <p style={{ marginBottom: '0.3rem', opacity: 0.7, fontSize: '0.7rem' }}>Amount</p>
+                  <code style={{ fontSize: '1rem', fontWeight: 'bold', background: 'rgba(255,255,255,0.2)', padding: '0.3rem 0.6rem', borderRadius: '8px', display: 'inline-block' }}>
+                    {currentDonation.formatted_amount || formatCurrency(parseFloat(currentDonation.amount))}
+                  </code>
+                </div>
+                <div>
+                  <p style={{ marginBottom: '0.3rem', opacity: 0.7, fontSize: '0.7rem' }}>Status</p>
+                  <span style={{
+                    display: 'inline-block',
+                    background: currentDonation.status === 'completed' ? '#4caf50' : '#F9C74F',
+                    color: currentDonation.status === 'completed' ? 'white' : '#0B3B2F',
+                    padding: '0.3rem 0.8rem',
+                    borderRadius: '20px',
+                    fontSize: '0.8rem',
+                    fontWeight: 'bold'
+                  }}>
+                    {currentDonation.status === 'completed' ? '✓ COMPLETED' : '⏳ PENDING'}
+                  </span>
+                </div>
+              </div>
             </div>
 
-            {/* Donation Summary */}
+            {/* Donor Information Card */}
             <div style={{
-              background: 'rgba(249,199,79,0.1)',
+              background: 'rgba(11,59,47,0.05)',
               borderRadius: '16px',
               padding: '1rem',
-              marginBottom: '1.5rem',
-              textAlign: 'center'
+              marginBottom: '1.5rem'
             }}>
-              <p><strong style={{ color: '#0B3B2F' }}>Donation Summary:</strong></p>
-              <p>
-                <strong>Reference:</strong> {referenceNumber} | 
-                <strong> Amount:</strong> {submittedDonation.formattedAmount} | 
-                <strong> Type:</strong> {donationType === 'one-time' ? 'One-Time' : 'Monthly'} |
-                <strong> Donor:</strong> {fullName}
-              </p>
-              <p style={{ fontSize: '0.8rem', color: '#666' }}>
-                Status: <strong style={{ color: submittedDonation.status === 'completed' ? '#4caf50' : '#F9C74F' }}>
-                  {submittedDonation.status === 'completed' ? 'Completed ✓' : 'Pending Payment'}
-                </strong>
-              </p>
+              <h4 style={{ color: '#0B3B2F', marginBottom: '0.8rem' }}>📋 Donor Information</h4>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.8rem' }}>
+                <div><strong>Full Name:</strong> {currentDonation.full_name}</div>
+                <div><strong>Email:</strong> {currentDonation.email}</div>
+                <div><strong>Mobile:</strong> {currentDonation.mobile_number}</div>
+                <div><strong>Location:</strong> {currentDonation.location}</div>
+                <div><strong>Donation Type:</strong> {currentDonation.donation_type === 'one-time' ? 'One-Time' : 'Monthly'}</div>
+                <div><strong>Created:</strong> {formatDate(currentDonation.created_at)}</div>
+              </div>
+              {currentDonation.message && (
+                <div style={{ marginTop: '0.8rem', padding: '0.5rem', background: 'rgba(249,199,79,0.1)', borderRadius: '8px' }}>
+                  <strong>💬 Message:</strong> "{currentDonation.message}"
+                </div>
+              )}
             </div>
+
+            {/* Payment Logs Card */}
+            {currentDonation.logs && currentDonation.logs.length > 0 && (
+              <div style={{
+                background: '#f9fbf7',
+                borderRadius: '16px',
+                padding: '1rem',
+                marginBottom: '1.5rem',
+                border: '1px solid #e0e0e0'
+              }}>
+                <h4 style={{ color: '#0B3B2F', marginBottom: '0.8rem' }}>
+                  <i className="fas fa-history"></i> Payment Activity Log
+                </h4>
+                <div style={{ maxHeight: '150px', overflowY: 'auto' }}>
+                  {currentDonation.logs.map((log, idx) => (
+                    <div key={log.id} className="log-entry" style={{
+                      padding: '0.5rem',
+                      borderBottom: idx < currentDonation.logs.length - 1 ? '1px solid #e0e0e0' : 'none',
+                      fontSize: '0.75rem'
+                    }}>
+                      <span style={{ color: '#F9C74F', fontWeight: 'bold' }}>●</span>
+                      <span style={{ marginLeft: '0.5rem', color: '#666' }}>{formatDate(log.created_at)}</span>
+                      <span style={{ marginLeft: '0.5rem', color: '#0B3B2F' }}>{log.description}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* M-PESA Instructions */}
             <div style={{
@@ -874,7 +1253,7 @@ VUMA Organization - www.vuma.or.tz
                 gap: '1rem'
               }}>
                 <div>
-                  <p style={{ margin: 0, fontSize: '0.7rem', color: '#888' }}>Paybill / Send to:</p>
+                  <p style={{ margin: 0, fontSize: '0.7rem', color: '#888' }}>Send to:</p>
                   <p style={{ fontSize: '1.3rem', fontWeight: 700, color: '#0B3B2F', margin: 0 }}>{mpesaNumber}</p>
                 </div>
                 <button
@@ -900,13 +1279,12 @@ VUMA Organization - www.vuma.or.tz
                 </p>
                 <ol style={{ fontSize: '0.75rem', color: '#666', margin: 0, paddingLeft: '1.2rem' }}>
                   <li>Open your M-PESA app</li>
-                  <li>Select "Send Money" or "Lipa na M-PESA"</li>
+                  <li>Select "Send Money"</li>
                   <li>Enter number: <strong>{mpesaNumber}</strong></li>
-                  <li>Enter the donation amount: <strong>{submittedDonation.formattedAmount}</strong></li>
-                  <li>Enter reference number: <strong>{referenceNumber}</strong></li>
-                  <li>Enter your name: <strong>{fullName}</strong></li>
+                  <li>Enter amount: <strong>{currentDonation.formatted_amount || formatCurrency(parseFloat(currentDonation.amount))}</strong></li>
+                  <li>Enter reference: <strong>{currentDonation.reference_number}</strong></li>
+                  <li>Enter your name: <strong>{currentDonation.full_name}</strong></li>
                   <li>Complete the transaction</li>
-                  <li><strong style={{ color: '#0B3B2F' }}>M-PESA will send you a transaction code (e.g., QRK7L9X2)</strong></li>
                 </ol>
               </div>
             </div>
@@ -932,7 +1310,7 @@ VUMA Organization - www.vuma.or.tz
                   <i className="fas fa-university" style={{ fontSize: '1.5rem', color: '#F9C74F' }}></i>
                 </div>
                 <div>
-                  <h3 style={{ color: '#0B3B2F', margin: 0 }}>Bank Transfer</h3>
+                  <h3 style={{ color: '#0B3B2F', margin: 0 }}>CRDB Bank Transfer</h3>
                   <p style={{ color: '#666', margin: 0, fontSize: '0.8rem' }}>Direct deposit to our bank account</p>
                 </div>
               </div>
@@ -956,7 +1334,7 @@ VUMA Organization - www.vuma.or.tz
                 </div>
                 <div>
                   <p style={{ fontSize: '0.7rem', color: '#888', marginBottom: '0.2rem' }}>Reference Number</p>
-                  <p style={{ fontWeight: 600, color: '#0B3B2F', margin: 0 }}>{referenceNumber}</p>
+                  <p style={{ fontWeight: 600, color: '#0B3B2F', margin: 0 }}>{currentDonation.reference_number}</p>
                 </div>
               </div>
               <button
@@ -978,7 +1356,7 @@ VUMA Organization - www.vuma.or.tz
             </div>
 
             {/* Payment Confirmation Section */}
-            {submittedDonation.status !== 'completed' && (
+            {currentDonation.status !== 'completed' && (
               <div style={{
                 background: 'rgba(249,199,79,0.15)',
                 borderRadius: '20px',
@@ -990,9 +1368,31 @@ VUMA Organization - www.vuma.or.tz
                   <i className="fas fa-check-circle" style={{ marginRight: '0.5rem', color: '#4caf50' }}></i>
                   Confirm Your Payment
                 </h3>
-                <p style={{ fontSize: '0.85rem', color: '#666', textAlign: 'center', marginBottom: '1rem' }}>
-                  After completing your payment via M-PESA or Bank Transfer, <strong style={{ color: '#0B3B2F' }}>enter the transaction code you received</strong> below to confirm.
-                </p>
+                
+                {confirmError && (
+                  <div className="error-message" style={{
+                    background: '#ffebee',
+                    color: '#d32f2f',
+                    padding: '0.8rem',
+                    borderRadius: '12px',
+                    marginBottom: '1rem'
+                  }}>
+                    <i className="fas fa-exclamation-triangle"></i> {confirmError}
+                  </div>
+                )}
+                
+                {confirmSuccess && (
+                  <div className="success-message" style={{
+                    background: '#e8f5e9',
+                    color: '#2e7d32',
+                    padding: '0.8rem',
+                    borderRadius: '12px',
+                    marginBottom: '1rem'
+                  }}>
+                    <i className="fas fa-check-circle"></i> {confirmSuccess}
+                  </div>
+                )}
+                
                 <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                   <select
                     value={selectedPaymentMethod}
@@ -1002,26 +1402,23 @@ VUMA Organization - www.vuma.or.tz
                       padding: '0.8rem',
                       borderRadius: '12px',
                       border: '1px solid #ddd',
-                      fontSize: '0.9rem',
-                      outline: 'none'
+                      fontSize: '0.9rem'
                     }}
                   >
                     <option value="">Select payment method</option>
                     <option value="mpesa">M-PESA</option>
-                    <option value="bank">Bank Transfer</option>
+                    <option value="bank">CRDB Bank Transfer</option>
                   </select>
                   <input
                     type="text"
-                    placeholder="Enter M-PESA Transaction Code (e.g., QRK7L9X2)"
+                    placeholder="Enter Transaction Code (e.g., QRK7L9X2)"
                     value={transactionCode}
                     onChange={(e) => setTransactionCode(e.target.value)}
                     style={{
                       flex: 2,
                       padding: '0.8rem',
                       borderRadius: '12px',
-                      border: '1px solid #ddd',
-                      fontSize: '0.9rem',
-                      outline: 'none'
+                      border: '1px solid #ddd'
                     }}
                   />
                   <button
@@ -1030,7 +1427,6 @@ VUMA Organization - www.vuma.or.tz
                     style={{
                       padding: '0.8rem 1.5rem',
                       borderRadius: '50px',
-                      border: 'none',
                       background: paymentConfirmed ? '#ccc' : '#0B3B2F',
                       color: 'white',
                       fontWeight: 600,
@@ -1038,29 +1434,18 @@ VUMA Organization - www.vuma.or.tz
                     }}
                   >
                     {paymentConfirmed ? (
-                      <><i className="fas fa-spinner fa-spin"></i> Confirming...</>
+                      <>
+                        <i className="fas fa-spinner fa-spin"></i> Confirming...
+                      </>
                     ) : (
-                      <><i className="fas fa-check"></i> Confirm Payment</>
+                      <>
+                        <i className="fas fa-check"></i> Confirm Payment
+                      </>
                     )}
                   </button>
                 </div>
               </div>
             )}
-
-            {/* Confirmation Instructions */}
-            <div style={{
-              background: 'rgba(76, 175, 80, 0.1)',
-              borderRadius: '16px',
-              padding: '1rem',
-              textAlign: 'center',
-              border: '1px solid #4caf50',
-              marginBottom: '1rem'
-            }}>
-              <i className="fas fa-info-circle" style={{ color: '#4caf50', fontSize: '1.2rem', marginRight: '0.5rem' }}></i>
-              <span style={{ fontSize: '0.85rem', color: '#555' }}>
-                After making payment, <strong>enter the transaction code from M-PESA</strong> above. The code looks like: <strong style={{ color: '#0B3B2F' }}>QRK7L9X2</strong>
-              </span>
-            </div>
 
             {/* Action Buttons */}
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -1080,7 +1465,7 @@ VUMA Organization - www.vuma.or.tz
               </button>
               <button
                 onClick={() => {
-                  window.location.href = `mailto:donations@vuma.or.tz?subject=Donation Payment Confirmation - ${referenceNumber}&body=Dear VUMA Team,%0D%0A%0D%0AI have completed my donation payment.%0D%0A%0D%0AReference Number: ${referenceNumber}%0D%0AFull Name: ${fullName}%0D%0AAmount: ${submittedDonation.formattedAmount}%0D%0APayment Method: [M-PESA/Bank Transfer]%0D%0ATransaction Code: [Enter your M-PESA transaction code]%0D%0A%0D%0AThank you!`;
+                  window.location.href = `mailto:donations@vuma.org?subject=Donation Payment Confirmation - ${currentDonation.reference_number}&body=Donation ID: ${currentDonation.id}%0D%0AReference: ${currentDonation.reference_number}%0D%0AName: ${currentDonation.full_name}%0D%0AAmount: ${currentDonation.formatted_amount}%0D%0ATransaction Code: ${transactionCode}`;
                 }}
                 style={{
                   padding: '0.6rem 1.2rem',
@@ -1099,6 +1484,162 @@ VUMA Organization - www.vuma.or.tz
         )}
       </div>
 
+      {/* Pending Donations Modal */}
+      {showPendingModal && (
+        <div className="modal-overlay" onClick={closePendingModal} style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.85)',
+          backdropFilter: 'blur(8px)',
+          zIndex: 2000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '16px'
+        }}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{
+            background: 'white',
+            borderRadius: '28px',
+            maxWidth: '600px',
+            width: '100%',
+            maxHeight: '80vh',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            position: 'relative'
+          }}>
+            {/* Modal Header */}
+            <div style={{
+              background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)',
+              padding: '1.5rem',
+              textAlign: 'center',
+              position: 'relative'
+            }}>
+              <button
+                onClick={closePendingModal}
+                style={{
+                  position: 'absolute',
+                  top: '12px',
+                  right: '16px',
+                  background: 'rgba(255,255,255,0.2)',
+                  border: 'none',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  cursor: 'pointer',
+                  color: 'white',
+                  fontSize: '1rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <i className="fas fa-times"></i>
+              </button>
+              <div style={{
+                width: '50px',
+                height: '50px',
+                background: '#F9C74F',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 0.5rem'
+              }}>
+                <i className="fas fa-clock" style={{ fontSize: '1.5rem', color: '#0B3B2F' }}></i>
+              </div>
+              <h2 style={{ color: 'white', margin: 0, fontSize: '1.3rem' }}>Pending Donations</h2>
+              <p style={{ color: 'rgba(255,255,255,0.8)', margin: '0.3rem 0 0', fontSize: '0.8rem' }}>
+                Select a donation to confirm payment
+              </p>
+            </div>
+
+            {/* Modal Body - List of Pending Donations */}
+            <div style={{
+              flex: 1,
+              overflowY: 'auto',
+              padding: '1rem'
+            }}>
+              {pendingDonations.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '2rem' }}>
+                  <i className="fas fa-inbox" style={{ fontSize: '3rem', color: '#ccc' }}></i>
+                  <p style={{ marginTop: '1rem', color: '#666' }}>No pending donations found</p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                  {pendingDonations.map((donation) => (
+                    <div
+                      key={donation.id}
+                      className="pending-donation-item"
+                      onClick={() => selectPendingDonation(donation)}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '1rem',
+                        background: '#f9fbf7',
+                        borderRadius: '16px',
+                        border: '1px solid #e0e0e0',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontWeight: 'bold', color: '#0B3B2F', marginBottom: '0.3rem' }}>
+                          <i className="fas fa-hashtag" style={{ fontSize: '0.7rem', marginRight: '0.3rem', color: '#F9C74F' }}></i>
+                          ID: {donation.id}
+                        </div>
+                        <div style={{ fontSize: '0.7rem', color: '#666', marginBottom: '0.2rem' }}>
+                          <i className="fas fa-calendar-alt" style={{ marginRight: '0.3rem' }}></i>
+                          {formatDate(donation.created_at)}
+                        </div>
+                        <div style={{ fontSize: '0.7rem', color: '#666' }}>
+                          <i className="fas fa-tag" style={{ marginRight: '0.3rem' }}></i>
+                          Ref: {donation.reference_number}
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#F9C74F' }}>
+                          {donation.formatted_amount || formatCurrency(parseFloat(donation.amount))}
+                        </div>
+                        <div style={{ fontSize: '0.65rem', color: '#888', marginTop: '0.2rem' }}>
+                          {donation.donation_type === 'one-time' ? 'One-Time' : 'Monthly'}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div style={{
+              padding: '1rem',
+              borderTop: '1px solid #e0e0e0',
+              textAlign: 'center'
+            }}>
+              <button
+                onClick={closePendingModal}
+                style={{
+                  padding: '0.6rem 1.5rem',
+                  borderRadius: '50px',
+                  border: 'none',
+                  background: '#0B3B2F',
+                  color: 'white',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Testimonials */}
       <div style={{ background: '#f0f5ee', padding: '3rem 2rem' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
@@ -1106,8 +1647,8 @@ VUMA Organization - www.vuma.or.tz
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
             {[
               { text: "I've seen firsthand how VUMA transforms communities around Lake Victoria. My donation is making a real difference.", author: "Sarah M.", location: "United States" },
-              { text: "Supporting VUMA is the best investment I've made in Africa's environmental future. Their solar irrigation program is exceptional.", author: "James K.", location: "United Kingdom" },
-              { text: "The M-PESA process was very easy. I just entered my transaction code and got confirmation instantly.", author: "Maria G.", location: "Germany" }
+              { text: "Supporting VUMA is the best investment I've made in Africa's environmental future.", author: "James K.", location: "United Kingdom" },
+              { text: "The payment confirmation process was very easy. I just entered my transaction code and got confirmation instantly.", author: "Maria G.", location: "Germany" }
             ].map((testimonial, idx) => (
               <div key={idx} data-aos="fade-up" data-aos-delay={idx * 100} style={{
                 background: 'white',
