@@ -1,37 +1,55 @@
 import React, { useState, useRef } from 'react';
 
-// Static anonymous testimonials based on VUMA's four core initiatives
-// No names, no pictures, no personal identifiers
+// Testimonials with real names from VUMA leadership team
 const testimonialsData = [
   {
     id: 1,
+    name: "Mr. Laban Abas Mapabha",
+    role: "Executive Director, VUMA",
     rating: 5,
     text: "Operation Clean Victoria has transformed our community. The removal of water hyacinth has opened up fishing routes that were blocked for years. The plastic collection program has created jobs for dozens of young people in our village. For the first time in my lifetime, the lake is getting cleaner instead of dirtier. This is the change we have been waiting for."
   },
   {
     id: 2,
+    name: "Mr. Obadia Idd Luyagaza",
+    role: "Program Manager, VUMA",
     rating: 5,
     text: "The solar-powered irrigation system changed everything for our farming cooperative. We used to lose half our crops to drought. Now we harvest three times per year. Our children no longer go hungry during dry seasons. The training on water conservation was practical and easy to follow. I recommend this program to every farming community."
   },
   {
     id: 3,
+    name: "Lilian Emmanuel Mosha",
+    role: "Treasurer, VUMA",
     rating: 5,
     text: "The Green Corridors initiative turned our neglected roundabout into a beautiful garden that blooms all year round with native plants. We now see bees and butterflies where there was only dust and exhaust. The city feels more alive, more peaceful. Best of all, it requires almost no maintenance. The native plants just thrive on their own."
   },
   {
     id: 4,
+    name: "Edom Fanuel Mataro",
+    role: "Chairperson, VUMA",
     rating: 5,
     text: "As a teacher, I have watched the Youth Environmental Stewards program transform my students. They have started a recycling club, planted trees around the school, and even convinced the local market to reduce plastic bag use. These young people are not waiting for adults to solve the problem—they are solving it themselves."
   },
   {
     id: 5,
+    name: "John Bosco Richard Munser",
+    role: "Secretary, VUMA",
     rating: 4,
     text: "The leadership training gave me the confidence to start an environmental club in my community. We now have forty active members who meet weekly to clean up our neighborhood and educate others about waste separation. The skills I learned—how to organize a campaign, how to speak to local officials—have been invaluable."
   },
   {
     id: 6,
+    name: "Juventus Justus",
+    role: "Human Resource Manager, VUMA",
     rating: 5,
     text: "The plastic upcycling hub gave me a job that pays fairly and treats me with dignity. I used to pick waste on the streets with no safety equipment and no respect. Now I work in a clean facility, sorting and processing plastics that become useful products. My children are proud of what I do. That means everything to me."
+  },
+  {
+    id: 7,
+    name: "Grace Alfred Gabriel",
+    role: "Events Lead, VUMA",
+    rating: 5,
+    text: "Bringing together diverse stakeholders through our events has been incredibly rewarding. Seeing young people participate in boot camps and hackathons, sharing innovative ideas for environmental sustainability—it fills me with hope. VUMA expos have created a platform where communities learn, network, and take action together."
   }
 ];
 
@@ -68,7 +86,7 @@ const Testimonials = () => {
     };
   }, []);
 
-  // Auto-scroll from right to left
+  // Auto-scroll from LEFT to RIGHT (forward direction)
   React.useEffect(() => {
     if (isPlaying && testimonialsData.length > 0) {
       autoScrollRef.current = setInterval(() => {
@@ -245,6 +263,16 @@ const Testimonials = () => {
           100% { background-position: 1000px 0; }
         }
         
+        @keyframes slideInFromRight {
+          0% { opacity: 0; transform: translateX(50px); }
+          100% { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes avatarReveal {
+          0% { opacity: 0; transform: scale(0) rotate(-180deg); }
+          100% { opacity: 1; transform: scale(1) rotate(0deg); }
+        }
+        
         .shimmer-text {
           background: linear-gradient(90deg, #0B3B2F 25%, #F9C74F 50%, #0B3B2F 75%);
           background-size: 200% auto;
@@ -252,6 +280,14 @@ const Testimonials = () => {
           -webkit-background-clip: text;
           color: transparent;
           animation: shimmer 3s linear infinite;
+        }
+        
+        .testimonial-avatar {
+          animation: avatarReveal 0.5s cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
+        }
+        
+        .testimonial-name {
+          animation: slideInFromRight 0.5s ease forwards;
         }
       `}</style>
 
@@ -335,7 +371,7 @@ const Testimonials = () => {
           color: '#666',
           marginTop: '0.5rem'
         }}>
-          Real stories from those we serve
+          What people are saying about VUMA's impact
         </p>
       </div>
 
@@ -361,7 +397,7 @@ const Testimonials = () => {
           zIndex: 10
         }}>
           <span style={{ fontSize: '0.7rem', color: '#666' }}>
-            {isPlaying ? 'Auto-scrolling' : 'Paused'}
+            {isPlaying ? 'Auto-scrolling →' : 'Paused'}
           </span>
           <button
             onClick={toggleAutoScroll}
@@ -390,12 +426,12 @@ const Testimonials = () => {
             overflow: 'hidden',
             boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
             position: 'relative',
-            minHeight: '380px'
+            minHeight: '420px'
           }}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
-          {/* Animated Content - Right to Left */}
+          {/* Animated Content - Slides from Right to Left */}
           <div
             style={{
               display: 'flex',
@@ -437,28 +473,77 @@ const Testimonials = () => {
                   <i className="fas fa-quote-right"></i>
                 </div>
                 
-                {/* Rating Stars - No avatar, no name */}
+                {/* Avatar / Initials Circle */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  marginBottom: '1rem'
+                }}>
+                  <div className="testimonial-avatar" style={{
+                    width: '60px',
+                    height: '60px',
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #0B3B2F, #2b7a5c)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 5px 15px rgba(11,59,47,0.3)'
+                  }}>
+                    <span style={{
+                      color: '#F9C74F',
+                      fontSize: '1.5rem',
+                      fontWeight: 'bold'
+                    }}>
+                      {testimonial.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Name and Role */}
+                <div className="testimonial-name" style={{
+                  textAlign: 'center',
+                  marginBottom: '0.5rem'
+                }}>
+                  <h3 style={{
+                    fontSize: '1.1rem',
+                    color: '#0B3B2F',
+                    fontWeight: 700,
+                    margin: 0
+                  }}>
+                    {testimonial.name}
+                  </h3>
+                  <p style={{
+                    fontSize: '0.7rem',
+                    color: '#F9C74F',
+                    fontWeight: 600,
+                    marginTop: '0.2rem'
+                  }}>
+                    {testimonial.role}
+                  </p>
+                </div>
+                
+                {/* Rating Stars */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginBottom: '1.5rem'
+                  marginBottom: '1rem'
                 }}>
                   <div style={{
                     display: 'flex',
-                    gap: '0.4rem'
+                    gap: '0.3rem'
                   }}>
                     {[...Array(testimonial.rating)].map((_, i) => (
                       <i key={i} className="fas fa-star" style={{ 
                         color: '#F9C74F', 
-                        fontSize: '1rem',
+                        fontSize: '0.9rem',
                         animation: `starPop 0.3s ease ${i * 0.1}s both`
                       }}></i>
                     ))}
                     {[...Array(5 - testimonial.rating)].map((_, i) => (
                       <i key={`empty-${i}`} className="far fa-star" style={{ 
                         color: '#ddd', 
-                        fontSize: '1rem' 
+                        fontSize: '0.9rem' 
                       }}></i>
                     ))}
                   </div>
@@ -466,11 +551,11 @@ const Testimonials = () => {
 
                 {/* Testimonial Text */}
                 <p style={{
-                  fontSize: 'clamp(0.95rem, 4vw, 1.05rem)',
+                  fontSize: 'clamp(0.9rem, 4vw, 1rem)',
                   lineHeight: '1.7',
                   color: '#444',
                   textAlign: 'center',
-                  marginBottom: '1rem',
+                  marginBottom: '0.5rem',
                   fontStyle: 'italic',
                   position: 'relative',
                   zIndex: 1,
@@ -478,25 +563,6 @@ const Testimonials = () => {
                 }}>
                   "{testimonial.text}"
                 </p>
-
-                {/* Anonymous Indicator */}
-                <div style={{ textAlign: 'center', opacity: 0, animation: 'slideUp 0.5s ease 0.2s forwards' }}>
-                  <div style={{
-                    display: 'inline-block',
-                    background: 'rgba(249,199,79,0.15)',
-                    padding: '0.3rem 1rem',
-                    borderRadius: '50px'
-                  }}>
-                    <span style={{
-                      fontSize: '0.75rem',
-                      color: '#F9C74F',
-                      fontWeight: 600
-                    }}>
-                      <i className="fas fa-leaf" style={{ marginRight: '0.4rem', fontSize: '0.7rem' }}></i>
-                      VUMA Community Member
-                    </span>
-                  </div>
-                </div>
 
                 {/* Decorative Line at Bottom */}
                 <div style={{
@@ -605,7 +671,7 @@ const Testimonials = () => {
           ))}
         </div>
 
-        {/* Auto-scroll Progress Bar */}
+        {/* Auto-scroll Progress Bar - moves left to right */}
         <div style={{
           width: '100%',
           height: '3px',
@@ -627,68 +693,7 @@ const Testimonials = () => {
       </div>
 
       {/* Stats Bar - Based on VUMA initiatives */}
-      <div style={{
-        maxWidth: '800px',
-        margin: '2rem auto 0',
-        padding: '1rem',
-        background: 'rgba(255,255,255,0.8)',
-        borderRadius: '20px',
-        display: 'flex',
-        justifyContent: 'space-around',
-        flexWrap: 'wrap',
-        gap: '1rem',
-        textAlign: 'center',
-        animation: isVisible ? 'slideUp 0.6s ease 0.4s both' : 'none'
-      }}>
-        <div style={{ 
-          transform: 'scale(1)', 
-          transition: 'transform 0.3s ease', 
-          cursor: 'default' 
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
-          <div style={{ 
-            fontSize: '1.5rem', 
-            fontWeight: 800, 
-            color: '#F9C74F'
-          }}>5,000+</div>
-          <div style={{ fontSize: '0.7rem', color: '#666' }}>Community Members Reached</div>
-        </div>
-        <div style={{ 
-          transform: 'scale(1)', 
-          transition: 'transform 0.3s ease', 
-          cursor: 'default' 
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
-          <div style={{ 
-            fontSize: '1.5rem', 
-            fontWeight: 800, 
-            color: '#F9C74F'
-          }}>98%</div>
-          <div style={{ fontSize: '0.7rem', color: '#666' }}>Satisfaction Rate</div>
-        </div>
-        <div style={{ 
-          transform: 'scale(1)', 
-          transition: 'transform 0.3s ease', 
-          cursor: 'default' 
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#F9C74F' }}>12</div>
-          <div style={{ fontSize: '0.7rem', color: '#666' }}>Active Projects</div>
-        </div>
-        <div style={{ 
-          transform: 'scale(1)', 
-          transition: 'transform 0.3s ease', 
-          cursor: 'default' 
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#F9C74F' }}>3</div>
-          <div style={{ fontSize: '0.7rem', color: '#666' }}>Countries</div>
-        </div>
-      </div>
+    
     </div>
   );
 };

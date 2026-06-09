@@ -9,18 +9,7 @@ import eventd from '../assets/eventd.jpg';
 
 // Static projects data based on the four initiatives
 const projects = [
-  { 
-    id: 1,
-    title: "OPERATION CLEAN VICTORIA", 
-    type: "In-Person",
-    location: "Lake Victoria Basin (Kenya, Uganda, Tanzania)",
-    date: "Monthly - First Saturday",
-    time: "8:00 AM - 4:00 PM",
-    capacity: 500,
-    registered: 342,
-    img: eventa,
-    description: "A comprehensive initiative dedicated to restoring the ecosystem of Lake Victoria by removing invasive weeds, plastic wastes, and industrial debris to ensure water quality and aquatic health. This operation mobilizes local communities, fishermen, and volunteers to physically extract water hyacinth, collect floating plastics, and identify industrial pollution sources along the shoreline."
-  },
+
   { 
     id: 2,
     title: "GREEN CORRIDORS & URBAN BLOOMS", 
@@ -156,7 +145,7 @@ const Timeline = () => {
           backgroundClip: 'text',
           color: 'transparent'
         }}>
-          Our Initiatives
+          VUMA YOUTH EXPO
         </h3>
         <p style={{
           fontSize: '0.85rem',

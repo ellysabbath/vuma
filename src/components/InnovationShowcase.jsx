@@ -70,7 +70,7 @@ const InnovationShowcase = () => {
         partners: ["UNEP", "WWF", "Local Government"],
         sdg: ["SDG 12: Responsible Consumption", "SDG 13: Climate Action", "SDG 8: Decent Work"]
       },
-      "Policy Innovators Fellowship": {
+      "Youth Leadership Innovation Fellowship": {
         fullDescription: "This fellowship program trains young policy advocates to influence environmental and social policies in Tanzania. Fellows receive training in policy analysis, advocacy strategies, and stakeholder engagement. They work on real policy issues and present recommendations to government bodies.",
         impact: "30 fellows trained, 3 policy briefs submitted",
         timeline: "September 2025 - February 2026",

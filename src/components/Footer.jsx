@@ -35,7 +35,7 @@ const Footer = () => {
       icon: 'fas fa-leaf',
       content: 'Empowering youth through innovation, leadership, and environmental conservation across Tanzania.',
       items: [
-        { icon: 'fas fa-map-marker-alt', text: 'Dar es Salaam, Tanzania' },
+        { icon: 'fas fa-map-marker-alt', text: 'Mwanza, Tanzania' },
         { icon: 'fas fa-flag-checkered', text: 'Est. 2020' }
       ]
     },
@@ -50,7 +50,8 @@ const Footer = () => {
         { name: 'Events', path: '/events' },
         { name: 'News & Stories', path: '/news' },
         { name: 'Volunteers', path: '/volunteers' },
-        { name: 'Contact', path: '/contact' }
+        { name: 'Contact', path: '/contact' },
+        { name: 'Donate', path: '/donate' }
       ]
     },
     {
@@ -58,12 +59,21 @@ const Footer = () => {
       title: 'Contact Info',
       icon: 'fas fa-address-card',
       contacts: [
-        { icon: 'fas fa-phone', text: '+255 123 456 789', link: 'tel:+255123456789' },
-        { icon: 'fas fa-envelope', text: 'info@vuma.or.tz', link: 'mailto:info@vuma.or.tz' },
+        { icon: 'fas fa-phone', text: '+255 759 913 433', link: 'tel:+255759913433' },
+        { icon: 'fas fa-envelope', text: 'vumainfo5@gmail.com', link: 'mailto:vumainfo5@gmail.com' },
         { icon: 'fas fa-clock', text: 'Mon-Fri: 9AM - 5PM' },
-        { icon: 'fab fa-whatsapp', text: '+255 123 456 789', link: 'https://wa.me/255123456789' }
+        { icon: 'fab fa-whatsapp', text: '+255 759 913 433', link: 'https://wa.me/255759913433' }
       ]
     }
+  ];
+
+  // Social media links - Updated with actual VUMA pages
+  const socialLinks = [
+    { icon: 'fab fa-facebook-f', color: '#1877f2', url: 'https://www.facebook.com/profile.php?id=61585839080146', name: 'Facebook' },
+    { icon: 'fab fa-instagram', color: '#e4405f', url: 'https://www.instagram.com/invites/contact/?utm_source=ig_contact_invite&utm_medium=copy_link&utm_content=jdbexwy', name: 'Instagram' },
+    { icon: 'fab fa-twitter', color: '#1da1f2', url: 'https://twitter.com/vumatanzania', name: 'Twitter' },
+    { icon: 'fab fa-linkedin-in', color: '#0077b5', url: 'https://linkedin.com/company/vuma-tanzania', name: 'LinkedIn' },
+    { icon: 'fab fa-youtube', color: '#ff0000', url: 'https://youtube.com/@vumatanzania', name: 'YouTube' }
   ];
 
   return (
@@ -74,6 +84,62 @@ const Footer = () => {
       position: 'relative',
       overflow: 'hidden'
     }}>
+      {/* CSS Animations */}
+      <style>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        @keyframes float {
+          0%, 100% {
+            transform: translate(0, 0);
+          }
+          25% {
+            transform: translate(15px, -15px);
+          }
+          50% {
+            transform: translate(-10px, 20px);
+          }
+          75% {
+            transform: translate(10px, -10px);
+          }
+        }
+        
+        @keyframes rotate360 {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+        
+        @media (max-width: 768px) {
+          .footer-section {
+            padding: 2rem 0.8rem 1rem;
+          }
+          
+          div[style*="gridTemplateColumns"] {
+            grid-template-columns: 1fr !important;
+            gap: 1rem !important;
+          }
+          
+          button {
+            bottom: 1rem !important;
+            right: 1rem !important;
+            width: 40px !important;
+            height: 40px !important;
+          }
+        }
+      `}</style>
+
       {/* Animated Background Elements */}
       <div style={{
         position: 'absolute',
@@ -341,26 +407,23 @@ const Footer = () => {
               </div>
             ))}
             
-            {/* Social Media Icons */}
+            {/* Social Media Icons - Updated with actual links */}
             <div style={{
               display: 'flex',
               gap: '0.8rem',
               marginTop: '1rem',
               justifyContent: 'center'
             }}>
-              {[
-                { icon: 'fab fa-facebook-f', color: '#1877f2' },
-                { icon: 'fab fa-twitter', color: '#1da1f2' },
-                { icon: 'fab fa-instagram', color: '#e4405f' },
-                { icon: 'fab fa-linkedin-in', color: '#0077b5' },
-                { icon: 'fab fa-youtube', color: '#ff0000' }
-              ].map((social, idx) => (
+              {socialLinks.map((social, idx) => (
                 <a
                   key={idx}
-                  href="#"
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={social.name}
                   style={{
-                    width: '35px',
-                    height: '35px',
+                    width: '38px',
+                    height: '38px',
                     borderRadius: '50%',
                     background: 'rgba(255,255,255,0.1)',
                     display: 'flex',
@@ -372,16 +435,29 @@ const Footer = () => {
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.background = social.color;
-                    e.currentTarget.style.transform = 'translateY(-3px) rotate(360deg)';
+                    e.currentTarget.style.transform = 'translateY(-5px) scale(1.1)';
+                    e.currentTarget.style.boxShadow = `0 5px 15px ${social.color}80`;
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
-                    e.currentTarget.style.transform = 'translateY(0) rotate(0deg)';
+                    e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                    e.currentTarget.style.boxShadow = 'none';
                   }}
                 >
-                  <i className={social.icon}></i>
+                  <i className={social.icon} style={{ fontSize: '1.1rem' }}></i>
                 </a>
               ))}
+            </div>
+            
+            {/* Follow Text */}
+            <div style={{
+              textAlign: 'center',
+              marginTop: '0.8rem',
+              fontSize: '0.7rem',
+              opacity: 0.6
+            }}>
+              <i className="fas fa-share-alt" style={{ marginRight: '0.3rem' }}></i>
+              Follow us on social media
             </div>
           </div>
         </div>
@@ -409,7 +485,7 @@ const Footer = () => {
             gap: '1.5rem',
             alignItems: 'center'
           }}>
-            {['UNDP', 'UNICEF', 'WWF', 'Greenpeace', 'Youth Alliance', 'UNEP'].map((partner, idx) => (
+            {['UNDP', 'UNICEF', 'WWF', 'Greenpeace', 'Youth Alliance', 'UNEP','UNESCO', 'UNA','UNDP','HWPL'].map((partner, idx) => (
               <span
                 key={idx}
                 style={{
@@ -540,53 +616,6 @@ const Footer = () => {
       >
         <i className="fas fa-arrow-up"></i>
       </button>
-
-      {/* CSS Animations */}
-      <style>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        @keyframes float {
-          0%, 100% {
-            transform: translate(0, 0);
-          }
-          25% {
-            transform: translate(15px, -15px);
-          }
-          50% {
-            transform: translate(-10px, 20px);
-          }
-          75% {
-            transform: translate(10px, -10px);
-          }
-        }
-        
-        @media (max-width: 768px) {
-          .footer-section {
-            padding: 2rem 0.8rem 1rem;
-          }
-          
-          div[style*="gridTemplateColumns"] {
-            grid-template-columns: 1fr !important;
-            gap: 1rem !important;
-          }
-          
-          button {
-            bottom: 1rem !important;
-            right: 1rem !important;
-            width: 40px !important;
-            height: 40px !important;
-          }
-        }
-      `}</style>
     </footer>
   );
 };

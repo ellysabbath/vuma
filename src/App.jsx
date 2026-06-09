@@ -25,6 +25,7 @@ import Report from './pages/Report';
 import Apply from './pages/Apply';
 import EventRegister from './pages/EventRegister';
 import Leadership from './pages/Leadership';
+import Pro from './components/programs'
 
 
 

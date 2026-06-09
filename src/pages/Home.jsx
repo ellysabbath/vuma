@@ -9,6 +9,7 @@ import Testimonials from '../components/Testimonials';
 import Forms from '../components/Forms';
 import Blog from '../components/Blog';
 import Leadership from '../components/Leadership';
+import Pro from '../components/programs';
 
 const Home = ({ onLoginClick }) => {
   return (
@@ -24,6 +25,7 @@ const Home = ({ onLoginClick }) => {
       <Testimonials />
       <div id="volunteer">
         <Forms />
+        <Pro /> {/* Add this line to include the Programs component */}
       </div>
       <div id="news">
         <Blog />

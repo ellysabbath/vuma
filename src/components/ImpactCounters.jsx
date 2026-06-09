@@ -50,10 +50,10 @@ const Counter = ({ target, label }) => {
 
 const ImpactCounters = () => {
   const counters = [
-    { target: 12480, label: 'YOUTH REACHED' },
-    { target: 18750, label: 'TREES PLANTED' },
-    { target: 742, label: 'IDEAS GENERATED' },
-    { target: 435, label: 'ACTIVE VOLUNTEERS' }
+    { target: 30000, label: 'YOUTH REACHED', suffix: '+' },
+    { target: 50000, label: 'TREES PLANTED', suffix: '+' },
+    { target: 742, label: 'IDEAS GENERATED', suffix: '+' },
+    { target: 435, label: 'ACTIVE VOLUNTEERS', suffix: '+' }
   ];
 
   return (

@@ -288,32 +288,7 @@ The project has created stable, dignified employment for over 100 people who pre
       "Model being replicated in 3 additional cities"
     ]
   },
-  {
-    id: 12,
-    title: "VUMA PRESIDENT ON TECH LEADERSHIP",
-    date: "January 5, 2026",
-    read_time: "6 min read",
-    views: 3456,
-    likes: 892,
-    image: eventl,
-    excerpt: "An exclusive interview with VUMA's president on the role of technology in environmental restoration and the organization's five-year vision.",
-    content: `In this exclusive interview, VUMA's President shares her vision for integrating technology into every aspect of environmental restoration, from satellite monitoring of deforestation to AI-powered waste sorting.
 
-"The environmental challenges we face are unprecedented in scale," she explains. "Traditional methods alone cannot keep pace. Technology gives us leverage—the ability to monitor vast areas, predict problems before they become crises, and engage citizens in solutions."
-
-She highlights the organization's investment in open-source environmental monitoring tools, citizen science platforms, and data literacy training. "We want communities to not just experience environmental problems but to measure them, understand them, and advocate for solutions based on evidence."
-
-Looking ahead, she describes a five-year vision: a continent-wide network of environmental data hubs, a fellowship program for young climate technologists, and partnerships with universities to embed environmental data science into curricula.
-
-"Technology is a tool, not a solution by itself," she concludes. "But when combined with community knowledge and political will, it is an extraordinarily powerful tool."`,
-    key_highlights: [
-      "Satellite monitoring now covers 80% of project areas",
-      "AI-powered waste sorting pilot achieving 95% accuracy",
-      "Open-source data platform launched with 50+ datasets",
-      "500 citizens trained in data collection and analysis",
-      "5-year vision includes 30 new technology hubs"
-    ]
-  }
 ];
 
 const Blog = () => {

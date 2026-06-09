@@ -49,12 +49,7 @@ export const projects = [
     img: eventf,
     description: "Tech skills for climate solutions"
   },
-  { 
-    title: "VUMA president in Tech Leadership", 
-    cat: "leadership", 
-    img: eventg,
-    description: "Empowering VUMA in technology sectors"
-  },
+ 
   { 
     title: "Zero Waste Initiative", 
     cat: "environment", 

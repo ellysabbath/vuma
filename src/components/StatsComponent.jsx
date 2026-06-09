@@ -16,8 +16,8 @@ const StatsComponent = () => {
 
   const statsData = [
     { id: 'experience', label: 'Years Combined Experience', value: 10, suffix: '+', icon: 'fas fa-calendar-alt', color: '#0B3B2F' },
-    { id: 'projects', label: 'Projects Completed', value: 50, suffix: '+', icon: 'fas fa-project-diagram', color: '#0B3B2F' },
-    { id: 'youth', label: 'Youth Empowered', value: 1000, suffix: '+', icon: 'fas fa-users', color: '#0B3B2F' },
+    { id: 'projects', label: 'Projects Completed', value: 4, suffix: '+', icon: 'fas fa-project-diagram', color: '#0B3B2F' },
+    { id: 'youth', label: 'Youth Empowered', value: 50000, suffix: '+', icon: 'fas fa-users', color: '#0B3B2F' },
     { id: 'partners', label: 'Community Partners', value: 20, suffix: '+', icon: 'fas fa-handshake', color: '#0B3B2F' }
   ];
 
