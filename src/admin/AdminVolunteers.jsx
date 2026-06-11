@@ -19,6 +19,7 @@ const AdminVolunteers = () => {
   const [imagePreview, setImagePreview] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [editImagePreview, setEditImagePreview] = useState('');
+  const [actionLoading, setActionLoading] = useState(false);
   const [newVolunteer, setNewVolunteer] = useState({
     name: '',
     role: '',
@@ -51,19 +52,27 @@ const AdminVolunteers = () => {
   const fetchVolunteers = async () => {
     setLoading(true);
     try {
-      // Remove Authorization header since backend has permission_classes = []
       const response = await fetch('https://vuma.pythonanywhere.com/api/volunteers/');
       const data = await response.json();
       if (data.success) {
         setVolunteers(data.data);
+        showActionFeedback('Volunteers loaded successfully!', 'success');
       } else {
         setError('Failed to load volunteers');
+        showActionFeedback('Failed to load volunteers', 'error');
       }
     } catch (error) {
       setError('Network error. Please check your connection.');
+      showActionFeedback('Network error. Please check your connection.', 'error');
     } finally {
       setLoading(false);
     }
+  };
+
+  const showActionFeedback = (message, type = 'success') => {
+    setSuccessMessage(message);
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 3000);
   };
 
   const fileToBase64 = (file) => {
@@ -83,6 +92,7 @@ const AdminVolunteers = () => {
       setImagePreview(preview);
       const base64 = await fileToBase64(file);
       setNewVolunteer(prev => ({ ...prev, image_base64: base64 }));
+      showActionFeedback('Image selected successfully!', 'success');
     }
   };
 
@@ -93,6 +103,7 @@ const AdminVolunteers = () => {
       setEditImagePreview(preview);
       const base64 = await fileToBase64(file);
       setEditingVolunteer(prev => ({ ...prev, image_base64: base64 }));
+      showActionFeedback('Image updated successfully!', 'success');
     }
   };
 
@@ -102,6 +113,7 @@ const AdminVolunteers = () => {
     setShowModal(true);
     navigate(`/admin/volunteers/${volunteer.id}`, { replace: true });
     document.body.style.overflow = 'hidden';
+    showActionFeedback(`Viewing ${volunteer.name}'s profile`, 'info');
   };
 
   const closeModal = () => {
@@ -121,6 +133,7 @@ const AdminVolunteers = () => {
     if (volunteer.image_base64) {
       setEditImagePreview(volunteer.image_base64);
     }
+    showActionFeedback(`Editing ${volunteer.name}`, 'info');
   };
 
   const handleEditChange = (e) => {
@@ -150,11 +163,11 @@ const AdminVolunteers = () => {
 
   const handleUpdateVolunteer = async () => {
     if (!editingVolunteer.name) {
-      alert('Please fill in volunteer name');
+      showActionFeedback('Please fill in volunteer name', 'error');
       return;
     }
     
-    // Remove Authorization header for update
+    setActionLoading(true);
     try {
       const response = await fetch(`https://vuma.pythonanywhere.com/api/volunteers/${editingVolunteer.id}/`, {
         method: 'PUT',
@@ -167,21 +180,22 @@ const AdminVolunteers = () => {
       const data = await response.json();
       if (data.success) {
         await fetchVolunteers();
-        setSuccessMessage('Volunteer updated successfully!');
-        setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 3000);
+        showActionFeedback(`${editingVolunteer.name} updated successfully!`, 'success');
         closeModal();
       } else {
-        alert(data.error || 'Failed to update volunteer');
+        showActionFeedback(data.error || 'Failed to update volunteer', 'error');
       }
     } catch (error) {
-      alert('Network error. Please try again.');
+      showActionFeedback('Network error. Please try again.', 'error');
+    } finally {
+      setActionLoading(false);
     }
   };
 
   const openAddModal = () => {
     setShowAddModal(true);
     document.body.style.overflow = 'hidden';
+    showActionFeedback('Opening add volunteer form', 'info');
   };
 
   const closeAddModal = () => {
@@ -205,11 +219,11 @@ const AdminVolunteers = () => {
 
   const handleAddVolunteer = async () => {
     if (!newVolunteer.name) {
-      alert('Please fill in volunteer name');
+      showActionFeedback('Please fill in volunteer name', 'error');
       return;
     }
     
-    // Remove Authorization header for add
+    setActionLoading(true);
     try {
       const response = await fetch('https://vuma.pythonanywhere.com/api/volunteers/', {
         method: 'POST',
@@ -222,39 +236,56 @@ const AdminVolunteers = () => {
       const data = await response.json();
       if (data.success) {
         await fetchVolunteers();
-        setSuccessMessage('Volunteer added successfully!');
-        setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 3000);
+        showActionFeedback(`${newVolunteer.name} added successfully!`, 'success');
         closeAddModal();
       } else {
-        alert(data.error || 'Failed to add volunteer');
+        showActionFeedback(data.error || 'Failed to add volunteer', 'error');
       }
     } catch (error) {
-      alert('Network error. Please try again.');
+      showActionFeedback('Network error. Please try again.', 'error');
+    } finally {
+      setActionLoading(false);
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this volunteer?')) {
-      // Remove Authorization header for delete
+  const handleDelete = async (volunteer) => {
+    const confirmDelete = window.confirm(`Are you sure you want to delete ${volunteer.name}?`);
+    if (confirmDelete) {
+      setActionLoading(true);
       try {
-        const response = await fetch(`https://vuma.pythonanywhere.com/api/volunteers/${id}/`, {
+        const response = await fetch(`https://vuma.pythonanywhere.com/api/volunteers/${volunteer.id}/`, {
           method: 'DELETE',
         });
         
         const data = await response.json();
         if (data.success) {
           await fetchVolunteers();
-          setSuccessMessage('Volunteer deleted successfully!');
-          setShowSuccess(true);
-          setTimeout(() => setShowSuccess(false), 3000);
+          showActionFeedback(`${volunteer.name} deleted successfully!`, 'success');
         } else {
-          alert(data.error || 'Failed to delete volunteer');
+          showActionFeedback(data.error || 'Failed to delete volunteer', 'error');
         }
       } catch (error) {
-        alert('Network error. Please try again.');
+        showActionFeedback('Network error. Please try again.', 'error');
+      } finally {
+        setActionLoading(false);
       }
     }
+  };
+
+  const handleViewClick = (volunteer) => {
+    openModal(volunteer);
+  };
+
+  const handleEditClick = (volunteer) => {
+    openEditModal(volunteer);
+  };
+
+  const handleDeleteClick = (volunteer) => {
+    handleDelete(volunteer);
+  };
+
+  const handleAddClick = () => {
+    openAddModal();
   };
 
   const handleInputChange = (e) => {
@@ -280,6 +311,15 @@ const AdminVolunteers = () => {
         [platform]: value
       }
     });
+  };
+
+  const handleBackToAdmin = () => {
+    navigate('/admin');
+    showActionFeedback('Returning to admin dashboard', 'info');
+  };
+
+  const handleRefresh = () => {
+    fetchVolunteers();
   };
 
   const getRoleColor = (role) => {
@@ -343,26 +383,65 @@ const AdminVolunteers = () => {
               width: '80px',
               height: '80px',
               borderRadius: '50%',
-              background: '#4caf50',
+              background: successMessage.includes('success') || successMessage.includes('Success') ? '#4caf50' : successMessage.includes('error') ? '#f44336' : '#2196F3',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               margin: '0 auto 1rem',
               animation: 'scaleIn 0.5s ease'
             }}>
-              <i className="fas fa-check" style={{ fontSize: '2.5rem', color: 'white' }}></i>
+              <i className={`fas ${successMessage.includes('success') || successMessage.includes('Success') ? 'fa-check' : successMessage.includes('error') ? 'fa-times' : 'fa-info'}`} style={{ fontSize: '2.5rem', color: 'white' }}></i>
             </div>
-            <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem' }}>Success!</h3>
+            <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem' }}>
+              {successMessage.includes('success') || successMessage.includes('Success') ? 'Success!' : successMessage.includes('error') ? 'Error!' : 'Info'}
+            </h3>
             <p style={{ color: '#666', fontSize: '0.9rem' }}>{successMessage}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Loading Overlay for Actions */}
+      {actionLoading && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.5)',
+          zIndex: 9998,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <div style={{ textAlign: 'center', background: 'white', padding: '2rem', borderRadius: '20px' }}>
+            <i className="fas fa-spinner fa-spin" style={{ fontSize: '2rem', color: '#0B3B2F' }}></i>
+            <p style={{ marginTop: '1rem', color: '#666' }}>Processing...</p>
           </div>
         </div>
       )}
 
       <div style={{ background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)', color: 'white', padding: '2rem 2rem' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
-            <i className="fas fa-arrow-left" style={{ cursor: 'pointer', fontSize: '1.2rem' }} onClick={() => navigate('/admin')}></i>
-            <h1 style={{ fontSize: '1.8rem' }}>Volunteers Management</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <i className="fas fa-arrow-left" style={{ cursor: 'pointer', fontSize: '1.2rem' }} onClick={handleBackToAdmin}></i>
+              <h1 style={{ fontSize: '1.8rem' }}>Volunteers Management</h1>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <i 
+                className="fas fa-sync-alt" 
+                style={{ 
+                  fontSize: '1.2rem', 
+                  cursor: 'pointer',
+                  padding: '0.5rem',
+                  transition: 'transform 0.2s'
+                }}
+                onClick={handleRefresh}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'rotate(180deg)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'rotate(0)'}
+              ></i>
+            </div>
           </div>
           <p>Manage volunteer applications and assignments</p>
         </div>
@@ -370,19 +449,31 @@ const AdminVolunteers = () => {
 
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
         <div style={{ background: 'white', borderRadius: '20px', padding: '1.5rem', boxShadow: '0 5px 15px rgba(0,0,0,0.05)' }}>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
-            <i 
-              className="fas fa-plus-circle" 
-              style={{ 
-                fontSize: '2rem', 
-                color: '#0B3B2F', 
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
+            <div>
+              <p style={{ color: '#666', fontSize: '0.9rem' }}>Total Volunteers: <strong>{volunteers.length}</strong></p>
+            </div>
+            <button 
+              onClick={handleAddClick}
+              style={{
+                background: '#0B3B2F',
+                color: 'white',
+                border: 'none',
+                padding: '0.5rem 1rem',
+                borderRadius: '30px',
                 cursor: 'pointer',
-                transition: 'transform 0.2s'
+                fontSize: '0.85rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                transition: 'all 0.2s'
               }}
-              onClick={openAddModal}
-              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
               onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-            ></i>
+            >
+              <i className="fas fa-plus-circle"></i>
+              Add Volunteer
+            </button>
           </div>
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -394,16 +485,16 @@ const AdminVolunteers = () => {
                   <th style={{ textAlign: 'left', padding: '0.8rem' }}>Hours</th>
                   <th style={{ textAlign: 'left', padding: '0.8rem' }}>Projects</th>
                   <th style={{ textAlign: 'left', padding: '0.8rem' }}>Actions</th>
-                </tr>
+                 </tr>
               </thead>
               <tbody>
                 {volunteers.map(volunteer => (
                   <tr key={volunteer.id} style={{ borderBottom: '1px solid #f0f0f0' }}>
                     <td style={{ padding: '0.8rem' }}>
-                      <span style={{ cursor: 'pointer', color: '#0B3B2F', fontWeight: 600 }} onClick={() => openModal(volunteer)}>
+                      <span style={{ cursor: 'pointer', color: '#0B3B2F', fontWeight: 600 }} onClick={() => handleViewClick(volunteer)}>
                         {volunteer.name}
                       </span>
-                    </td>
+                     </td>
                     <td style={{ padding: '0.8rem' }}>
                       <span style={{
                         background: getRoleColor(volunteer.role),
@@ -412,16 +503,34 @@ const AdminVolunteers = () => {
                         borderRadius: '20px',
                         fontSize: '0.7rem'
                       }}>{volunteer.role || 'Volunteer'}</span>
-                    </td>
+                     </td>
                     <td style={{ padding: '0.8rem' }}>{volunteer.location || '-'}</td>
                     <td style={{ padding: '0.8rem' }}>{volunteer.hours_contributed}</td>
                     <td style={{ padding: '0.8rem' }}>{volunteer.projects_participated}</td>
                     <td style={{ padding: '0.8rem' }}>
-                      <i className="fas fa-eye" style={{ color: '#0B3B2F', cursor: 'pointer', marginRight: '0.8rem' }} onClick={() => openModal(volunteer)}></i>
-                      <i className="fas fa-edit" style={{ color: '#2196F3', cursor: 'pointer', marginRight: '0.8rem' }} onClick={() => openEditModal(volunteer)}></i>
-                      <i className="fas fa-trash" style={{ color: '#d32f2f', cursor: 'pointer' }} onClick={() => handleDelete(volunteer.id)}></i>
-                    </td>
-                  </tr>
+                      <i 
+                        className="fas fa-eye" 
+                        style={{ color: '#0B3B2F', cursor: 'pointer', marginRight: '0.8rem', fontSize: '1rem' }} 
+                        onClick={() => handleViewClick(volunteer)}
+                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                      ></i>
+                      <i 
+                        className="fas fa-edit" 
+                        style={{ color: '#2196F3', cursor: 'pointer', marginRight: '0.8rem', fontSize: '1rem' }} 
+                        onClick={() => handleEditClick(volunteer)}
+                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                      ></i>
+                      <i 
+                        className="fas fa-trash" 
+                        style={{ color: '#d32f2f', cursor: 'pointer', fontSize: '1rem' }} 
+                        onClick={() => handleDeleteClick(volunteer)}
+                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                      ></i>
+                     </td>
+                   </tr>
                 ))}
               </tbody>
             </table>
@@ -603,7 +712,9 @@ const AdminVolunteers = () => {
                   
                   <div style={{ display: 'flex', gap: '0.8rem', marginTop: '1rem' }}>
                     <button onClick={closeModal} style={{ flex: 1, background: '#f0f0f0', border: 'none', padding: '0.7rem', borderRadius: '50px', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}>Cancel</button>
-                    <button onClick={handleUpdateVolunteer} style={{ flex: 1, background: '#0B3B2F', color: 'white', border: 'none', padding: '0.7rem', borderRadius: '50px', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}>Update Volunteer</button>
+                    <button onClick={handleUpdateVolunteer} disabled={actionLoading} style={{ flex: 1, background: '#0B3B2F', color: 'white', border: 'none', padding: '0.7rem', borderRadius: '50px', fontWeight: 600, cursor: actionLoading ? 'not-allowed' : 'pointer', fontSize: '0.9rem', opacity: actionLoading ? 0.6 : 1 }}>
+                      {actionLoading ? <i className="fas fa-spinner fa-spin"></i> : 'Update Volunteer'}
+                    </button>
                   </div>
                 </>
               ) : (
@@ -873,7 +984,9 @@ const AdminVolunteers = () => {
               
               <div style={{ display: 'flex', gap: '0.8rem', marginTop: '1rem' }}>
                 <button onClick={closeAddModal} style={{ flex: 1, background: '#f0f0f0', border: 'none', padding: '0.7rem', borderRadius: '50px', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}>Cancel</button>
-                <button onClick={handleAddVolunteer} style={{ flex: 1, background: '#0B3B2F', color: 'white', border: 'none', padding: '0.7rem', borderRadius: '50px', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}>Add Volunteer</button>
+                <button onClick={handleAddVolunteer} disabled={actionLoading} style={{ flex: 1, background: '#0B3B2F', color: 'white', border: 'none', padding: '0.7rem', borderRadius: '50px', fontWeight: 600, cursor: actionLoading ? 'not-allowed' : 'pointer', fontSize: '0.9rem', opacity: actionLoading ? 0.6 : 1 }}>
+                  {actionLoading ? <i className="fas fa-spinner fa-spin"></i> : 'Add Volunteer'}
+                </button>
               </div>
             </div>
           </div>

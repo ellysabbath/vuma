@@ -10,10 +10,9 @@ const Volunteers = () => {
   const [error, setError] = useState('');
   const [selectedVolunteer, setSelectedVolunteer] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [isJoinHovered, setIsJoinHovered] = useState(false);
 
   useEffect(() => {
-    AOS.init({ duration: 800, once: false });
+    AOS.init({ duration: 800, once: true });
     fetchVolunteers();
   }, []);
 
@@ -28,13 +27,14 @@ const Volunteers = () => {
         setError('Failed to load volunteers');
       }
     } catch (error) {
+      console.error('Error fetching volunteers:', error);
       setError('Network error. Please check your connection.');
     } finally {
       setLoading(false);
     }
   };
 
-  const openModal = async (volunteer) => {
+  const openModal = (volunteer) => {
     setSelectedVolunteer(volunteer);
     setShowModal(true);
     document.body.style.overflow = 'hidden';
@@ -50,12 +50,37 @@ const Volunteers = () => {
     navigate('/signup');
   };
 
+  const getImageSrc = (volunteer) => {
+    if (volunteer.image_base64) {
+      if (volunteer.image_base64.startsWith('data:image')) {
+        return volunteer.image_base64;
+      }
+      return `data:image/jpeg;base64,${volunteer.image_base64}`;
+    }
+    const name = volunteer.name || 'Volunteer';
+    const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=0B3B2F&color=fff&size=200&bold=true`;
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Unknown';
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
   if (loading) {
     return (
-      <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f9fbf7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
-          <i className="fas fa-spinner fa-spin" style={{ fontSize: '3rem', color: '#0B3B2F' }}></i>
-          <p style={{ marginTop: '1rem', color: '#666' }}>Loading volunteers...</p>
+          <div style={{ width: '60px', height: '60px', margin: '0 auto', border: '3px solid rgba(11,59,47,0.1)', borderTopColor: '#0B3B2F', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+          <p style={{ marginTop: '1rem', fontSize: '0.875rem', color: '#64748b' }}>Loading volunteers...</p>
         </div>
       </div>
     );
@@ -63,11 +88,11 @@ const Volunteers = () => {
 
   if (error) {
     return (
-      <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f9fbf7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center' }}>
-          <i className="fas fa-exclamation-circle" style={{ fontSize: '3rem', color: '#d32f2f' }}></i>
-          <p style={{ marginTop: '1rem', color: '#666' }}>{error}</p>
-          <button onClick={fetchVolunteers} style={{ marginTop: '1rem', background: '#F9C74F', border: 'none', padding: '0.5rem 1rem', borderRadius: '20px', cursor: 'pointer' }}>
+      <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center', background: 'white', padding: '2rem', borderRadius: '16px', maxWidth: '400px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+          <i className="fas fa-exclamation-circle" style={{ fontSize: '3rem', color: '#ef4444' }}></i>
+          <p style={{ marginTop: '1rem', color: '#64748b', fontSize: '0.875rem' }}>{error}</p>
+          <button onClick={fetchVolunteers} style={{ marginTop: '1rem', background: '#0B3B2F', color: 'white', border: 'none', padding: '0.5rem 1.5rem', borderRadius: '30px', cursor: 'pointer', fontSize: '0.813rem' }}>
             Try Again
           </button>
         </div>
@@ -76,134 +101,296 @@ const Volunteers = () => {
   }
 
   return (
-    <div style={{ paddingTop: '70px' }}>
-      {/* Hero Section */}
+    <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f8fafc' }}>
+      {/* Thin Header */}
       <div style={{
-        background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)',
-        color: 'white',
-        padding: '4rem 2rem',
-        textAlign: 'center'
+        background: 'white',
+        borderBottom: '1px solid #e2e8f0',
+        padding: '1rem 2rem',
+        position: 'sticky',
+        top: '70px',
+        zIndex: 100,
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
       }}>
-        <h1 data-aos="fade-up" style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', marginBottom: '1rem' }}>
-          Our Amazing Volunteers
-        </h1>
-        <p data-aos="fade-up" data-aos-delay="200" style={{ fontSize: 'clamp(1rem, 3vw, 1.2rem)' }}>
-          Meet the dedicated individuals making a difference in communities across Tanzania
-        </p>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+            <div>
+              <h1 style={{ fontSize: '1.25rem', fontWeight: 600, color: '#0B3B2F', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <i className="fas fa-hands-helping" style={{ color: '#F9C74F' }}></i>
+                Volunteers
+              </h1>
+              <p style={{ fontSize: '0.75rem', color: '#64748b', margin: '0.25rem 0 0 0' }}>
+                {volunteers.length} dedicated volunteer{volunteers.length !== 1 ? 's' : ''} making a difference
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button
+                onClick={handleJoinClick}
+                style={{
+                  background: '#0B3B2F',
+                  color: 'white',
+                  border: 'none',
+                  padding: '0.4rem 1rem',
+                  borderRadius: '30px',
+                  fontSize: '0.7rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#1a5c48'}
+                onMouseLeave={(e) => e.currentTarget.style.background = '#0B3B2F'}
+              >
+                <i className="fas fa-user-plus"></i>
+                Join Team
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Volunteers Gallery */}
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '4rem 2rem' }}>
+      {/* Stats Bar */}
+      <div style={{
+        background: 'white',
+        borderBottom: '1px solid #e2e8f0',
+        padding: '0.75rem 2rem'
+      }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-around', gap: '1rem' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#F9C74F' }}>{volunteers.length}</div>
+              <div style={{ fontSize: '0.6rem', color: '#64748b' }}>Volunteers</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#F9C74F' }}>
+                {volunteers.reduce((sum, v) => sum + (v.hours_contributed || 0), 0)}+
+              </div>
+              <div style={{ fontSize: '0.6rem', color: '#64748b' }}>Hours</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#F9C74F' }}>
+                {volunteers.reduce((sum, v) => sum + (v.projects_participated || 0), 0)}
+              </div>
+              <div style={{ fontSize: '0.6rem', color: '#64748b' }}>Projects</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Volunteers Grid - Borderless Cards */}
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
         {volunteers.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '3rem' }}>
-            <i className="fas fa-users" style={{ fontSize: '3rem', color: '#999' }}></i>
-            <p style={{ marginTop: '1rem', color: '#666' }}>No volunteers found.</p>
+          <div style={{ textAlign: 'center', padding: '4rem', background: 'white', borderRadius: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+            <i className="fas fa-users" style={{ fontSize: '3rem', color: '#cbd5e1' }}></i>
+            <p style={{ marginTop: '1rem', color: '#64748b', fontSize: '0.875rem' }}>No volunteers found.</p>
           </div>
         ) : (
           <div style={{ 
             display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
-            gap: '2rem',
-            marginBottom: '3rem'
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', 
+            gap: '2rem' 
           }}>
             {volunteers.map((volunteer, idx) => (
-              <div key={volunteer.id} data-aos="zoom-in" data-aos-delay={idx * 100} style={{
-                background: 'white',
-                borderRadius: '20px',
-                overflow: 'hidden',
-                boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
-                transition: 'transform 0.3s ease',
-                cursor: 'pointer',
-                textAlign: 'center'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
-              onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-              onClick={() => openModal(volunteer)}>
-                <div style={{
-                  width: '120px',
-                  height: '120px',
-                  margin: '1.5rem auto 0',
-                  borderRadius: '50%',
+              <div 
+                key={volunteer.id} 
+                data-aos="fade-up" 
+                data-aos-delay={idx * 50}
+                style={{
+                  background: 'white',
+                  borderRadius: '20px',
                   overflow: 'hidden',
-                  border: '3px solid #F9C74F'
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-6px)';
+                  e.currentTarget.style.boxShadow = '0 20px 30px -12px rgba(0,0,0,0.15)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
+                }}
+                onClick={() => openModal(volunteer)}
+              >
+                {/* Profile Image */}
+                <div style={{ 
+                  padding: '2rem 1.5rem 1rem',
+                  textAlign: 'center',
+                  background: 'linear-gradient(135deg, #fafbfc 0%, #ffffff 100%)'
                 }}>
-                  <img 
-                    src={volunteer.image} 
-                    alt={volunteer.name}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                </div>
-                <div style={{ padding: '1.5rem' }}>
-                  <h3 style={{ color: '#0B3B2F', marginBottom: '0.3rem' }}>{volunteer.name}</h3>
-                  <p style={{ color: '#F9C74F', fontWeight: 600, marginBottom: '0.5rem' }}>{volunteer.role}</p>
-                  <p style={{ color: '#666', fontSize: '0.8rem', marginBottom: '0.3rem' }}>
-                    <i className="fas fa-map-marker-alt" style={{ marginRight: '0.3rem', color: '#F9C74F' }}></i>
-                    {volunteer.location}
-                  </p>
-                  <p style={{ color: '#666', fontSize: '0.8rem' }}>
-                    <i className="fas fa-clock" style={{ marginRight: '0.3rem', color: '#F9C74F' }}></i>
-                    {volunteer.hours_contributed}+ hours
-                  </p>
-                  <div style={{ 
-                    marginTop: '0.8rem', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center', 
-                    gap: '0.5rem', 
-                    color: '#F9C74F', 
-                    fontSize: '0.8rem',
-                    cursor: 'pointer'
+                  <div style={{
+                    width: '120px',
+                    height: '120px',
+                    margin: '0 auto',
+                    borderRadius: '50%',
+                    overflow: 'hidden',
+                    boxShadow: '0 8px 20px rgba(0,0,0,0.08)'
                   }}>
-                    <i className="fas fa-eye"></i>
-                    <span>View Profile</span>
+                    <img 
+                      src={getImageSrc(volunteer)} 
+                      alt={volunteer.name}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        const name = volunteer.name || 'Volunteer';
+                        const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
+                        e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=0B3B2F&color=fff&size=200&bold=true`;
+                      }}
+                    />
+                  </div>
+                  
+                  {/* Verified Badge */}
+                  <div style={{
+                    display: 'inline-block',
+                    marginTop: '0.5rem',
+                    background: 'rgba(249,199,79,0.15)',
+                    borderRadius: '20px',
+                    padding: '0.2rem 0.6rem',
+                    fontSize: '0.6rem',
+                    fontWeight: 600,
+                    color: '#F9C74F'
+                  }}>
+                    <i className="fas fa-check-circle" style={{ marginRight: '0.2rem', fontSize: '0.55rem' }}></i>
+                    Verified Volunteer
+                  </div>
+                </div>
+                
+                {/* Content - All Details */}
+                <div style={{ padding: '0 1.5rem 1.5rem' }}>
+                  <h3 style={{ 
+                    color: '#0B3B2F', 
+                    marginBottom: '0.3rem', 
+                    fontSize: '1.1rem', 
+                    fontWeight: 700,
+                    textAlign: 'center'
+                  }}>
+                    {volunteer.name}
+                  </h3>
+                  <p style={{ 
+                    color: '#F9C74F', 
+                    fontWeight: 600, 
+                    fontSize: '0.7rem',
+                    marginBottom: '1rem',
+                    textAlign: 'center',
+                    letterSpacing: '0.3px'
+                  }}>
+                    {volunteer.role}
+                  </p>
+                  
+                  {/* Details Grid */}
+                  <div style={{ 
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '0.5rem',
+                    marginBottom: '1rem',
+                    background: '#f8fafc',
+                    borderRadius: '12px',
+                    padding: '0.75rem'
+                  }}>
+                    <div style={{ textAlign: 'center' }}>
+                      <i className="fas fa-map-marker-alt" style={{ color: '#F9C74F', fontSize: '0.7rem', marginBottom: '0.2rem', display: 'block' }}></i>
+                      <span style={{ fontSize: '0.65rem', color: '#64748b' }}>Location</span>
+                      <p style={{ fontSize: '0.7rem', fontWeight: 600, color: '#0B3B2F', marginTop: '0.2rem' }}>
+                        {volunteer.location}
+                      </p>
+                    </div>
+                    <div style={{ textAlign: 'center' }}>
+                      <i className="fas fa-clock" style={{ color: '#F9C74F', fontSize: '0.7rem', marginBottom: '0.2rem', display: 'block' }}></i>
+                      <span style={{ fontSize: '0.65rem', color: '#64748b' }}>Hours</span>
+                      <p style={{ fontSize: '0.7rem', fontWeight: 600, color: '#0B3B2F', marginTop: '0.2rem' }}>
+                        {volunteer.hours_contributed}+ hours
+                      </p>
+                    </div>
+                    <div style={{ textAlign: 'center' }}>
+                      <i className="fas fa-project-diagram" style={{ color: '#F9C74F', fontSize: '0.7rem', marginBottom: '0.2rem', display: 'block' }}></i>
+                      <span style={{ fontSize: '0.65rem', color: '#64748b' }}>Projects</span>
+                      <p style={{ fontSize: '0.7rem', fontWeight: 600, color: '#0B3B2F', marginTop: '0.2rem' }}>
+                        {volunteer.projects_participated} projects
+                      </p>
+                    </div>
+                    <div style={{ textAlign: 'center' }}>
+                      <i className="fas fa-calendar-alt" style={{ color: '#F9C74F', fontSize: '0.7rem', marginBottom: '0.2rem', display: 'block' }}></i>
+                      <span style={{ fontSize: '0.65rem', color: '#64748b' }}>Member Since</span>
+                      <p style={{ fontSize: '0.7rem', fontWeight: 600, color: '#0B3B2F', marginTop: '0.2rem' }}>
+                        {volunteer.join_date ? new Date(volunteer.join_date).getFullYear() : '2024'}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Bio Preview */}
+                  {volunteer.bio && (
+                    <p style={{ 
+                      fontSize: '0.7rem', 
+                      color: '#64748b', 
+                      lineHeight: '1.4',
+                      marginBottom: '1rem',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      textAlign: 'center'
+                    }}>
+                      {volunteer.bio.length > 100 ? volunteer.bio.substring(0, 100) + '...' : volunteer.bio}
+                    </p>
+                  )}
+                  
+                  {/* Achievements Preview */}
+                  {volunteer.achievements && volunteer.achievements.length > 0 && (
+                    <div style={{ marginBottom: '1rem' }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', justifyContent: 'center' }}>
+                        {volunteer.achievements.slice(0, 2).map((achievement, i) => (
+                          <span key={i} style={{
+                            background: '#fef3c7',
+                            padding: '0.15rem 0.5rem',
+                            borderRadius: '12px',
+                            fontSize: '0.55rem',
+                            fontWeight: 500,
+                            color: '#0B3B2F'
+                          }}>
+                            <i className="fas fa-medal" style={{ marginRight: '0.2rem', fontSize: '0.5rem' }}></i>
+                            {achievement.length > 30 ? achievement.substring(0, 30) + '...' : achievement}
+                          </span>
+                        ))}
+                        {volunteer.achievements.length > 2 && (
+                          <span style={{
+                            background: '#e2e8f0',
+                            padding: '0.15rem 0.5rem',
+                            borderRadius: '12px',
+                            fontSize: '0.55rem',
+                            fontWeight: 500,
+                            color: '#64748b'
+                          }}>
+                            +{volunteer.achievements.length - 2} more
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* View Profile Link */}
+                  <div style={{ 
+                    textAlign: 'center',
+                    paddingTop: '0.5rem',
+                    borderTop: '1px solid #f1f5f9',
+                    color: '#F9C74F',
+                    fontSize: '0.7rem',
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.3rem'
+                  }}>
+                    <span>View Full Profile</span>
+                    <i className="fas fa-arrow-right" style={{ fontSize: '0.6rem', transition: 'transform 0.2s' }}></i>
                   </div>
                 </div>
               </div>
             ))}
           </div>
         )}
-
-        {/* Join Volunteer Team - Arrow Forward Icon */}
-        <div style={{ 
-          textAlign: 'center', 
-          marginTop: '2rem',
-          animation: 'slideInUp 0.6s ease'
-        }}>
-          <div
-            onClick={handleJoinClick}
-            onMouseEnter={() => setIsJoinHovered(true)}
-            onMouseLeave={() => setIsJoinHovered(false)}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.8rem',
-              cursor: 'pointer',
-              padding: '0.5rem 1rem',
-              borderRadius: '50px',
-              transition: 'all 0.3s ease',
-              background: 'transparent'
-            }}
-          >
-            <span style={{
-              color: '#0B3B2F',
-              fontWeight: 600,
-              fontSize: 'clamp(0.9rem, 4vw, 1rem)',
-              transition: 'color 0.3s ease'
-            }}>
-              Join Our Volunteer Team
-            </span>
-            <i 
-              className="fas fa-arrow-right" 
-              style={{
-                fontSize: '1.2rem',
-                color: '#F9C74F',
-                transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                transform: isJoinHovered ? 'translateX(8px)' : 'translateX(0)',
-                animation: isJoinHovered ? 'none' : 'bounceArrow 1.5s ease-in-out infinite'
-              }}
-            ></i>
-          </div>
-        </div>
       </div>
 
       {/* Volunteer Profile Modal */}
@@ -220,13 +407,13 @@ const Volunteers = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '16px',
+          padding: '20px',
           animation: 'fadeIn 0.3s ease'
         }}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{
             background: 'white',
-            borderRadius: '28px',
-            maxWidth: '600px',
+            borderRadius: '24px',
+            maxWidth: '550px',
             width: '100%',
             maxHeight: '85vh',
             overflowY: 'auto',
@@ -240,22 +427,23 @@ const Volunteers = () => {
                 position: 'absolute',
                 top: '16px',
                 right: '16px',
-                background: 'rgba(0,0,0,0.5)',
+                background: 'rgba(0,0,0,0.6)',
+                backdropFilter: 'blur(4px)',
                 border: 'none',
                 width: '36px',
                 height: '36px',
                 borderRadius: '50%',
                 cursor: 'pointer',
                 color: 'white',
-                fontSize: '1.2rem',
+                fontSize: '1rem',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 zIndex: 10,
-                transition: 'all 0.3s ease'
+                transition: 'all 0.2s ease'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.7)'}
-              onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.5)'}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.8)'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.6)'}
             >
               <i className="fas fa-times"></i>
             </button>
@@ -264,153 +452,123 @@ const Volunteers = () => {
             <div style={{
               background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)',
               padding: '2rem',
-              textAlign: 'center',
-              position: 'relative'
+              textAlign: 'center'
             }}>
               <div style={{
-                width: '120px',
-                height: '120px',
+                width: '110px',
+                height: '110px',
                 margin: '0 auto',
                 borderRadius: '50%',
                 overflow: 'hidden',
-                border: '4px solid #F9C74F',
+                border: '3px solid #F9C74F',
                 boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
               }}>
                 <img 
-                  src={selectedVolunteer.image} 
+                  src={getImageSrc(selectedVolunteer)} 
                   alt={selectedVolunteer.name}
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    const name = selectedVolunteer.name || 'Volunteer';
+                    const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
+                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=0B3B2F&color=fff&size=200&bold=true`;
+                  }}
                 />
               </div>
-              <h2 style={{ color: 'white', marginTop: '1rem', marginBottom: '0.3rem' }}>{selectedVolunteer.name}</h2>
-              <p style={{ color: '#F9C74F', fontWeight: 600 }}>{selectedVolunteer.role}</p>
+              <h2 style={{ color: 'white', marginTop: '0.75rem', marginBottom: '0.2rem', fontSize: '1.25rem', fontWeight: 700 }}>
+                {selectedVolunteer.name}
+              </h2>
+              <p style={{ color: '#F9C74F', fontWeight: 600, fontSize: '0.7rem' }}>
+                {selectedVolunteer.role}
+              </p>
             </div>
 
             {/* Profile Body */}
-            <div style={{ padding: '1.5rem' }}>
+            <div style={{ padding: '1.25rem' }}>
               {/* Stats */}
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(3, 1fr)',
-                gap: '1rem',
-                marginBottom: '1.5rem',
-                textAlign: 'center'
+                gap: '0.75rem',
+                marginBottom: '1.25rem'
               }}>
-                <div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#F9C74F' }}>{selectedVolunteer.hours_contributed}+</div>
-                  <div style={{ fontSize: '0.7rem', color: '#666' }}>Hours</div>
+                <div style={{ background: '#f8fafc', padding: '0.5rem', borderRadius: '12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#F9C74F' }}>{selectedVolunteer.hours_contributed}+</div>
+                  <div style={{ fontSize: '0.6rem', color: '#64748b' }}>Hours</div>
                 </div>
-                <div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#F9C74F' }}>{selectedVolunteer.projects_participated}</div>
-                  <div style={{ fontSize: '0.7rem', color: '#666' }}>Projects</div>
+                <div style={{ background: '#f8fafc', padding: '0.5rem', borderRadius: '12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#F9C74F' }}>{selectedVolunteer.projects_participated}</div>
+                  <div style={{ fontSize: '0.6rem', color: '#64748b' }}>Projects</div>
                 </div>
-                <div>
-                  <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#F9C74F' }}>{selectedVolunteer.join_date.split(' ')[1]}</div>
-                  <div style={{ fontSize: '0.7rem', color: '#666' }}>Member</div>
+                <div style={{ background: '#f8fafc', padding: '0.5rem', borderRadius: '12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#F9C74F' }}>
+                    {selectedVolunteer.join_date ? new Date(selectedVolunteer.join_date).getFullYear() : '2024'}
+                  </div>
+                  <div style={{ fontSize: '0.6rem', color: '#64748b' }}>Joined</div>
                 </div>
-              </div>
-
-              {/* Bio */}
-              <div style={{ marginBottom: '1.5rem' }}>
-                <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem', fontSize: '1rem' }}>
-                  <i className="fas fa-user-circle" style={{ marginRight: '0.5rem', color: '#F9C74F' }}></i>
-                  About
-                </h3>
-                <p style={{ color: '#555', lineHeight: '1.6', fontSize: '0.9rem' }}>{selectedVolunteer.bio}</p>
               </div>
 
               {/* Location */}
-              <div style={{ marginBottom: '1rem' }}>
-                <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem', fontSize: '1rem' }}>
-                  <i className="fas fa-map-marker-alt" style={{ marginRight: '0.5rem', color: '#F9C74F' }}></i>
-                  Location
-                </h3>
-                <p style={{ color: '#555', fontSize: '0.9rem' }}>{selectedVolunteer.location}</p>
-              </div>
-
-              {/* Achievements */}
-              {selectedVolunteer.achievements && selectedVolunteer.achievements.length > 0 && (
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem', fontSize: '1rem' }}>
-                    <i className="fas fa-trophy" style={{ marginRight: '0.5rem', color: '#F9C74F' }}></i>
-                    Achievements
+              {selectedVolunteer.location && (
+                <div style={{ marginBottom: '1rem' }}>
+                  <h3 style={{ color: '#0B3B2F', marginBottom: '0.4rem', fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <i className="fas fa-map-marker-alt" style={{ color: '#F9C74F', fontSize: '0.7rem' }}></i>
+                    Location
                   </h3>
-                  <ul style={{ listStyle: 'none', padding: 0 }}>
-                    {selectedVolunteer.achievements.map((achievement, i) => (
-                      <li key={i} style={{ padding: '0.3rem 0', color: '#555', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
-                        <i className="fas fa-medal" style={{ color: '#F9C74F', fontSize: '0.7rem' }}></i>
-                        {achievement}
-                      </li>
-                    ))}
-                  </ul>
+                  <div style={{ background: '#f8fafc', padding: '0.5rem', borderRadius: '10px', fontSize: '0.75rem', color: '#0B3B2F' }}>
+                    <i className="fas fa-location-dot" style={{ marginRight: '0.3rem', color: '#F9C74F' }}></i>
+                    {selectedVolunteer.location}
+                  </div>
                 </div>
               )}
 
-              {/* Social Links */}
-              {selectedVolunteer.social && Object.keys(selectedVolunteer.social).length > 0 && (
+              {/* Bio */}
+              {selectedVolunteer.bio && (
                 <div style={{ marginBottom: '1rem' }}>
-                  <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem', fontSize: '1rem' }}>
-                    <i className="fas fa-share-alt" style={{ marginRight: '0.5rem', color: '#F9C74F' }}></i>
-                    Connect
+                  <h3 style={{ color: '#0B3B2F', marginBottom: '0.4rem', fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <i className="fas fa-user-circle" style={{ color: '#F9C74F', fontSize: '0.7rem' }}></i>
+                    About
                   </h3>
-                  <div style={{ display: 'flex', gap: '0.8rem' }}>
-                    {selectedVolunteer.social.twitter && (
-                      <a href={`https://twitter.com/${selectedVolunteer.social.twitter}`} target="_blank" rel="noopener noreferrer" style={{
-                        background: '#1da1f2',
-                        border: 'none',
-                        width: '36px',
-                        height: '36px',
-                        borderRadius: '50%',
-                        color: 'white',
-                        cursor: 'pointer',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'transform 0.3s ease'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
-                        <i className="fab fa-twitter"></i>
-                      </a>
-                    )}
-                    {selectedVolunteer.social.linkedin && (
-                      <a href={`https://linkedin.com/in/${selectedVolunteer.social.linkedin}`} target="_blank" rel="noopener noreferrer" style={{
-                        background: '#0077b5',
-                        border: 'none',
-                        width: '36px',
-                        height: '36px',
-                        borderRadius: '50%',
-                        color: 'white',
-                        cursor: 'pointer',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'transform 0.3s ease'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
-                        <i className="fab fa-linkedin-in"></i>
-                      </a>
-                    )}
-                    {selectedVolunteer.social.instagram && (
-                      <a href={`https://instagram.com/${selectedVolunteer.social.instagram}`} target="_blank" rel="noopener noreferrer" style={{
-                        background: '#e4405f',
-                        border: 'none',
-                        width: '36px',
-                        height: '36px',
-                        borderRadius: '50%',
-                        color: 'white',
-                        cursor: 'pointer',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'transform 0.3s ease'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
-                        <i className="fab fa-instagram"></i>
-                      </a>
-                    )}
+                  <p style={{ color: '#475569', lineHeight: '1.5', fontSize: '0.75rem' }}>
+                    {selectedVolunteer.bio}
+                  </p>
+                </div>
+              )}
+
+              {/* Join Date */}
+              {selectedVolunteer.join_date && (
+                <div style={{ marginBottom: '1rem' }}>
+                  <h3 style={{ color: '#0B3B2F', marginBottom: '0.4rem', fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <i className="fas fa-calendar-check" style={{ color: '#F9C74F', fontSize: '0.7rem' }}></i>
+                    Joined Date
+                  </h3>
+                  <div style={{ background: '#f8fafc', padding: '0.5rem', borderRadius: '10px', fontSize: '0.75rem', color: '#0B3B2F' }}>
+                    {formatDate(selectedVolunteer.join_date)}
+                  </div>
+                </div>
+              )}
+
+              {/* Achievements */}
+              {selectedVolunteer.achievements && selectedVolunteer.achievements.length > 0 && (
+                <div style={{ marginBottom: '1rem' }}>
+                  <h3 style={{ color: '#0B3B2F', marginBottom: '0.4rem', fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <i className="fas fa-trophy" style={{ color: '#F9C74F', fontSize: '0.7rem' }}></i>
+                    Achievements
+                  </h3>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                    {selectedVolunteer.achievements.map((achievement, i) => (
+                      <span key={i} style={{
+                        background: '#fef3c7',
+                        padding: '0.3rem 0.8rem',
+                        borderRadius: '20px',
+                        fontSize: '0.7rem',
+                        fontWeight: 500,
+                        color: '#0B3B2F'
+                      }}>
+                        <i className="fas fa-medal" style={{ marginRight: '0.3rem', color: '#F9C74F' }}></i>
+                        {achievement}
+                      </span>
+                    ))}
                   </div>
                 </div>
               )}
@@ -422,23 +580,25 @@ const Volunteers = () => {
                   width: '100%',
                   background: '#F9C74F',
                   border: 'none',
-                  padding: '0.8rem',
-                  borderRadius: '50px',
+                  padding: '0.6rem',
+                  borderRadius: '40px',
                   color: '#0B3B2F',
                   fontWeight: 600,
+                  fontSize: '0.75rem',
                   cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  marginTop: '1rem'
+                  transition: 'all 0.2s ease',
+                  marginTop: '0.5rem'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'scale(1.02)';
-                  e.currentTarget.style.boxShadow = '0 5px 20px rgba(249,199,79,0.4)';
+                  e.currentTarget.style.boxShadow = '0 4px 15px rgba(249,199,79,0.3)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'scale(1)';
                   e.currentTarget.style.boxShadow = 'none';
                 }}
               >
+                <i className="fas fa-times" style={{ marginRight: '0.3rem' }}></i>
                 Close
               </button>
             </div>
@@ -447,15 +607,18 @@ const Volunteers = () => {
       )}
 
       <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
         @keyframes fadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
         }
-        
         @keyframes slideInUp {
           from {
             opacity: 0;
-            transform: translateY(50px);
+            transform: translateY(30px);
           }
           to {
             opacity: 1;
@@ -463,24 +626,13 @@ const Volunteers = () => {
           }
         }
         
-        @keyframes bounceArrow {
-          0%, 100% {
-            transform: translateX(0);
-          }
-          50% {
-            transform: translateX(5px);
-          }
-        }
-        
         .modal-content::-webkit-scrollbar {
-          width: 6px;
+          width: 5px;
         }
-        
         .modal-content::-webkit-scrollbar-track {
-          background: #f1f1f1;
+          background: #f1f5f9;
           border-radius: 3px;
         }
-        
         .modal-content::-webkit-scrollbar-thumb {
           background: #F9C74F;
           border-radius: 3px;
@@ -489,12 +641,6 @@ const Volunteers = () => {
         @media (max-width: 768px) {
           .modal-content {
             max-height: 90vh;
-          }
-        }
-        
-        @media (max-width: 480px) {
-          .modal-content {
-            border-radius: 20px !important;
           }
         }
       `}</style>

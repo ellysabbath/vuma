@@ -9,105 +9,106 @@ import eventd from '../assets/new/eventd.jpg';
 import evente from '../assets/new/evente.jpg';
 import eventf from '../assets/new/eventf.jpg';
 
-// Static leadership data - using only event.jpg to eventf.jpg
+// Updated leadership data with new biographies and achievements
 const leadershipData = [
   {
     id: 1,
     name: "Mr. Laban Abas Mapabha",
-    role: "-Co Founder & Executive Director",
-    image: event, // Founder uses event.jpg
+    role: "Executive Director",
+    image: event,
     isFounder: true,
-    bio: "Leading VUMA's comprehensive ecosystem restoration initiatives across Lake Victoria and beyond. Mr Laban Abas Mapabha holds an experience in Environmental Science and has over 15 years of experience in aquatic ecosystem management and community-led conservation.",
-    fullBio: "Mr. Laban Abas Mapabha is the visionary founder of VUMA Organization. With extensive experience in Environmental Science and decades of hands-on experience around Lake Victoria, he has dedicated his life to restoring degraded ecosystems while empowering local communities. Under his leadership, VUMA has launched multiple conservation initiatives, removing thousands of tons of invasive weeds and plastic waste from the lake. He is a recipient of multiple environmental awards and serves on various international environmental advisory boards.",
+    bio: "Mr. Laban Mapabha is the Executive Director of VUMA. Utilizing his legal background, he mentors youth leaders for national development and environmental stewardship.",
+    fullBio: "Mr. Laban Mapabha is the Executive Director of VUMA. Utilizing his legal background, he is dedicated to mentoring the next generation of youth leaders to drive national development and foster environmental stewardship. He firmly believes that sustainable development both in Tanzania and globally is impossible if the youth are left behind. As a collaborative leader, he champions strategic partnerships to achieve meaningful, long-term impact.",
     achievements: [
-      "Environmental Science Expert ",
-      "15+ years in aquatic ecosystem restoration",
-      "Founded VUMA Organization",
-      "NICE attendee in  earth protection SUMMITS"
+      "10+ Years of Leadership: Extensive experience directing and managing non-profit organizations.",
+      "Strategic Partnerships: Successfully united and coordinated over 8 institutions to work collaboratively on community initiatives.",
+      "Youth Empowerment: Inspired and mentored over 70,000 young people in leadership development.",
+      "Environmental Impact: Spearheaded reforestation efforts, resulting in the planting of over 80,000 trees across various regions.",
+      "Global Advocacy: Actively participated in major national and international conferences focused on sustainable development."
     ]
   },
   {
     id: 2,
-    name: "Lilian Emmanuel Mosha",
-    role: "-Co Founder, Treasurer",
-    image: eventa,
+    name: "Mr. Obadia Idd Luyagaza",
+    role: "Program Manager",
+    image: eventd,
     isFounder: false,
-    bio: "Overseeing large-scale removal of invasive weeds, plastic waste, and industrial debris from Lake Victoria. Expert in logistics and community mobilization.",
-    fullBio: "Lilian Emmanuel Mosha brings over 12 years of experience in large-scale environmental operations management. He leads daily activities of conservation initiatives, coordinating mechanical harvesters, plastic recovery boats, and over 200 field staff across three countries.",
+    bio: "Overseeing community projects focused on youth leadership, education, innovation, and environmental conservation.",
+    fullBio: "Mr. Obadia Idd Luyagaza is the Program Manager of VUMA Tanzania, overseeing the coordination of community projects focused on youth leadership, education, innovation, and environmental conservation.",
     achievements: [
-      "12+ years operations management",
-      "Led removal of 450+ tons of invasive weeds",
-      "Trained 500+ local waste management workers"
+      "Leading VUMA Tanzania programs with social impact",
+      "Coordinating youth leadership, innovation and environmental sustainability projects",
+      "Strengthening national and international collaboration"
     ]
   },
   {
     id: 3,
-    name: "Edom Fanuel Mataro",
-    role: "Co Founder, Chair person",
-    image: eventb,
+    name: "Lilian Emmanuel Mosha",
+    role: "Treasurer",
+    image: eventa,
     isFounder: false,
-    bio: "Transforming urban landscapes through native flora landscaping. Specialist in sustainable urban design and biodiversity conservation.",
-    fullBio: "Edom Fanuel Mataro is a landscape architect and urban ecologist who leads VUMA's Green Corridors & Urban Blooms initiative. He has transformed over 50 public roundabouts and open spaces into thriving native plant habitats.",
+    bio: "Certified accountant ensuring all contributions and project funds are utilized in accordance with financial regulations.",
+    fullBio: "I am a certified accountant responsible for ensuring that all contributions, organizational revenues, and project funds are utilized in accordance with approved meetings, resolutions, and financial regulations. I have served in this role for approximately 12 years, with a commitment to ensuring that VUMA remains true to its founding mission and principles.",
     achievements: [
-      "Much experience in Landscape Architecture",
-      "Transformed 50+ public spaces",
-      "40% increase in urban bee populations"
+      "Ensured proper budgeting and financial allocation for all projects.",
+      "Maintained accurate records, receipts, and accountability for every transaction.",
+      "Prepared clear financial summaries and reports for all disbursed funds."
     ]
   },
   {
     id: 4,
-    name: "Johnbosco Munser",
-    role: "-Co founder,Secretary",
-    image: eventc,
+    name: "Edom Fanuel Mataro",
+    role: "Chairperson",
+    image: eventb,
     isFounder: false,
-    bio: "Leading solar-powered irrigation programs for smallholder farmers. Specialist in climate-smart agriculture and renewable energy.",
-    fullBio: "Mr. Johnbosco Munser is an agricultural engineer and renewable energy expert who heads VUMA's Solar-Agri Empowerment initiative. He has overseen the installation of over 800 solar-powered irrigation systems.",
+    bio: "Dedicated teacher and community leader providing strategic leadership and oversight to VUMA Tanzania.",
+    fullBio: "Edom Fanuel Mataro serves as the Chairperson of VUMA Tanzania. He is a dedicated teacher and community leader with a strong passion for youth development, education, environmental conservation, and innovation. As Chairperson, he provides strategic leadership and oversight to ensure that the organization effectively fulfills its mission and objectives while promoting collaboration, accountability, and sustainable community impact.",
     achievements: [
-      "Bachelor in law",
-      "Installed 800+ solar irrigation systems",
-      "Trained 2,000+ farmers"
+      "Provided strategic leadership that strengthened VUMA's governance and organizational direction.",
+      "Promoted partnerships and stakeholder engagement to expand opportunities for youth, innovation, and environmental initiatives.",
+      "Enhanced institutional accountability and effective implementation of programs in line with VUMA's vision and mission."
     ]
   },
   {
     id: 5,
-    name: "Mr. Obadia Idd Luyagaza",
-    role: "-Founder-Program manager",
-    image: eventd,
+    name: "John Bosco Richard Munser",
+    role: "Secretary",
+    image: eventc,
     isFounder: false,
-    bio: "Nurturing next generation environmental leaders through training and innovation workshops.",
-    fullBio: "Dr. Fatima Hassan is an educator and youth development specialist who leads VUMA's Youth Environmental Stewards program, reaching over 3,000 students across 45 schools.",
+    bio: "Legal professional committed to promoting good governance, accountability, and institutional development.",
+    fullBio: "John Bosco Richard Munser serves as the Secretary of VUMA Tanzania and is a legal professional committed to promoting good governance, accountability, and institutional development. As Secretary, he plays a vital role in coordinating organizational affairs, maintaining official records, ensuring compliance with legal and regulatory requirements, and facilitating effective communication among members and stakeholders. His legal expertise has significantly contributed to strengthening VUMA's governance structures and supporting the successful implementation of its programs and initiatives.",
     achievements: [
-      "Experienced in  in Education and Youth Development",
-      "Reached 3,000+ students",
-      "Developed environmental curriculum"
+      "Strengthened VUMA's governance and administrative systems through effective record management and compliance oversight.",
+      "Provided legal guidance and policy support to enhance organizational accountability and decision-making.",
+      "Facilitated coordination and communication among members, partners, and stakeholders, improving the effectiveness of VUMA's operations and programs."
     ]
   },
   {
     id: 6,
-    name: "Mrs. Grace Alfred Gabriel",
-    role: "Events Lead",
-    image: evente,
+    name: "Juventus Justus",
+    role: "Human Resource Manager",
+    image: eventf,
     isFounder: false,
-    bio: "Managing financial sustainability and building strategic partnerships with global organizations.",
-    fullBio: "Peter Njoroge brings over 18 years of experience in nonprofit finance and has secured funding from World Bank, UNEP, and Global Environment Facility.",
+    bio: "Supporting human capital development, staff welfare, and volunteer engagement.",
+    fullBio: "Juventus Justus serves as the Human Resource Manager of VUMA Tanzania, where he is responsible for supporting the organization's human capital development, staff welfare, and volunteer engagement. He plays a key role in fostering a productive and inclusive working environment, strengthening team performance, and ensuring that VUMA attracts, develops, and retains talented individuals committed to advancing youth empowerment, leadership, innovation, and environmental sustainability.",
     achievements: [
-      "Much experienced in years VUMA missions",
-      "Secured World Bank funding",
-      "Built 20+ partnerships"
+      "Strengthened staff and volunteer recruitment, orientation, and retention processes.",
+      "Promoted capacity-building initiatives that enhanced team performance and organizational effectiveness.",
+      "Fostered a positive and collaborative workplace culture that improved staff engagement and productivity."
     ]
   },
   {
     id: 7,
-    name: "Mr. Justus Juventus",
-    role: "Resource Manager",
-    image: eventf,
+    name: "Grace Alfred Gabriel",
+    role: "Events Lead",
+    image: evente,
     isFounder: false,
-    bio: "Driving technological innovation in waste management and recycling solutions.",
-    fullBio: "John Kimani leads VUMA's innovation lab, developing open-source technologies for plastic recycling, water quality monitoring, and composting systems.",
+    bio: "Coordinating and overseeing key organizational events including boot camps, hackathons, forums, and community outreach.",
+    fullBio: "Grace Alfred Gabriel serves as the Events Lead at VUMA Tanzania, where she coordinates and oversees the planning and execution of key organizational events, including youth leadership and environmental boot camps, hackathons, forums, VUMA expos, campaigns, seminars, workshops, and community outreach programs. Through her strong organizational and leadership skills, she brings together diverse stakeholders, promotes youth participation, and ensures that VUMA's events create meaningful learning, networking, and impact opportunities for communities.",
     achievements: [
-      "5+ tech innovations deployed",
-      "Open-source hardware designs",
-      "Trained 200+ youth in tech"
+      "Successfully coordinated youth leadership and environmental programs that increased community engagement and participation.",
+      "Led the organization and delivery of forums, workshops, and VUMA expos that strengthened knowledge sharing and innovation.",
+      "Enhanced stakeholder collaboration and event management systems, improving the reach and impact of VUMA's initiatives."
     ]
   }
 ];
@@ -218,8 +219,8 @@ const Leadership = () => {
     
     const statsData = [
       { id: 'experience', target: 15 },
-      { id: 'projects', target: 50 },
-      { id: 'youth', target: 5000 },
+      { id: 'projects', target: 4 },
+      { id: 'youth', target: 50000 },
       { id: 'partners', target: 25 }
     ];
     

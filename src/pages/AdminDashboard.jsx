@@ -48,7 +48,7 @@ const AdminDashboard = () => {
     if (response.success && response.data) {
       return response.data;
     }
-    // Handle { count, results } for paginated responses
+    // Handle { count, results } for paginated responses (like events)
     if (isPaginated && response.results) {
       return response.results;
     }
@@ -61,6 +61,28 @@ const AdminDashboard = () => {
       return response.data;
     }
     return [];
+  };
+
+  // Helper to get count from paginated response
+  const getCountFromPaginatedResponse = (response) => {
+    if (!response) return 0;
+    // If response has count property (paginated)
+    if (response.count !== undefined) {
+      return response.count;
+    }
+    // If response has results array
+    if (response.results && Array.isArray(response.results)) {
+      return response.results.length;
+    }
+    // If response is array
+    if (Array.isArray(response)) {
+      return response.length;
+    }
+    // If response has data array
+    if (response.data && Array.isArray(response.data)) {
+      return response.data.length;
+    }
+    return 0;
   };
 
   const fetchDashboardData = async () => {
@@ -95,7 +117,7 @@ const AdminDashboard = () => {
           const data = await response.json();
           const projects = extractData(data);
           totalProjects = projects.length;
-          ongoingProjects = projects.filter(p => p.status === 'ongoing' || !p.status).length;
+          ongoingProjects = projects.filter(p => p.status === 'ongoing' || p.status === 'active' || !p.status).length;
           completedProjects = projects.filter(p => p.status === 'completed').length;
         } else {
           setErrors(prev => ({ ...prev, projects: `API Error: ${response.status}` }));
@@ -104,14 +126,22 @@ const AdminDashboard = () => {
         setErrors(prev => ({ ...prev, projects: 'Network error' }));
       }
 
-      // ==================== EVENTS API ====================
+      // ==================== EVENTS API (FIXED) ====================
       let totalEvents = 0;
       try {
         const response = await fetch('https://vuma.pythonanywhere.com/api/events/');
         if (response.ok) {
           const data = await response.json();
-          const events = extractData(data);
-          totalEvents = events.length;
+          // Handle paginated response with results array
+          if (data.results && Array.isArray(data.results)) {
+            totalEvents = data.count || data.results.length;
+          } else if (Array.isArray(data)) {
+            totalEvents = data.length;
+          } else if (data.success && data.data) {
+            totalEvents = data.data.length;
+          } else {
+            totalEvents = 0;
+          }
         } else {
           setErrors(prev => ({ ...prev, events: `API Error: ${response.status}` }));
         }
@@ -175,7 +205,7 @@ const AdminDashboard = () => {
       // ==================== PROGRAMS API ====================
       let totalPrograms = 0;
       try {
-        const response = await fetch('https://vuma.pythonanywhere.com/api/programs/');
+        const response = await fetch(`${API_BASE_URL}/prog/`);
         if (response.ok) {
           const data = await response.json();
           const programs = extractData(data);
@@ -258,7 +288,7 @@ const AdminDashboard = () => {
       }
 
       // Calculate derived stats
-      const environmentMissions = missionsData.filter(m => m.category === 'environment').length;
+      const environmentMissions = missionsData.filter(m => m.category === 'environment' || m.category === 'environmental').length;
       const leadershipMissions = missionsData.filter(m => m.category === 'leadership').length;
       const avgRating = testimonialsData.length > 0 
         ? (testimonialsData.reduce((sum, t) => sum + (t.rating || 0), 0) / testimonialsData.length).toFixed(1)
@@ -318,7 +348,6 @@ const AdminDashboard = () => {
 
   // ==================== ADMIN CARDS DATA ====================
   const adminCards = [
-    // Original Cards
     { 
       id: 'users', 
       title: 'Users Management', 
@@ -399,7 +428,6 @@ const AdminDashboard = () => {
       path: '/admin/messages',
       error: null
     },
-    // New Content Management Cards
     { 
       id: 'leaders', 
       title: 'Leadership Team', 
