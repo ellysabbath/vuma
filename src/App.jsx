@@ -26,11 +26,11 @@ import Apply from './pages/Apply';
 import EventRegister from './pages/EventRegister';
 import Leadership from './pages/Leadership';
 import Pro from './components/programs'
+import EventRegistrationConfirmation from './pages/EventRegistrationConfirmation';
 
 
-
-
-
+import AdminTestimonials from './admin/AdminTestmonials';
+import EventsRequests from './admin/EventRequests';
 import AdminUsers from './admin/AdminUsers';
 import AdminProjects from './admin/AdminProjects';
 import AdminEvents from './admin/AdminEvents';
@@ -49,6 +49,7 @@ import AdminNews from './admin/AdminNews';
 import NewsDetails from './admin/NewsDetails';
 import AdminLeadership from './admin/AdminLeaderShip';
 import AdminDonations from './admin/AdminDonations';
+import What from './pages/What';
 // ScrollToTop component to reset scroll on page change
 
 
@@ -137,6 +138,8 @@ function App() {
             <Route path="/events/register" element={<EventRegister />} />
             <Route path="/partners" element={<Partners />} />
             <Route path="/leadership" element={<Leadership />} />
+            <Route path="/events/requests" element={<EventsRequests />} />
+            <Route path="/say-about-us" element={<What />} />
 
 
 
@@ -152,6 +155,9 @@ function App() {
 <Route path="/admin/messages" element={<AdminMessages />} />
 <Route path="/admin/news" element={<AdminNews />} />
 <Route path="/admin/leadership" element={<AdminLeadership />} />
+<Route path="/events/register/confirmation/:id" element={<EventRegistrationConfirmation />} />
+<Route path="/admin/testimonials" element={<AdminTestimonials />} />
+
 
 <Route path="/admin/users/:id" element={<UserDetails />} />
 <Route path="/admin/projects/:id" element={<ProjectDetails />} />

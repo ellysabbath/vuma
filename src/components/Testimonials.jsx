@@ -1,7 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
-// Testimonials with real names from VUMA leadership team
-const testimonialsData = [
+// Demo data as fallback when API fails
+const demoTestimonialsData = [
   {
     id: 1,
     name: "Mr. Laban Abas Mapabha",
@@ -54,6 +54,9 @@ const testimonialsData = [
 ];
 
 const Testimonials = () => {
+  const [testimonialsData, setTestimonialsData] = useState(demoTestimonialsData);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -62,8 +65,47 @@ const Testimonials = () => {
   const [touchStart, setTouchStart] = useState(null);
   const autoScrollRef = useRef(null);
 
+  const API_BASE_URL = 'https://vuma.pythonanywhere.com/api';
+
+  // Fetch testimonials from backend
+  const fetchTestimonials = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${API_BASE_URL}/test/`);
+      
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      
+      const data = await response.json();
+      
+      // Handle paginated response
+      let testimonialsList = [];
+      if (data.results && Array.isArray(data.results)) {
+        testimonialsList = data.results;
+      } else if (Array.isArray(data)) {
+        testimonialsList = data;
+      } else if (data.success && Array.isArray(data.data)) {
+        testimonialsList = data.data;
+      }
+      
+      if (testimonialsList.length > 0) {
+        setTestimonialsData(testimonialsList);
+      } else {
+        // Use demo data if no data from API
+        setTestimonialsData(demoTestimonialsData);
+      }
+    } catch (error) {
+      console.error('Error fetching testimonials:', error);
+      setError('Failed to load testimonials. Showing demo data.');
+      // Keep demo data as fallback
+      setTestimonialsData(demoTestimonialsData);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Intersection Observer for section visibility
-  React.useEffect(() => {
+  useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -86,9 +128,14 @@ const Testimonials = () => {
     };
   }, []);
 
+  // Fetch testimonials on component mount
+  useEffect(() => {
+    fetchTestimonials();
+  }, []);
+
   // Auto-scroll from LEFT to RIGHT (forward direction)
-  React.useEffect(() => {
-    if (isPlaying && testimonialsData.length > 0) {
+  useEffect(() => {
+    if (isPlaying && testimonialsData.length > 0 && !loading) {
       autoScrollRef.current = setInterval(() => {
         next();
       }, 5000);
@@ -98,7 +145,7 @@ const Testimonials = () => {
         clearInterval(autoScrollRef.current);
       }
     };
-  }, [currentIndex, isPlaying, testimonialsData.length]);
+  }, [currentIndex, isPlaying, testimonialsData.length, loading]);
 
   const next = () => {
     if (isAnimating || testimonialsData.length === 0) return;
@@ -182,6 +229,35 @@ const Testimonials = () => {
   // Create doubled array for seamless infinite scroll
   const infiniteTestimonials = [...testimonialsData, ...testimonialsData];
 
+  // Loading state
+  if (loading) {
+    return (
+      <div ref={sectionRef} style={{
+        padding: '3rem 1rem',
+        background: 'linear-gradient(135deg, #f9fbf7 0%, #f0f5ee 100%)',
+        position: 'relative',
+        overflow: 'hidden',
+        minHeight: '500px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            width: '50px',
+            height: '50px',
+            border: '3px solid #F9C74F',
+            borderTopColor: '#0B3B2F',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 1rem'
+          }} />
+          <p style={{ color: '#666' }}>Loading testimonials...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (testimonialsData.length === 0) {
     return (
       <div ref={sectionRef} style={{
@@ -211,75 +287,44 @@ const Testimonials = () => {
     }}>
       {/* CSS Animations */}
       <style>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
         @keyframes float {
           0%, 100% { transform: translate(0, 0); }
           25% { transform: translate(15px, -15px); }
           50% { transform: translate(-10px, 20px); }
           75% { transform: translate(10px, -10px); }
         }
-        
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        
-        @keyframes pulseGlow {
-          0%, 100% { box-shadow: 0 10px 25px rgba(11,59,47,0.2); transform: scale(1); }
-          50% { box-shadow: 0 15px 35px rgba(249,199,79,0.4); transform: scale(1.05); }
-        }
-        
         @keyframes starPop {
           0% { opacity: 0; transform: scale(0); }
           80% { transform: scale(1.2); }
           100% { opacity: 1; transform: scale(1); }
         }
-        
         @keyframes textReveal {
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(30px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        
         @keyframes floatParticle {
           0%, 100% { transform: translate(0, 0) rotate(0deg); }
           25% { transform: translate(10px, -10px) rotate(5deg); }
           50% { transform: translate(-5px, 15px) rotate(-3deg); }
           75% { transform: translate(5px, -5px) rotate(2deg); }
         }
-        
         @keyframes bounceIn {
           0% { opacity: 0; transform: scale(0.3); }
           50% { opacity: 1; transform: scale(1.05); }
           70% { transform: scale(0.9); }
           100% { transform: scale(1); }
         }
-        
-        @keyframes shimmer {
-          0% { background-position: -1000px 0; }
-          100% { background-position: 1000px 0; }
-        }
-        
         @keyframes slideInFromRight {
           0% { opacity: 0; transform: translateX(50px); }
           100% { opacity: 1; transform: translateX(0); }
         }
-        
         @keyframes avatarReveal {
           0% { opacity: 0; transform: scale(0) rotate(-180deg); }
           100% { opacity: 1; transform: scale(1) rotate(0deg); }
-        }
-        
-        .shimmer-text {
-          background: linear-gradient(90deg, #0B3B2F 25%, #F9C74F 50%, #0B3B2F 75%);
-          background-size: 200% auto;
-          background-clip: text;
-          -webkit-background-clip: text;
-          color: transparent;
-          animation: shimmer 3s linear infinite;
         }
         
         .testimonial-avatar {
@@ -290,6 +335,28 @@ const Testimonials = () => {
           animation: slideInFromRight 0.5s ease forwards;
         }
       `}</style>
+
+      {/* Error message if API failed */}
+      {error && (
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          zIndex: 1000,
+          background: '#fef2f2',
+          color: '#dc2626',
+          padding: '0.5rem 1rem',
+          borderRadius: '8px',
+          fontSize: '0.75rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+        }}>
+          <i className="fas fa-exclamation-circle"></i>
+          {error}
+        </div>
+      )}
 
       {/* Decorative Background Elements */}
       <div style={{
@@ -671,7 +738,7 @@ const Testimonials = () => {
           ))}
         </div>
 
-        {/* Auto-scroll Progress Bar - moves left to right */}
+        {/* Auto-scroll Progress Bar */}
         <div style={{
           width: '100%',
           height: '3px',
@@ -691,9 +758,6 @@ const Testimonials = () => {
           />
         </div>
       </div>
-
-      {/* Stats Bar - Based on VUMA initiatives */}
-    
     </div>
   );
 };

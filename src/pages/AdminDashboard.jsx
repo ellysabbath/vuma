@@ -27,7 +27,8 @@ const AdminDashboard = () => {
     total_statistics: 0,
     total_environment_missions: 0,
     total_leadership_missions: 0,
-    average_rating: 0
+    average_rating: 0,
+    pending_event_requests: 0
   });
   
   const [loading, setLoading] = useState(true);
@@ -40,49 +41,14 @@ const AdminDashboard = () => {
     fetchDashboardData();
   }, []);
 
-  // Helper function to extract data from various API response formats
+  // Helper function to extract data from API responses
   const extractData = (response, isPaginated = false) => {
     if (!response) return [];
-    
-    // Handle { success: true, data: [...] }
-    if (response.success && response.data) {
-      return response.data;
-    }
-    // Handle { count, results } for paginated responses (like events)
-    if (isPaginated && response.results) {
-      return response.results;
-    }
-    // Handle direct array
-    if (Array.isArray(response)) {
-      return response;
-    }
-    // Handle { data: [...] }
-    if (response.data && Array.isArray(response.data)) {
-      return response.data;
-    }
+    if (response.success && response.data) return response.data;
+    if (isPaginated && response.results) return response.results;
+    if (Array.isArray(response)) return response;
+    if (response.data && Array.isArray(response.data)) return response.data;
     return [];
-  };
-
-  // Helper to get count from paginated response
-  const getCountFromPaginatedResponse = (response) => {
-    if (!response) return 0;
-    // If response has count property (paginated)
-    if (response.count !== undefined) {
-      return response.count;
-    }
-    // If response has results array
-    if (response.results && Array.isArray(response.results)) {
-      return response.results.length;
-    }
-    // If response is array
-    if (Array.isArray(response)) {
-      return response.length;
-    }
-    // If response has data array
-    if (response.data && Array.isArray(response.data)) {
-      return response.data.length;
-    }
-    return 0;
   };
 
   const fetchDashboardData = async () => {
@@ -90,9 +56,8 @@ const AdminDashboard = () => {
     setErrors({});
 
     try {
-      // ==================== USERS API ====================
-      let totalUsers = 0;
-      let activeUsers = 0;
+      // USERS API
+      let totalUsers = 0, activeUsers = 0;
       try {
         const response = await fetch('https://vuma.pythonanywhere.com/api/users/');
         if (response.ok) {
@@ -107,10 +72,8 @@ const AdminDashboard = () => {
         setErrors(prev => ({ ...prev, users: 'Network error' }));
       }
 
-      // ==================== PROJECTS API ====================
-      let totalProjects = 0;
-      let ongoingProjects = 0;
-      let completedProjects = 0;
+      // PROJECTS API
+      let totalProjects = 0, ongoingProjects = 0, completedProjects = 0;
       try {
         const response = await fetch('https://vuma.pythonanywhere.com/api/projects/');
         if (response.ok) {
@@ -126,21 +89,18 @@ const AdminDashboard = () => {
         setErrors(prev => ({ ...prev, projects: 'Network error' }));
       }
 
-      // ==================== EVENTS API (FIXED) ====================
+      // EVENTS API
       let totalEvents = 0;
       try {
         const response = await fetch('https://vuma.pythonanywhere.com/api/events/');
         if (response.ok) {
           const data = await response.json();
-          // Handle paginated response with results array
           if (data.results && Array.isArray(data.results)) {
             totalEvents = data.count || data.results.length;
           } else if (Array.isArray(data)) {
             totalEvents = data.length;
           } else if (data.success && data.data) {
             totalEvents = data.data.length;
-          } else {
-            totalEvents = 0;
           }
         } else {
           setErrors(prev => ({ ...prev, events: `API Error: ${response.status}` }));
@@ -149,9 +109,23 @@ const AdminDashboard = () => {
         setErrors(prev => ({ ...prev, events: 'Network error' }));
       }
 
-      // ==================== VOLUNTEERS API ====================
-      let totalVolunteers = 0;
-      let volunteerHours = 0;
+      // EVENT REQUESTS API
+      let pendingEventRequests = 0;
+      try {
+        const response = await fetch('https://vuma.pythonanywhere.com/event/api/registrations/');
+        if (response.ok) {
+          const data = await response.json();
+          const requests = extractData(data, true);
+          pendingEventRequests = requests.filter(r => r.status === 'pending' || !r.status).length;
+        } else {
+          setErrors(prev => ({ ...prev, event_requests: `API Error: ${response.status}` }));
+        }
+      } catch (err) {
+        setErrors(prev => ({ ...prev, event_requests: 'Network error' }));
+      }
+
+      // VOLUNTEERS API
+      let totalVolunteers = 0, volunteerHours = 0;
       try {
         const response = await fetch('https://vuma.pythonanywhere.com/api/volunteers/');
         if (response.ok) {
@@ -166,9 +140,8 @@ const AdminDashboard = () => {
         setErrors(prev => ({ ...prev, volunteers: 'Network error' }));
       }
 
-      // ==================== PARTNERS API ====================
-      let totalPartners = 0;
-      let activePartners = 0;
+      // PARTNERS API
+      let totalPartners = 0, activePartners = 0;
       try {
         const response = await fetch('https://vuma.pythonanywhere.com/api/partners/stats/');
         if (response.ok) {
@@ -187,7 +160,7 @@ const AdminDashboard = () => {
         setErrors(prev => ({ ...prev, partners: 'Network error' }));
       }
 
-      // ==================== NEWS API ====================
+      // NEWS API
       let totalNews = 0;
       try {
         const response = await fetch('https://vuma.pythonanywhere.com/api/news/');
@@ -202,7 +175,7 @@ const AdminDashboard = () => {
         setErrors(prev => ({ ...prev, news: 'Network error' }));
       }
 
-      // ==================== PROGRAMS API ====================
+      // PROGRAMS API
       let totalPrograms = 0;
       try {
         const response = await fetch(`${API_BASE_URL}/prog/`);
@@ -217,7 +190,7 @@ const AdminDashboard = () => {
         setErrors(prev => ({ ...prev, programs: 'Network error' }));
       }
 
-      // ==================== LEADERS API ====================
+      // LEADERS API
       let leadersData = [];
       try {
         const response = await fetch(`${API_BASE_URL}/leaders/`);
@@ -231,7 +204,7 @@ const AdminDashboard = () => {
         setErrors(prev => ({ ...prev, leaders: 'Network error' }));
       }
 
-      // ==================== MISSIONS API ====================
+      // MISSIONS API
       let missionsData = [];
       try {
         const response = await fetch(`${API_BASE_URL}/missions/`);
@@ -245,13 +218,18 @@ const AdminDashboard = () => {
         setErrors(prev => ({ ...prev, missions: 'Network error' }));
       }
 
-      // ==================== TESTIMONIALS API ====================
+      // TESTIMONIALS API
       let testimonialsData = [];
+      let avgRating = 0;
       try {
         const response = await fetch(`${API_BASE_URL}/testimonials/`);
         if (response.ok) {
           const data = await response.json();
           testimonialsData = extractData(data, true);
+          if (testimonialsData.length > 0) {
+            const sum = testimonialsData.reduce((acc, t) => acc + (t.rating || 0), 0);
+            avgRating = (sum / testimonialsData.length).toFixed(1);
+          }
         } else {
           setErrors(prev => ({ ...prev, testimonials: `API Error: ${response.status}` }));
         }
@@ -259,7 +237,7 @@ const AdminDashboard = () => {
         setErrors(prev => ({ ...prev, testimonials: 'Network error' }));
       }
 
-      // ==================== BLOG POSTS API ====================
+      // BLOG POSTS API
       let blogPostsData = [];
       try {
         const response = await fetch(`${API_BASE_URL}/blog-posts/`);
@@ -273,7 +251,7 @@ const AdminDashboard = () => {
         setErrors(prev => ({ ...prev, blog_posts: 'Network error' }));
       }
 
-      // ==================== STATISTICS API ====================
+      // STATISTICS API
       let statisticsData = [];
       try {
         const response = await fetch(`${API_BASE_URL}/statistics/`);
@@ -290,11 +268,7 @@ const AdminDashboard = () => {
       // Calculate derived stats
       const environmentMissions = missionsData.filter(m => m.category === 'environment' || m.category === 'environmental').length;
       const leadershipMissions = missionsData.filter(m => m.category === 'leadership').length;
-      const avgRating = testimonialsData.length > 0 
-        ? (testimonialsData.reduce((sum, t) => sum + (t.rating || 0), 0) / testimonialsData.length).toFixed(1)
-        : 0;
 
-      // Update all stats
       setStats({
         total_users: totalUsers,
         active_users: activeUsers,
@@ -315,7 +289,8 @@ const AdminDashboard = () => {
         total_statistics: statisticsData.length,
         total_environment_missions: environmentMissions,
         total_leadership_missions: leadershipMissions,
-        average_rating: avgRating
+        average_rating: avgRating,
+        pending_event_requests: pendingEventRequests
       });
 
     } catch (error) {
@@ -325,11 +300,9 @@ const AdminDashboard = () => {
     }
   };
 
-  const hasAnyError = () => {
-    return Object.values(errors).length > 0;
-  };
+  const hasAnyError = () => Object.values(errors).length > 0;
 
-  // ==================== STATS CARDS DATA ====================
+  // Stats Cards Data
   const statsCards = [
     { label: 'Total Users', value: stats.total_users, icon: 'fas fa-users', color: '#0B3B2F', error: errors.users },
     { label: 'Active Users', value: stats.active_users, icon: 'fas fa-user-check', color: '#4caf50', error: errors.users },
@@ -344,9 +317,10 @@ const AdminDashboard = () => {
     { label: 'Blog Posts', value: stats.total_blog_posts, icon: 'fas fa-blog', color: '#2b7a5c', error: errors.blog_posts },
     { label: 'Statistics', value: stats.total_statistics, icon: 'fas fa-chart-line', color: '#9C27B0', error: errors.statistics },
     { label: 'Avg Rating', value: stats.average_rating, icon: 'fas fa-star-half-alt', color: '#FF9800', error: errors.testimonials, suffix: '★' },
+    { label: 'Event Requests', value: stats.pending_event_requests, icon: 'fas fa-calendar-plus', color: '#f59e0b', error: errors.event_requests },
   ];
 
-  // ==================== ADMIN CARDS DATA ====================
+  // Admin Cards Data - UPDATED with Testimonials direct path
   const adminCards = [
     { 
       id: 'users', 
@@ -379,6 +353,17 @@ const AdminDashboard = () => {
       error: errors.events
     },
     { 
+      id: 'event_requests', 
+      title: 'Event Requests', 
+      icon: 'fas fa-calendar-plus', 
+      color: '#f59e0b', 
+      description: 'Review and manage event registration requests',
+      count: stats.pending_event_requests,
+      path: '/events/requests',
+      error: errors.event_requests,
+      badge: stats.pending_event_requests > 0 ? stats.pending_event_requests : null
+    },
+    { 
       id: 'volunteers', 
       title: 'Volunteers', 
       icon: 'fas fa-hands-helping', 
@@ -407,6 +392,19 @@ const AdminDashboard = () => {
       count: stats.total_news,
       path: '/admin/news',
       error: errors.news
+    },
+    { 
+      id: 'testimonials', 
+      title: 'Testimonials', 
+      icon: 'fas fa-star', 
+      color: '#F9C74F', 
+      description: 'Manage community testimonials and reviews',
+      count: stats.total_testimonials,
+      path: '/admin/testimonials',
+      error: errors.testimonials,
+      subStats: [
+        { label: 'Avg Rating', value: stats.average_rating, suffix: '★' }
+      ]
     },
     { 
       id: 'programs', 
@@ -455,20 +453,6 @@ const AdminDashboard = () => {
       ]
     },
     { 
-      id: 'testimonials', 
-      title: 'Testimonials', 
-      icon: 'fas fa-star', 
-      color: '#FF9800', 
-      description: 'Manage community testimonials and reviews',
-      count: stats.total_testimonials,
-      path: '/admin/leadership',
-      error: errors.testimonials,
-      tab: 'testimonials',
-      subStats: [
-        { label: 'Avg Rating', value: stats.average_rating, suffix: '★' }
-      ]
-    },
-    { 
       id: 'blog_posts', 
       title: 'Blog Posts', 
       icon: 'fas fa-blog', 
@@ -492,38 +476,7 @@ const AdminDashboard = () => {
     }
   ];
 
-  // ==================== EVENT HANDLERS ====================
-  const handleCardMouseEnter = (e, hasError) => {
-    if (!hasError) {
-      e.currentTarget.style.transform = 'translateY(-8px)';
-      e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.15)';
-    }
-  };
-
-  const handleCardMouseLeave = (e) => {
-    e.currentTarget.style.transform = 'translateY(0)';
-    e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.08)';
-  };
-
-  const handleIconMouseEnter = (e, hasError) => {
-    if (!hasError) {
-      e.currentTarget.style.transform = 'scale(1.1)';
-    }
-  };
-
-  const handleIconMouseLeave = (e) => {
-    e.currentTarget.style.transform = 'scale(1)';
-  };
-
-  const handleArrowMouseEnter = (e) => {
-    e.currentTarget.style.transform = 'translateX(5px)';
-  };
-
-  const handleArrowMouseLeave = (e) => {
-    e.currentTarget.style.transform = 'translateX(0)';
-  };
-
-  // ==================== LOADING STATE ====================
+  // Loading State
   if (loading) {
     return (
       <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f9fbf7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -543,7 +496,6 @@ const AdminDashboard = () => {
     );
   }
 
-  // ==================== MAIN RENDER ====================
   return (
     <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f9fbf7' }}>
       {/* Header Section */}
@@ -664,9 +616,36 @@ const AdminDashboard = () => {
                 overflow: 'hidden',
                 opacity: card.error ? 0.7 : 1
               }}
-              onMouseEnter={(e) => handleCardMouseEnter(e, card.error)}
-              onMouseLeave={handleCardMouseLeave}
+              onMouseEnter={(e) => {
+                if (!card.error) {
+                  e.currentTarget.style.transform = 'translateY(-8px)';
+                  e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.15)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.08)';
+              }}
             >
+              {/* Badge for pending requests */}
+              {card.badge && card.badge > 0 && (
+                <div style={{
+                  position: 'absolute',
+                  top: '12px',
+                  right: '12px',
+                  background: '#ef4444',
+                  color: 'white',
+                  padding: '0.2rem 0.6rem',
+                  borderRadius: '20px',
+                  fontSize: '0.7rem',
+                  fontWeight: 'bold',
+                  zIndex: 10,
+                  animation: 'pulse 2s infinite'
+                }}>
+                  {card.badge} Pending
+                </div>
+              )}
+
               {/* Error Badge */}
               {card.error && (
                 <div style={{
@@ -711,8 +690,10 @@ const AdminDashboard = () => {
                   justifyContent: 'center',
                   transition: 'transform 0.3s ease'
                 }}
-                onMouseEnter={(e) => handleIconMouseEnter(e, card.error)}
-                onMouseLeave={handleIconMouseLeave}>
+                onMouseEnter={(e) => {
+                  if (!card.error) e.currentTarget.style.transform = 'scale(1.1)';
+                }}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
                   <i className={card.icon} style={{ fontSize: '1.8rem', color: card.color }}></i>
                 </div>
                 <div>
@@ -721,7 +702,7 @@ const AdminDashboard = () => {
                 </div>
               </div>
               
-              {/* Sub Stats (for cards that have them) */}
+              {/* Sub Stats */}
               {card.subStats && !card.error && (
                 <div style={{
                   display: 'flex',
@@ -775,8 +756,8 @@ const AdminDashboard = () => {
                   }}>
                     <span>Manage</span>
                     <i className="fas fa-arrow-right" style={{ fontSize: '0.7rem', transition: 'transform 0.3s ease' }}
-                       onMouseEnter={handleArrowMouseEnter}
-                       onMouseLeave={handleArrowMouseLeave} />
+                       onMouseEnter={(e) => e.currentTarget.style.transform = 'translateX(5px)'}
+                       onMouseLeave={(e) => e.currentTarget.style.transform = 'translateX(0)'} />
                   </div>
                 </div>
               )}
@@ -821,21 +802,15 @@ const AdminDashboard = () => {
         )}
       </div>
 
-      {/* Global Styles */}
       <style>{`
         @keyframes spin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
-        
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        
-        @keyframes slideInUp {
-          from { opacity: 0; transform: translateY(50px); }
-          to { opacity: 1; transform: translateY(0); }
+        @keyframes pulse {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+          100% { transform: scale(1); }
         }
       `}</style>
     </div>

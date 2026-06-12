@@ -10,13 +10,61 @@ const Navbar = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isServicesDropdownOpen, setIsServicesDropdownOpen] = useState(false);
   const [isAboutDropdownOpen, setIsAboutDropdownOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
+  const [testimonialCount, setTestimonialCount] = useState(0);
+  const [recentTestimonials, setRecentTestimonials] = useState([]);
+  const [pendingTestimonials, setPendingTestimonials] = useState(0);
   const userMenuRef = useRef(null);
   const servicesDropdownRef = useRef(null);
   const aboutDropdownRef = useRef(null);
+  const notificationsRef = useRef(null);
   const aboutTimeoutRef = useRef(null);
   const servicesTimeoutRef = useRef(null);
+
+  const API_BASE_URL = 'https://vuma.pythonanywhere.com/api';
+
+  // Fetch testimonial stats from correct endpoint - /test/stats/
+  const fetchTestimonialStats = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/test/stats/`);
+      if (response.ok) {
+        const data = await response.json();
+        setTestimonialCount(data.total || 0);
+      } else {
+        console.error('Stats endpoint returned:', response.status);
+      }
+    } catch (error) {
+      console.error('Error fetching testimonial stats:', error);
+    }
+  };
+
+  // Fetch recent testimonials from correct endpoint - /test/
+  const fetchRecentTestimonials = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/test/`);
+      if (response.ok) {
+        const data = await response.json();
+        // Handle paginated response with results array
+        let testimonials = [];
+        if (data.results && Array.isArray(data.results)) {
+          testimonials = data.results;
+        } else if (Array.isArray(data)) {
+          testimonials = data;
+        }
+        setRecentTestimonials(testimonials.slice(0, 5));
+        
+        // Count pending testimonials (is_active = false)
+        const pending = testimonials.filter(t => !t.is_active).length;
+        setPendingTestimonials(pending);
+      } else {
+        console.error('Testimonials endpoint returned:', response.status);
+      }
+    } catch (error) {
+      console.error('Error fetching recent testimonials:', error);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -36,8 +84,21 @@ const Navbar = () => {
       setIsLoggedIn(false);
       setUser(null);
     }
+    
+    // Fetch testimonial data
+    fetchTestimonialStats();
+    fetchRecentTestimonials();
+    
+    // Refresh every 60 seconds
+    const interval = setInterval(() => {
+      fetchTestimonialStats();
+      fetchRecentTestimonials();
+    }, 60000);
+    
+    return () => clearInterval(interval);
   }, [location]);
 
+  // Rest of the component remains the same...
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
@@ -48,6 +109,9 @@ const Navbar = () => {
       }
       if (aboutDropdownRef.current && !aboutDropdownRef.current.contains(e.target)) {
         setIsAboutDropdownOpen(false);
+      }
+      if (notificationsRef.current && !notificationsRef.current.contains(e.target)) {
+        setIsNotificationsOpen(false);
       }
     };
     document.addEventListener('click', handleClickOutside);
@@ -80,10 +144,13 @@ const Navbar = () => {
       if (e.key === 'Escape' && isSidebarOpen) {
         setIsSidebarOpen(false);
       }
+      if (e.key === 'Escape' && isNotificationsOpen) {
+        setIsNotificationsOpen(false);
+      }
     };
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
-  }, [isSidebarOpen]);
+  }, [isSidebarOpen, isNotificationsOpen]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -96,6 +163,11 @@ const Navbar = () => {
   const toggleUserMenu = (e) => {
     e.stopPropagation();
     setIsUserMenuOpen(!isUserMenuOpen);
+  };
+
+  const toggleNotifications = (e) => {
+    e.stopPropagation();
+    setIsNotificationsOpen(!isNotificationsOpen);
   };
 
   const handleLogoutClick = (e) => {
@@ -184,7 +256,6 @@ const Navbar = () => {
     { id: 'contact', label: 'Contact', icon: 'fas fa-envelope', path: '/contact' }
   ];
 
-  // Check if user has admin role (case insensitive)
   const isAdmin = user?.role && (user.role.toLowerCase() === 'admin' || user.role.toLowerCase() === 'administrator');
 
   return (
@@ -514,6 +585,37 @@ const Navbar = () => {
             </Link>
 
             <Link 
+              to="/say-about-us"
+              className="desktop-nav-link"
+              style={{
+                color: isActive('/say-about-us') ? '#F9C74F' : 'white',
+                textDecoration: 'none',
+                fontSize: '0.9rem',
+                fontWeight: 500,
+                padding: '0.4rem 0.8rem',
+                borderRadius: '8px',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: isActive('/say-about-us') ? 'rgba(249,199,79,0.1)' : 'transparent'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)';
+                e.currentTarget.style.color = '#F9C74F';
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive('/say-about-us')) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = 'white';
+                }
+              }}
+            >
+              <i className="fas fa-star" style={{ fontSize: '0.8rem' }}></i>
+              Share Story
+            </Link>
+
+            <Link 
               to="/contact"
               className="desktop-nav-link"
               style={{
@@ -574,6 +676,294 @@ const Navbar = () => {
               <i className="fas fa-heart" style={{ fontSize: '0.8rem' }}></i>
               Donate
             </Link>
+          </div>
+
+          {/* Notification Icon */}
+          <div style={{ position: 'relative', marginRight: '0.5rem' }} ref={notificationsRef}>
+            <button
+              onClick={toggleNotifications}
+              style={{
+                background: 'none',
+                border: 'none',
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.3s ease',
+                position: 'relative',
+                color: 'white',
+                fontSize: '1.1rem'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                e.currentTarget.style.transform = 'scale(1.05)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+            >
+              <i className="fas fa-bell"></i>
+              {testimonialCount > 0 && (
+                <span style={{
+                  position: 'absolute',
+                  top: '0',
+                  right: '0',
+                  background: '#ef4444',
+                  color: 'white',
+                  fontSize: '0.6rem',
+                  fontWeight: 'bold',
+                  padding: '0.1rem 0.3rem',
+                  borderRadius: '10px',
+                  minWidth: '16px',
+                  textAlign: 'center'
+                }}>
+                  {testimonialCount > 9 ? '9+' : testimonialCount}
+                </span>
+              )}
+              {pendingTestimonials > 0 && isAdmin && (
+                <span style={{
+                  position: 'absolute',
+                  bottom: '0',
+                  right: '0',
+                  background: '#f59e0b',
+                  color: 'white',
+                  fontSize: '0.5rem',
+                  fontWeight: 'bold',
+                  padding: '0.1rem 0.3rem',
+                  borderRadius: '10px',
+                  minWidth: '14px',
+                  textAlign: 'center'
+                }}>
+                  {pendingTestimonials}
+                </span>
+              )}
+            </button>
+
+            {/* Notifications Dropdown */}
+            {isNotificationsOpen && (
+              <div style={{
+                position: 'absolute',
+                top: '50px',
+                right: '0',
+                width: '320px',
+                maxHeight: '400px',
+                background: 'white',
+                borderRadius: '12px',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+                overflow: 'hidden',
+                zIndex: 1001,
+                animation: 'fadeInUp 0.3s ease'
+              }}>
+                <div style={{
+                  padding: '0.75rem 1rem',
+                  background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)',
+                  color: 'white',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+                    <i className="fas fa-bell" style={{ marginRight: '0.5rem' }}></i>
+                    Notifications
+                  </span>
+                  <button
+                    onClick={() => {
+                      setIsNotificationsOpen(false);
+                      navigate('/admin/testimonials');
+                    }}
+                    style={{
+                      background: 'rgba(255,255,255,0.2)',
+                      border: 'none',
+                      padding: '0.2rem 0.6rem',
+                      borderRadius: '12px',
+                      fontSize: '0.65rem',
+                      cursor: 'pointer',
+                      color: 'white'
+                    }}
+                  >
+                    View All
+                  </button>
+                </div>
+                
+                <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
+                  {/* Testimonial Stats Card */}
+                  <div style={{
+                    padding: '0.75rem 1rem',
+                    borderBottom: '1px solid #f0f0f0',
+                    background: '#fefce8'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '50%',
+                        background: '#F9C74F',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <i className="fas fa-star" style={{ fontSize: '0.8rem', color: '#0B3B2F' }}></i>
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#0B3B2F' }}>
+                          Total Testimonials
+                        </div>
+                        <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                          {testimonialCount} stories shared by our community
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setIsNotificationsOpen(false);
+                          navigate('/say-about-us');
+                        }}
+                        style={{
+                          background: '#F9C74F',
+                          border: 'none',
+                          padding: '0.2rem 0.6rem',
+                          borderRadius: '12px',
+                          fontSize: '0.65rem',
+                          cursor: 'pointer',
+                          color: '#0B3B2F'
+                        }}
+                      >
+                        Share
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Recent Testimonials */}
+                  {recentTestimonials.length > 0 && (
+                    <div>
+                      <div style={{
+                        padding: '0.5rem 1rem',
+                        fontSize: '0.7rem',
+                        color: '#64748b',
+                        fontWeight: 600,
+                        borderBottom: '1px solid #f0f0f0'
+                      }}>
+                        Recent Stories
+                      </div>
+                      {recentTestimonials.map((testimonial) => (
+                        <div
+                          key={testimonial.id}
+                          style={{
+                            padding: '0.75rem 1rem',
+                            borderBottom: '1px solid #f0f0f0',
+                            cursor: 'pointer',
+                            transition: 'background 0.2s'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                          onClick={() => {
+                            setIsNotificationsOpen(false);
+                            if (isAdmin) {
+                              navigate('/admin/testimonials');
+                            }
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div style={{
+                              width: '28px',
+                              height: '28px',
+                              borderRadius: '50%',
+                              background: '#f1f5f9',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}>
+                              <i className="fas fa-user" style={{ fontSize: '0.7rem', color: '#0B3B2F' }}></i>
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#0B3B2F' }}>
+                                {testimonial.name}
+                              </div>
+                              <div style={{ fontSize: '0.65rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                {[...Array(testimonial.rating)].map((_, i) => (
+                                  <i key={i} className="fas fa-star" style={{ color: '#F9C74F', fontSize: '0.5rem' }}></i>
+                                ))}
+                                <span style={{ marginLeft: '4px' }}>{testimonial.text.substring(0, 40)}...</span>
+                              </div>
+                            </div>
+                            {!testimonial.is_active && isAdmin && (
+                              <span style={{
+                                background: '#fef3c7',
+                                color: '#d97706',
+                                fontSize: '0.6rem',
+                                padding: '0.15rem 0.4rem',
+                                borderRadius: '10px'
+                              }}>
+                                Pending
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {recentTestimonials.length === 0 && (
+                    <div style={{
+                      padding: '2rem',
+                      textAlign: 'center',
+                      color: '#94a3b8'
+                    }}>
+                      <i className="fas fa-inbox" style={{ fontSize: '2rem', marginBottom: '0.5rem', display: 'block' }}></i>
+                      <p style={{ fontSize: '0.75rem' }}>No testimonials yet</p>
+                      <button
+                        onClick={() => {
+                          setIsNotificationsOpen(false);
+                          navigate('/say-about-us');
+                        }}
+                        style={{
+                          background: '#F9C74F',
+                          border: 'none',
+                          padding: '0.3rem 0.8rem',
+                          borderRadius: '20px',
+                          fontSize: '0.7rem',
+                          cursor: 'pointer',
+                          color: '#0B3B2F',
+                          marginTop: '0.5rem'
+                        }}
+                      >
+                        Be the first to share
+                      </button>
+                    </div>
+                  )}
+
+                  {isAdmin && pendingTestimonials > 0 && (
+                    <div style={{
+                      padding: '0.75rem 1rem',
+                      background: '#fef3c7',
+                      borderTop: '1px solid #fde68a',
+                      textAlign: 'center'
+                    }}>
+                      <Link
+                        to="/admin/testimonials"
+                        onClick={() => setIsNotificationsOpen(false)}
+                        style={{
+                          fontSize: '0.7rem',
+                          color: '#d97706',
+                          textDecoration: 'none',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.5rem'
+                        }}
+                      >
+                        <i className="fas fa-clock"></i>
+                        {pendingTestimonials} testimonial(s) pending review
+                        <i className="fas fa-arrow-right"></i>
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           <div style={{ position: 'relative' }} ref={userMenuRef}>
@@ -735,7 +1125,29 @@ const Navbar = () => {
                   <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
                 </Link>
                 
-                {/* Admin Dashboard Links - Grouped together */}
+                {/* Share Your Story link in user menu */}
+                <Link
+                  to="/say-about-us"
+                  onClick={() => setIsUserMenuOpen(false)}
+                  className="dropdown-item"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '0.8rem 1rem',
+                    color: '#333',
+                    textDecoration: 'none',
+                    transition: 'all 0.3s ease',
+                    borderBottom: '1px solid #f0f0f0'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                >
+                  <i className="fas fa-star" style={{ width: '20px', color: '#F9C74F' }}></i>
+                  <span style={{ flex: 1 }}>Share Your Story</span>
+                  <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
+                </Link>
+                
                 {isAdmin && (
                   <>
                     <Link
@@ -761,7 +1173,7 @@ const Navbar = () => {
                     </Link>
 
                     <Link
-                      to="/admin/donations"
+                      to="/admin/testimonials"
                       onClick={() => setIsUserMenuOpen(false)}
                       className="dropdown-item"
                       style={{
@@ -777,52 +1189,19 @@ const Navbar = () => {
                       onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
                       onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
                     >
-                      <i className="fas fa-hand-holding-usd" style={{ width: '20px', color: '#F9C74F' }}></i>
-                      <span style={{ flex: 1 }}>Manage Donations</span>
-                      <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
-                    </Link>
-
-                    <Link
-                      to="/admin/programs"
-                      onClick={() => setIsUserMenuOpen(false)}
-                      className="dropdown-item"
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        padding: '0.8rem 1rem',
-                        color: '#333',
-                        textDecoration: 'none',
-                        transition: 'all 0.3s ease',
-                        borderBottom: '1px solid #f0f0f0'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
-                    >
-                      <i className="fas fa-chalkboard-user" style={{ width: '20px', color: '#F9C74F' }}></i>
-                      <span style={{ flex: 1 }}>Manage Programs</span>
-                      <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
-                    </Link>
-
-                    <Link
-                      to="/admin/users"
-                      onClick={() => setIsUserMenuOpen(false)}
-                      className="dropdown-item"
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        padding: '0.8rem 1rem',
-                        color: '#333',
-                        textDecoration: 'none',
-                        transition: 'all 0.3s ease',
-                        borderBottom: '1px solid #f0f0f0'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
-                    >
-                      <i className="fas fa-users" style={{ width: '20px', color: '#F9C74F' }}></i>
-                      <span style={{ flex: 1 }}>Manage Users</span>
+                      <i className="fas fa-star" style={{ width: '20px', color: '#F9C74F' }}></i>
+                      <span style={{ flex: 1 }}>Manage Testimonials</span>
+                      {pendingTestimonials > 0 && (
+                        <span style={{
+                          background: '#f59e0b',
+                          color: 'white',
+                          padding: '0.1rem 0.4rem',
+                          borderRadius: '10px',
+                          fontSize: '0.6rem'
+                        }}>
+                          {pendingTestimonials}
+                        </span>
+                      )}
                       <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
                     </Link>
                   </>
@@ -948,6 +1327,7 @@ const Navbar = () => {
               { to: '/news', icon: 'fas fa-newspaper', label: 'News & Stories' },
               { to: '/volunteers', icon: 'fas fa-hands-helping', label: 'Volunteers' },
               { to: '/partners', icon: 'fas fa-handshake', label: 'Partners' },
+              { to: '/say-about-us', icon: 'fas fa-star', label: 'Share Your Story' },
               { to: '/contact', icon: 'fas fa-envelope', label: 'Contact Us' }
             ].map((item) => (
               <Link
@@ -979,6 +1359,18 @@ const Navbar = () => {
               >
                 <i className={item.icon} style={{ width: '20px', color: '#F9C74F' }}></i>
                 <span>{item.label}</span>
+                {item.to === '/say-about-us' && testimonialCount > 0 && (
+                  <span style={{
+                    marginLeft: 'auto',
+                    background: '#F9C74F',
+                    color: '#0B3B2F',
+                    fontSize: '0.6rem',
+                    padding: '0.1rem 0.4rem',
+                    borderRadius: '10px'
+                  }}>
+                    {testimonialCount}
+                  </span>
+                )}
               </Link>
             ))}
           </div>
@@ -1046,7 +1438,16 @@ const Navbar = () => {
                   <span>My Profile</span>
                 </Link>
                 
-                {/* Admin Dashboard in Sidebar - Fixed role check */}
+                <Link to="/say-about-us" onClick={closeSidebar} style={{
+                  display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
+                  margin: '0 0.5rem', borderRadius: '12px', color: 'white', textDecoration: 'none',
+                  transition: 'all 0.3s ease'
+                }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
+                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                  <i className="fas fa-star" style={{ width: '20px', color: '#F9C74F' }}></i>
+                  <span>Share Your Story</span>
+                </Link>
+                
                 {isAdmin && (
                   <>
                     <Link to="/admin" onClick={closeSidebar} style={{
@@ -1059,34 +1460,26 @@ const Navbar = () => {
                       <span>Admin Dashboard</span>
                     </Link>
                     
-                    <Link to="/admin/donations" onClick={closeSidebar} style={{
+                    <Link to="/admin/testimonials" onClick={closeSidebar} style={{
                       display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
                       margin: '0 0.5rem', borderRadius: '12px', color: 'white', textDecoration: 'none',
                       transition: 'all 0.3s ease'
                     }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-                      <i className="fas fa-hand-holding-usd" style={{ width: '20px', color: '#F9C74F' }}></i>
-                      <span>Donations</span>
-                    </Link>
-                    
-                    <Link to="/admin/programs" onClick={closeSidebar} style={{
-                      display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
-                      margin: '0 0.5rem', borderRadius: '12px', color: 'white', textDecoration: 'none',
-                      transition: 'all 0.3s ease'
-                    }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
-                       onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-                      <i className="fas fa-chalkboard-user" style={{ width: '20px', color: '#F9C74F' }}></i>
-                      <span>Programs</span>
-                    </Link>
-                    
-                    <Link to="/admin/users" onClick={closeSidebar} style={{
-                      display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
-                      margin: '0 0.5rem', borderRadius: '12px', color: 'white', textDecoration: 'none',
-                      transition: 'all 0.3s ease'
-                    }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
-                       onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-                      <i className="fas fa-users" style={{ width: '20px', color: '#F9C74F' }}></i>
-                      <span>Users</span>
+                      <i className="fas fa-star" style={{ width: '20px', color: '#F9C74F' }}></i>
+                      <span>Manage Testimonials</span>
+                      {pendingTestimonials > 0 && (
+                        <span style={{
+                          marginLeft: 'auto',
+                          background: '#f59e0b',
+                          color: 'white',
+                          fontSize: '0.6rem',
+                          padding: '0.1rem 0.4rem',
+                          borderRadius: '10px'
+                        }}>
+                          {pendingTestimonials}
+                        </span>
+                      )}
                     </Link>
                   </>
                 )}
@@ -1183,7 +1576,7 @@ const Navbar = () => {
         
         .sidebar-container::-webkit-scrollbar-thumb {
           background: #F9C74F;
-          border-radius: 2px;
+          borderRadius: '2px'
         }
         
         @media (min-width: 992px) {

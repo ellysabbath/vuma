@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import eventdImg from '../assets/eventd.jpg'; // Import the image
+import { useNavigate } from 'react-router-dom';
+import eventdImg from '../assets/eventd.jpg';
 
 const Hero = ({ onLoginClick }) => {
+  const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = useState(false);
 
   useEffect(() => {
@@ -244,6 +246,39 @@ const Hero = ({ onLoginClick }) => {
           >
             Join Movement →
           </button>
+
+          {/* NEW: Share Your Story Button */}
+          <button 
+            className="btn-cta"
+            onClick={() => navigate('/say-about-us')}
+            style={{
+              background: 'transparent',
+              border: '2px solid #F9C74F',
+              padding: '0.7rem 1.5rem',
+              borderRadius: '60px',
+              fontWeight: 700,
+              margin: '0',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              fontSize: 'clamp(0.8rem, 3.5vw, 1rem)',
+              flex: '0 1 auto',
+              minWidth: '140px',
+              color: 'white'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.05)';
+              e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.2)';
+              e.currentTarget.style.borderColor = '#F9C74F';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
+          >
+            <i className="fas fa-star" style={{ marginRight: '0.5rem' }}></i>
+            Share Your Story
+          </button>
+
           <button 
             className="btn-cta btn-outline-light"
             onClick={onLoginClick}
@@ -275,17 +310,10 @@ const Hero = ({ onLoginClick }) => {
         </div>
       </div>
 
-     
-
-      {/* CSS Animations */}
       <style>{`
         @keyframes pulse {
-          0%, 100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.8;
-          }
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.8; }
         }
         
         @keyframes slideInUp {
@@ -299,36 +327,11 @@ const Hero = ({ onLoginClick }) => {
           }
         }
         
-        @keyframes bounce {
-          0%, 100% {
-            transform: translateX(-50%) translateY(0);
-          }
-          50% {
-            transform: translateX(-50%) translateY(10px);
-          }
-        }
-        
-        @keyframes scrollDown {
-          0% {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-          }
-          100% {
-            opacity: 0;
-            transform: translateX(-50%) translateY(20px);
-          }
-        }
-        
         @keyframes spin {
-          0% {
-            transform: rotate(0deg);
-          }
-          100% {
-            transform: rotate(360deg);
-          }
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
         
-        /* Mobile Responsive Styles */
         @media (max-width: 768px) {
           .hero-content {
             max-width: 95% !important;
@@ -373,49 +376,6 @@ const Hero = ({ onLoginClick }) => {
             padding: 0.5rem 1rem !important;
             font-size: 0.8rem !important;
             min-width: 120px !important;
-          }
-          
-          .hero-content {
-            padding: 0.5rem !important;
-          }
-          
-          .scroll-indicator {
-            display: none !important;
-          }
-          
-          ul li {
-            padding: 5px 8px !important;
-          }
-          
-          ul li i {
-            font-size: 0.8rem !important;
-          }
-        }
-        
-        /* Landscape mode on mobile */
-        @media (max-width: 768px) and (orientation: landscape) {
-          .hero-container {
-            min-height: auto;
-            padding: 60px 1rem 40px;
-          }
-          
-          .hero-content h1 {
-            font-size: 1.4rem !important;
-          }
-          
-          .hero-content p {
-            font-size: 0.8rem !important;
-          }
-        }
-        
-        /* Touch device optimizations */
-        @media (hover: none) and (pointer: coarse) {
-          .btn-cta, .btn-outline-light {
-            -webkit-tap-highlight-color: transparent;
-          }
-          
-          .btn-cta:active, .btn-outline-light:active {
-            transform: scale(0.98) !important;
           }
         }
       `}</style>

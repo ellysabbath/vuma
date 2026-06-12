@@ -10,7 +10,6 @@ const Events = () => {
   const [error, setError] = useState('');
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [registering, setRegistering] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('success');
@@ -69,36 +68,16 @@ const Events = () => {
     }, 3000);
   };
 
-  const handleRegister = async (eventId, eventTitle) => {
+  // MODIFIED: Navigate to registration page WITHOUT ID
+  const handleRegisterClick = () => {
     if (selectedEvent.registered >= selectedEvent.capacity) {
       showCircledAlert('This event is fully booked!', 'error');
       return;
     }
     
-    setRegistering(true);
-    try {
-      const response = await fetch(`${API_BASE_URL}/events/${eventId}/register/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      const data = await response.json();
-      
-      if (data.success || response.ok) {
-        showCircledAlert(`Successfully registered for "${eventTitle}"!`, 'success');
-        await fetchEvents();
-        closeModal();
-      } else {
-        showCircledAlert(data.error || 'Registration failed. Please try again.', 'error');
-      }
-    } catch (error) {
-      console.error('Registration error:', error);
-      showCircledAlert('Registration failed. Please try again.', 'error');
-    } finally {
-      setRegistering(false);
-    }
+    closeModal();
+    // Navigate to registration page - no ID in URL
+    navigate('/events/register');
   };
 
   const getTypeStyle = (type) => {
@@ -201,7 +180,7 @@ const Events = () => {
               <i className={`fas ${alertType === 'success' ? 'fa-check' : 'fa-times'}`} style={{ fontSize: '2rem', color: 'white' }}></i>
             </div>
             <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem', fontSize: '1rem', fontWeight: 600 }}>
-              {alertType === 'success' ? 'Registration Successful!' : 'Registration Failed!'}
+              {alertType === 'success' ? 'Success!' : 'Error!'}
             </h3>
             <p style={{ color: '#64748b', fontSize: '0.85rem' }}>{alertMessage}</p>
           </div>
@@ -574,18 +553,18 @@ const Events = () => {
                   Close
                 </button>
                 <button
-                  onClick={() => handleRegister(selectedEvent.id, selectedEvent.title)}
-                  disabled={registering || selectedEvent.registered >= selectedEvent.capacity}
+                  onClick={handleRegisterClick}
+                  disabled={selectedEvent.registered >= selectedEvent.capacity}
                   style={{
                     flex: 2,
-                    background: (registering || selectedEvent.registered >= selectedEvent.capacity) ? '#cbd5e1' : '#F9C74F',
+                    background: selectedEvent.registered >= selectedEvent.capacity ? '#cbd5e1' : '#F9C74F',
                     border: 'none',
                     padding: '0.6rem',
                     borderRadius: '40px',
-                    color: (registering || selectedEvent.registered >= selectedEvent.capacity) ? '#64748b' : '#0B3B2F',
+                    color: selectedEvent.registered >= selectedEvent.capacity ? '#64748b' : '#0B3B2F',
                     fontWeight: 600,
                     fontSize: '0.75rem',
-                    cursor: (registering || selectedEvent.registered >= selectedEvent.capacity) ? 'not-allowed' : 'pointer',
+                    cursor: selectedEvent.registered >= selectedEvent.capacity ? 'not-allowed' : 'pointer',
                     transition: 'all 0.2s ease',
                     display: 'flex',
                     alignItems: 'center',
@@ -593,12 +572,7 @@ const Events = () => {
                     gap: '0.4rem'
                   }}
                 >
-                  {registering ? (
-                    <>
-                      <i className="fas fa-spinner fa-spin"></i>
-                      Registering...
-                    </>
-                  ) : selectedEvent.registered >= selectedEvent.capacity ? (
+                  {selectedEvent.registered >= selectedEvent.capacity ? (
                     <>
                       <i className="fas fa-times-circle"></i>
                       Fully Booked

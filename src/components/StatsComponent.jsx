@@ -272,37 +272,7 @@ const StatsComponent = () => {
         transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
         transition: 'all 0.6s ease 0.4s'
       }}>
-        <button 
-          className="btn-cta"
-          onClick={handleViewReport}
-          style={{
-            background: '#F9C74F',
-            border: 'none',
-            padding: '0.7rem 1.5rem',
-            borderRadius: '60px',
-            fontWeight: 700,
-            margin: '0',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            fontSize: 'clamp(0.8rem, 3.5vw, 1rem)',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            color: '#0B3B2F'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'scale(1.05)';
-            e.currentTarget.style.boxShadow = '0 5px 20px rgba(249,199,79,0.4)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'scale(1)';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
-        >
-          <i className="fas fa-chart-simple"></i>
-          View Our Annual Report
-          <i className="fas fa-arrow-right"></i>
-        </button>
+        
       </div>
 
       <style>{`

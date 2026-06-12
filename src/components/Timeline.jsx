@@ -145,7 +145,7 @@ const Timeline = () => {
           backgroundClip: 'text',
           color: 'transparent'
         }}>
-          VUMA YOUTH EXPO
+           OUR PROGRAMS
         </h3>
         <p style={{
           fontSize: '0.85rem',
