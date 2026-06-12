@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { projects } from '../data/projects';
+import { projects } from '../data/proj';
 
 const InnovationShowcase = () => {
   const navigate = useNavigate();

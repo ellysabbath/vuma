@@ -1,88 +1,83 @@
 // Import local images from assets folder
-import eventa from '../assets/download.jpg';
-import eventb from '../assets/downloada.jpg';
-import eventc from '../assets/downloadb.jpg';
-import eventd from '../assets/downloadc.jpg';
-import evente from '../assets/downloadd.jpg';
-import eventf from '../assets/downloade.jpg';
-import eventg from '../assets/downloadf.jpg';
-import eventh from '../assets/downloadh.jpg';
-import eventi from '../assets/downloadg.jpg';
-import eventj from '../assets/downloadi.jpg';
-import eventk from '../assets/downloadj.jpg';
-import eventl from '../assets/downloadk.jpg';
+import eventa from '../assets/imageb.jpg';
+import eventb from '../assets/image.jpg';
+import eventc from '../assets/imagea.jpg';
+import eventd from '../assets/eventd.jpg';
+import evente from '../assets/imaged.jpg';
+import eventf from '../assets/imagee.jpg';
+import eventg from '../assets/eventg.jpg';
+import eventh from '../assets/imagef.jpg';
+import eventi from '../assets/imageg.jpg';
+import eventj from '../assets/eventj.jpg';
+import eventk from '../assets/eventk.jpg';
+import eventl from '../assets/eventl.jpg';
 
 export const projects = [
   { 
-    title: "AI-Powered Waste Sorting System", 
+    title: "Solar-Powered Water Pump", 
     cat: "environment", 
     img: eventa,
-    description: "Using artificial intelligence and computer vision to automatically sort recyclable materials, increasing recycling efficiency by up to 80%."
+    description: "Sustainable water solution for rural communities"
   },
   { 
-    title: "Solar-Powered Water Quality Drones", 
-    cat: "environment", 
+    title: "Youth Leadership Academy", 
+    cat: "leadership", 
     img: eventb,
-    description: "Deploying autonomous drones equipped with sensors to monitor water quality in real-time across Lake Victoria and rivers."
+    description: "Empowering next generation of African leaders"
   },
   { 
-    title: "Blockchain Carbon Credit Platform", 
+    title: "Plastic Upcycling Hub", 
     cat: "environment", 
     img: eventc,
-    description: "A blockchain-based platform that allows communities to earn and trade carbon credits for tree planting and forest conservation."
+    description: "Turning waste into valuable products"
   },
   { 
-    title: "IoT Air Quality Monitoring Network", 
-    cat: "environment", 
+    title: "Policy Innovators Fellowship", 
+    cat: "leadership", 
     img: eventd,
-    description: "Installing Internet of Things sensors across cities to track air pollution levels and provide real-time data to citizens."
+    description: "Shaping tomorrow's environmental policies"
   },
   { 
-    title: "Mobile App for Waste Collection", 
+    title: "Urban Vertical Farming", 
     cat: "environment", 
     img: evente,
-    description: "On-demand waste collection mobile application connecting households with recycling collectors using GPS tracking and digital payments."
+    description: "Innovative food production in city spaces"
   },
   { 
-    title: "Smart Composting Bins", 
-    cat: "environment", 
+    title: "Climate Tech Bootcamp", 
+    cat: "leadership", 
     img: eventf,
-    description: "IoT-enabled composting bins that monitor temperature, moisture, and fill levels, optimizing the composting process for urban areas."
+    description: "Tech skills for climate solutions"
   },
+ 
   { 
-    title: "Vertical Farming AI System", 
-    cat: "environment", 
-    img: eventg,
-    description: "AI-controlled vertical farming units using hydroponics and LED lighting to grow fresh produce in urban spaces with minimal water."
-  },
-  { 
-    title: "Ocean Plastic Recovery Vessel", 
+    title: "Zero Waste Initiative", 
     cat: "environment", 
     img: eventh,
-    description: "Solar-powered autonomous vessels designed to collect plastic waste from oceans, lakes, and rivers using conveyor belt systems."
+    description: "Promoting waste reduction and recycling"
   },
   { 
-    title: "Drone Reforestation Technology", 
+    title: "Green Energy Solutions", 
     cat: "environment", 
     img: eventi,
-    description: "Using drone technology to seed thousands of trees per day in deforested areas with biodegradable seed pods and soil sensors."
+    description: "Renewable energy for rural communities"
   },
   { 
-    title: "Waste-to-Energy Micro Reactors", 
-    cat: "environment", 
+    title: "Youth Entrepreneurship Program", 
+    cat: "leadership", 
     img: eventj,
-    description: "Small-scale pyrolysis reactors that convert plastic waste into fuel and charcoal, providing clean energy for local communities."
+    description: "Building business skills for young entrepreneurs"
   },
   { 
-    title: "Smart Water Metering System", 
-    cat: "environment", 
+    title: "Climate Advocacy Training", 
+    cat: "leadership", 
     img: eventk,
-    description: "IoT-enabled water meters that track consumption, detect leaks, and help households reduce water waste through real-time alerts."
+    description: "Training youth climate advocates"
   },
   { 
-    title: "AR Environmental Education Platform", 
+    title: "Community Recycling Project", 
     cat: "environment", 
     img: eventl,
-    description: "Augmented reality mobile app that teaches users about environmental conservation through interactive 3D models and gamified learning."
+    description: "Community-based recycling initiatives"
   }
 ];
