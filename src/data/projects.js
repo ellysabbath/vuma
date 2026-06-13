@@ -1,5 +1,5 @@
 // Import local images from assets folder
-import eventa from '../assets/imageb.jpg';
+import eventa from '../assets/imageb.png';
 import eventb from '../assets/image.jpg';
 import eventc from '../assets/imagea.jpg';
 import eventd from '../assets/eventd.jpg';
@@ -32,7 +32,7 @@ export const projects = [
     description: "Turning waste into valuable products"
   },
   { 
-    title: "Policy Innovators Fellowship", 
+    title: "Environmental seminars for team members", 
     cat: "leadership", 
     img: eventd,
     description: "Shaping tomorrow's environmental policies"

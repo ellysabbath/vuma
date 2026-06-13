@@ -118,7 +118,7 @@ const InnovationShowcase = () => {
           padding: '0 1rem'
         }}
       >
-        Innovation Showcase
+       What we have done ?  
       </h2>
       
       <div className="filter-buttons" style={{

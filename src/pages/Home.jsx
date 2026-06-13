@@ -28,7 +28,7 @@ const Home = ({ onLoginClick }) => {
         <Pro /> {/* Add this line to include the Programs component */}
       </div>
       <div id="news">
-        <Blog />
+        {/* <Blog /> */}
       </div>
       <Leadership />
     </>
