@@ -15,7 +15,7 @@ const AdminDashboard = () => {
     completed_projects: 0,
     total_events: 0,
     total_volunteers: 0,
-    volunteer_hours: 0,
+    
     total_partners: 0,
     active_partners: 0,
     total_news: 0,
@@ -28,7 +28,10 @@ const AdminDashboard = () => {
     total_environment_missions: 0,
     total_leadership_missions: 0,
     average_rating: 0,
-    pending_event_requests: 0
+    pending_event_requests: 0,
+    pending_applications: 0,
+    accepted_applications: 0,
+    rejected_applications: 0
   });
   
   const [loading, setLoading] = useState(true);
@@ -138,6 +141,23 @@ const AdminDashboard = () => {
         }
       } catch (err) {
         setErrors(prev => ({ ...prev, volunteers: 'Network error' }));
+      }
+
+      // VOLUNTEER APPLICATIONS API
+      let pendingApplications = 0, acceptedApplications = 0, rejectedApplications = 0;
+      try {
+        const response = await fetch(`${API_BASE_URL}/volunteers/applications/`);
+        if (response.ok) {
+          const data = await response.json();
+          const applications = data.data || [];
+          pendingApplications = applications.filter(app => app.status === 'pending' || app.status === 'reviewing').length;
+          acceptedApplications = applications.filter(app => app.status === 'accepted').length;
+          rejectedApplications = applications.filter(app => app.status === 'rejected').length;
+        } else {
+          setErrors(prev => ({ ...prev, applications: `API Error: ${response.status}` }));
+        }
+      } catch (err) {
+        setErrors(prev => ({ ...prev, applications: 'Network error' }));
       }
 
       // PARTNERS API
@@ -290,7 +310,10 @@ const AdminDashboard = () => {
         total_environment_missions: environmentMissions,
         total_leadership_missions: leadershipMissions,
         average_rating: avgRating,
-        pending_event_requests: pendingEventRequests
+        pending_event_requests: pendingEventRequests,
+        pending_applications: pendingApplications,
+        accepted_applications: acceptedApplications,
+        rejected_applications: rejectedApplications
       });
 
     } catch (error) {
@@ -308,7 +331,7 @@ const AdminDashboard = () => {
     { label: 'Active Users', value: stats.active_users, icon: 'fas fa-user-check', color: '#4caf50', error: errors.users },
     { label: 'Active Projects', value: stats.ongoing_projects, icon: 'fas fa-project-diagram', color: '#F9C74F', error: errors.projects },
     { label: 'Total Events', value: stats.total_events, icon: 'fas fa-calendar-check', color: '#2b7a5c', error: errors.events },
-    { label: 'Volunteer Hours', value: stats.volunteer_hours, icon: 'fas fa-clock', color: '#F9C74F', error: errors.volunteers },
+   
     { label: 'Active Partners', value: stats.active_partners, icon: 'fas fa-handshake', color: '#0B3B2F', error: errors.partners },
     { label: 'News Articles', value: stats.total_news, icon: 'fas fa-newspaper', color: '#FF9800', error: errors.news },
     { label: 'Total Leaders', value: stats.total_leaders, icon: 'fas fa-users-cog', color: '#0B3B2F', error: errors.leaders },
@@ -320,7 +343,7 @@ const AdminDashboard = () => {
     { label: 'Event Requests', value: stats.pending_event_requests, icon: 'fas fa-calendar-plus', color: '#f59e0b', error: errors.event_requests },
   ];
 
-  // Admin Cards Data - UPDATED with Testimonials direct path
+  // Admin Cards Data - REMOVED Volunteers Management card
   const adminCards = [
     { 
       id: 'users', 
@@ -364,14 +387,20 @@ const AdminDashboard = () => {
       badge: stats.pending_event_requests > 0 ? stats.pending_event_requests : null
     },
     { 
-      id: 'volunteers', 
-      title: 'Volunteers', 
-      icon: 'fas fa-hands-helping', 
-      color: '#F9C74F', 
-      description: 'Manage volunteer applications and assignments',
-      count: stats.total_volunteers,
+      id: 'applications', 
+      title: 'Volunteer Applications', 
+      icon: 'fas fa-file-alt', 
+      color: '#9C27B0', 
+      description: 'Review and process volunteer applications',
+      count: stats.pending_applications,
       path: '/admin/volunteers',
-      error: errors.volunteers
+      error: errors.applications,
+      badge: stats.pending_applications > 0 ? stats.pending_applications : null,
+      subStats: [
+        { label: 'Pending', value: stats.pending_applications },
+        { label: 'Accepted', value: stats.accepted_applications },
+        { label: 'Rejected', value: stats.rejected_applications }
+      ]
     },
     { 
       id: 'partners', 
@@ -711,10 +740,11 @@ const AdminDashboard = () => {
                   marginBottom: '1rem',
                   padding: '0.5rem',
                   background: '#f9f9f9',
-                  borderRadius: '12px'
+                  borderRadius: '12px',
+                  flexWrap: 'wrap'
                 }}>
                   {card.subStats.map((sub, subIdx) => (
-                    <div key={subIdx} style={{ flex: 1, textAlign: 'center' }}>
+                    <div key={subIdx} style={{ flex: 1, textAlign: 'center', minWidth: '80px' }}>
                       <div style={{ fontSize: '0.7rem', color: '#888' }}>{sub.label}</div>
                       <div style={{ fontSize: '1.1rem', fontWeight: 700, color: card.color }}>
                         {sub.value}{sub.suffix || ''}
