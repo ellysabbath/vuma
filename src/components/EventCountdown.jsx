@@ -36,8 +36,8 @@ const EventCountdown = () => {
       gap: '1rem'
     }}>
       <div>
-        <h2>🌍 VUMA Climate Innovation Summit</h2>
-        <p>Dodoma | June 15-17, 2026</p>
+        <h2>Welcome VUMA</h2>
+        <p>Lets build the Earth, together!</p>
       </div>
       <div className="countdown" style={{
         fontSize: '1.6rem',
