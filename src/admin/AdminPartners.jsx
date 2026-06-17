@@ -19,6 +19,13 @@ const AdminPartners = () => {
   const [logoPreview, setLogoPreview] = useState('');
   const [logoFile, setLogoFile] = useState(null);
   const [editLogoPreview, setEditLogoPreview] = useState('');
+  
+  // Loading states for actions
+  const [isAdding, setIsAdding] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+  
   const [newPartner, setNewPartner] = useState({
     name: '',
     type: 'development',
@@ -110,6 +117,8 @@ const AdminPartners = () => {
     setSelectedPartner(null);
     setIsEditMode(false);
     setEditingPartner(null);
+    setEditLogoPreview('');
+    setIsUpdating(false);
     navigate('/admin/partners', { replace: true });
     document.body.style.overflow = 'unset';
   };
@@ -145,6 +154,7 @@ const AdminPartners = () => {
       return;
     }
     
+    setIsUpdating(true);
     try {
       const response = await fetch(`https://vuma.pythonanywhere.com/api/partners/${editingPartner.id}/`, {
         method: 'PUT',
@@ -159,13 +169,17 @@ const AdminPartners = () => {
         await fetchPartners();
         setSuccessMessage('Partner updated successfully!');
         setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 3000);
-        closeModal();
+        setTimeout(() => {
+          setShowSuccess(false);
+          closeModal();
+        }, 2000);
       } else {
         alert(data.error || 'Failed to update partner');
+        setIsUpdating(false);
       }
     } catch (error) {
       alert('Network error. Please try again.');
+      setIsUpdating(false);
     }
   };
 
@@ -192,6 +206,7 @@ const AdminPartners = () => {
     });
     setLogoPreview('');
     setLogoFile(null);
+    setIsAdding(false);
     document.body.style.overflow = 'unset';
   };
 
@@ -201,6 +216,7 @@ const AdminPartners = () => {
       return;
     }
     
+    setIsAdding(true);
     try {
       const response = await fetch('https://vuma.pythonanywhere.com/api/partners/', {
         method: 'POST',
@@ -215,35 +231,42 @@ const AdminPartners = () => {
         await fetchPartners();
         setSuccessMessage('Partner added successfully!');
         setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 3000);
-        closeAddModal();
+        setTimeout(() => {
+          setShowSuccess(false);
+          closeAddModal();
+        }, 2000);
       } else {
         alert(data.error || 'Failed to add partner');
+        setIsAdding(false);
       }
     } catch (error) {
       alert('Network error. Please try again.');
+      setIsAdding(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this partner?')) {
-      try {
-        const response = await fetch(`https://vuma.pythonanywhere.com/api/partners/${id}/`, {
-          method: 'DELETE',
-        });
-        
-        const data = await response.json();
-        if (data.success) {
-          await fetchPartners();
-          setSuccessMessage('Partner deleted successfully!');
-          setShowSuccess(true);
-          setTimeout(() => setShowSuccess(false), 3000);
-        } else {
-          alert(data.error || 'Failed to delete partner');
-        }
-      } catch (error) {
-        alert('Network error. Please try again.');
+    setDeletingId(id);
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`https://vuma.pythonanywhere.com/api/partners/${id}/`, {
+        method: 'DELETE',
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        await fetchPartners();
+        setSuccessMessage('Partner deleted successfully!');
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 3000);
+      } else {
+        alert(data.error || 'Failed to delete partner');
       }
+    } catch (error) {
+      alert('Network error. Please try again.');
+    } finally {
+      setIsDeleting(false);
+      setDeletingId(null);
     }
   };
 
@@ -333,23 +356,35 @@ const AdminPartners = () => {
       {showSuccess && (
         <div style={{
           position: 'fixed',
-          top: '20px',
-          right: '20px',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
           zIndex: 9999,
-          animation: 'slideInRight 0.3s ease'
+          animation: 'fadeInScale 0.3s ease'
         }}>
           <div style={{
             background: 'white',
-            borderRadius: '12px',
-            padding: '0.75rem 1rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-            borderLeft: `3px solid #10b981`
+            borderRadius: '20px',
+            padding: '2rem',
+            textAlign: 'center',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+            minWidth: '300px'
           }}>
-            <i className="fas fa-check-circle" style={{ color: '#10b981', fontSize: '1rem' }}></i>
-            <span style={{ fontSize: '0.813rem', color: '#0B3B2F' }}>{successMessage}</span>
+            <div style={{
+              width: '80px',
+              height: '80px',
+              borderRadius: '50%',
+              background: '#10b981',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 1rem',
+              animation: 'scaleIn 0.5s ease'
+            }}>
+              <i className="fas fa-check" style={{ fontSize: '2.5rem', color: 'white' }}></i>
+            </div>
+            <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem' }}>Success!</h3>
+            <p style={{ color: '#666', fontSize: '0.9rem' }}>{successMessage}</p>
           </div>
         </div>
       )}
@@ -376,7 +411,7 @@ const AdminPartners = () => {
                 background: '#0B3B2F',
                 color: 'white',
                 border: 'none',
-                padding: '0.375rem 0.875rem',
+                padding: '0.5rem 1.25rem',
                 borderRadius: '8px',
                 fontSize: '0.813rem',
                 fontWeight: 500,
@@ -384,10 +419,19 @@ const AdminPartners = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                transition: 'all 0.2s ease'
+                transition: 'all 0.3s ease',
+                boxShadow: '0 2px 8px rgba(11, 59, 47, 0.2)'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.background = '#1a5c48'}
-              onMouseLeave={(e) => e.currentTarget.style.background = '#0B3B2F'}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#1a5c48';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(11, 59, 47, 0.3)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#0B3B2F';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(11, 59, 47, 0.2)';
+              }}
             >
               <i className="fas fa-plus" style={{ fontSize: '0.75rem' }}></i>
               Add Partner
@@ -408,89 +452,175 @@ const AdminPartners = () => {
                 </tr>
               </thead>
               <tbody>
-                {partners.map(partner => (
-                  <tr key={partner.id} style={{ borderBottom: '1px solid #f1f5f9', transition: 'background 0.2s ease' }} onMouseEnter={(e) => e.currentTarget.style.background = '#fafafa'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
-                    <td style={{ padding: '0.75rem 1rem' }}>
-                      <span style={{ cursor: 'pointer', color: '#0B3B2F', fontWeight: 500, fontSize: '0.813rem' }} onClick={() => openModal(partner)}>
-                        {partner.name}
-                      </span>
-                    </td>
-                    <td style={{ padding: '0.75rem 1rem' }}>
-                      <span style={{
-                        background: `${getTypeColor(partner.type)}15`,
-                        color: getTypeColor(partner.type),
-                        padding: '0.125rem 0.5rem',
-                        borderRadius: '12px',
-                        fontSize: '0.688rem',
-                        fontWeight: 500,
-                        display: 'inline-block'
-                      }}>{getTypeLabel(partner.type)}</span>
-                    </td>
-                    <td style={{ padding: '0.75rem 1rem' }}>
-                      <span style={{
-                        background: `${getStatusColor(partner.status)}15`,
-                        color: getStatusColor(partner.status),
-                        padding: '0.125rem 0.5rem',
-                        borderRadius: '12px',
-                        fontSize: '0.688rem',
-                        fontWeight: 500,
-                        display: 'inline-block'
-                      }}>{getStatusLabel(partner.status)}</span>
-                    </td>
-                    <td style={{ padding: '0.75rem 1rem', color: '#475569', fontSize: '0.813rem' }}>{partner.since}</td>
-                    <td style={{ padding: '0.75rem 1rem', color: '#475569', fontSize: '0.813rem' }}>{partner.projects_count || 0}</td>
-                    <td style={{ padding: '0.75rem 1rem' }}>
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <i className="fas fa-eye" style={{ color: '#0B3B2F', cursor: 'pointer', fontSize: '0.875rem', transition: 'opacity 0.2s' }} onClick={() => openModal(partner)} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}></i>
-                        <i className="fas fa-edit" style={{ color: '#3b82f6', cursor: 'pointer', fontSize: '0.875rem', transition: 'opacity 0.2s' }} onClick={() => openEditModal(partner)} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}></i>
-                        <i className="fas fa-trash" style={{ color: '#ef4444', cursor: 'pointer', fontSize: '0.875rem', transition: 'opacity 0.2s' }} onClick={() => handleDelete(partner.id)} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}></i>
-                      </div>
+                {partners.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>
+                      <i className="fas fa-handshake" style={{ fontSize: '2rem', display: 'block', marginBottom: '0.5rem', opacity: 0.5 }}></i>
+                      No partners found. Click "Add Partner" to get started.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  partners.map(partner => (
+                    <tr key={partner.id} style={{ borderBottom: '1px solid #f1f5f9', transition: 'background 0.2s ease' }} onMouseEnter={(e) => e.currentTarget.style.background = '#fafafa'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                      <td style={{ padding: '0.75rem 1rem' }}>
+                        <span style={{ cursor: 'pointer', color: '#0B3B2F', fontWeight: 500, fontSize: '0.813rem' }} onClick={() => openModal(partner)}>
+                          {partner.name}
+                        </span>
+                      </td>
+                      <td style={{ padding: '0.75rem 1rem' }}>
+                        <span style={{
+                          background: `${getTypeColor(partner.type)}15`,
+                          color: getTypeColor(partner.type),
+                          padding: '0.125rem 0.5rem',
+                          borderRadius: '12px',
+                          fontSize: '0.688rem',
+                          fontWeight: 500,
+                          display: 'inline-block'
+                        }}>{getTypeLabel(partner.type)}</span>
+                      </td>
+                      <td style={{ padding: '0.75rem 1rem' }}>
+                        <span style={{
+                          background: `${getStatusColor(partner.status)}15`,
+                          color: getStatusColor(partner.status),
+                          padding: '0.125rem 0.5rem',
+                          borderRadius: '12px',
+                          fontSize: '0.688rem',
+                          fontWeight: 500,
+                          display: 'inline-block'
+                        }}>{getStatusLabel(partner.status)}</span>
+                      </td>
+                      <td style={{ padding: '0.75rem 1rem', color: '#475569', fontSize: '0.813rem' }}>{partner.since}</td>
+                      <td style={{ padding: '0.75rem 1rem', color: '#475569', fontSize: '0.813rem' }}>{partner.projects_count || 0}</td>
+                      <td style={{ padding: '0.75rem 1rem' }}>
+                        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                          <button
+                            onClick={() => openModal(partner)}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                              padding: '0.25rem',
+                              transition: 'all 0.2s ease',
+                              color: '#0B3B2F'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.transform = 'scale(1.2)';
+                              e.currentTarget.style.color = '#1a5c48';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.transform = 'scale(1)';
+                              e.currentTarget.style.color = '#0B3B2F';
+                            }}
+                            title="View Details"
+                          >
+                            <i className="fas fa-eye" style={{ fontSize: '0.875rem' }}></i>
+                          </button>
+                          <button
+                            onClick={() => openEditModal(partner)}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                              padding: '0.25rem',
+                              transition: 'all 0.2s ease',
+                              color: '#3b82f6'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.transform = 'scale(1.2)';
+                              e.currentTarget.style.color = '#2563eb';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.transform = 'scale(1)';
+                              e.currentTarget.style.color = '#3b82f6';
+                            }}
+                            title="Edit Partner"
+                          >
+                            <i className="fas fa-edit" style={{ fontSize: '0.875rem' }}></i>
+                          </button>
+                          <button
+                            onClick={() => handleDelete(partner.id)}
+                            disabled={isDeleting && deletingId === partner.id}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              cursor: isDeleting && deletingId === partner.id ? 'not-allowed' : 'pointer',
+                              padding: '0.25rem',
+                              transition: 'all 0.2s ease',
+                              color: '#ef4444',
+                              opacity: isDeleting && deletingId === partner.id ? 0.5 : 1
+                            }}
+                            onMouseEnter={(e) => {
+                              if (!(isDeleting && deletingId === partner.id)) {
+                                e.currentTarget.style.transform = 'scale(1.2)';
+                                e.currentTarget.style.color = '#dc2626';
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (!(isDeleting && deletingId === partner.id)) {
+                                e.currentTarget.style.transform = 'scale(1)';
+                                e.currentTarget.style.color = '#ef4444';
+                              }
+                            }}
+                            title="Delete Partner"
+                          >
+                            {isDeleting && deletingId === partner.id ? (
+                              <i className="fas fa-spinner fa-spin" style={{ fontSize: '0.875rem' }}></i>
+                            ) : (
+                              <i className="fas fa-trash" style={{ fontSize: '0.875rem' }}></i>
+                            )}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
         </div>
       </div>
 
-      {/* Partner Details/Edit Modal */}
+      {/* Partner Details/Edit Modal - Enhanced */}
       {showModal && (
         <div className="modal-overlay" onClick={closeModal} style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)',
-          zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', animation: 'fadeIn 0.2s ease'
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)',
+          zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', animation: 'fadeIn 0.3s ease'
         }}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{
-            background: 'white', borderRadius: '16px', maxWidth: '480px', width: '100%', 
-            maxHeight: '85vh', display: 'flex', flexDirection: 'column',
-            position: 'relative', animation: 'slideInUp 0.2s ease'
+            background: 'white', borderRadius: '20px', maxWidth: '480px', width: '100%', 
+            maxHeight: '90vh', display: 'flex', flexDirection: 'column',
+            position: 'relative', animation: 'slideInUp 0.3s ease'
           }}>
             <button onClick={closeModal} style={{
               position: 'absolute', top: '12px', right: '12px', background: 'rgba(0,0,0,0.5)', border: 'none',
               width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', color: 'white', fontSize: '0.875rem',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10
-            }}><i className="fas fa-times"></i></button>
+              display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10,
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.8)'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.5)'}
+            ><i className="fas fa-times"></i></button>
             
             <div style={{ 
               background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)', 
-              padding: '1rem 1rem', 
+              padding: '1.25rem 1.25rem', 
               textAlign: 'center', 
-              borderRadius: '16px 16px 0 0',
+              borderRadius: '20px 20px 0 0',
               flexShrink: 0
             }}>
               <div style={{ width: '56px', height: '56px', margin: '0 auto', borderRadius: '50%', background: '#F9C74F', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <i className="fas fa-handshake" style={{ fontSize: '1.5rem', color: '#0B3B2F' }}></i>
               </div>
-              <h2 style={{ color: 'white', marginTop: '0.5rem', marginBottom: '0', fontSize: '1rem', fontWeight: 600 }}>
+              <h2 style={{ color: 'white', marginTop: '0.5rem', marginBottom: '0', fontSize: '1.1rem', fontWeight: 600 }}>
                 {isEditMode ? 'Edit Partner' : 'Partner Details'}
               </h2>
             </div>
             
             <div style={{ 
-              padding: '1rem', 
+              padding: '1.25rem', 
               overflowY: 'auto', 
               flex: 1,
-              maxHeight: 'calc(85vh - 100px)'
+              maxHeight: 'calc(90vh - 120px)'
             }}>
               {isEditMode && editingPartner ? (
                 <>
@@ -506,7 +636,7 @@ const AdminPartners = () => {
 
                   <div style={{ marginBottom: '0.75rem' }}>
                     <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500, fontSize: '0.75rem', color: '#475569' }}>Name *</label>
-                    <input type="text" name="name" value={editingPartner.name} onChange={handleEditChange} style={{ width: '100%', padding: '0.5rem', fontSize: '0.813rem', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
+                    <input type="text" name="name" value={editingPartner.name} onChange={handleEditChange} style={{ width: '100%', padding: '0.5rem', fontSize: '0.813rem', border: '1px solid #e2e8f0', borderRadius: '8px', transition: 'border-color 0.2s' }} />
                   </div>
                   
                   <div style={{ marginBottom: '0.75rem' }}>
@@ -545,8 +675,61 @@ const AdminPartners = () => {
                   </div>
                   
                   <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
-                    <button onClick={closeModal} style={{ flex: 1, background: '#f1f5f9', border: 'none', padding: '0.5rem', borderRadius: '8px', fontWeight: 500, cursor: 'pointer', fontSize: '0.813rem' }}>Cancel</button>
-                    <button onClick={handleUpdatePartner} style={{ flex: 1, background: '#0B3B2F', color: 'white', border: 'none', padding: '0.5rem', borderRadius: '8px', fontWeight: 500, cursor: 'pointer', fontSize: '0.813rem' }}>Update</button>
+                    <button onClick={closeModal} style={{ 
+                      flex: 1, background: '#f1f5f9', border: 'none', padding: '0.5rem', borderRadius: '8px', 
+                      fontWeight: 500, cursor: 'pointer', fontSize: '0.813rem',
+                      transition: 'background 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = '#e2e8f0'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = '#f1f5f9'}
+                    disabled={isUpdating}
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      onClick={handleUpdatePartner} 
+                      disabled={isUpdating}
+                      style={{ 
+                        flex: 1, 
+                        background: isUpdating ? '#94a3b8' : '#0B3B2F', 
+                        color: 'white', 
+                        border: 'none', 
+                        padding: '0.5rem', 
+                        borderRadius: '8px', 
+                        fontWeight: 500, 
+                        cursor: isUpdating ? 'not-allowed' : 'pointer', 
+                        fontSize: '0.813rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isUpdating) {
+                          e.currentTarget.style.background = '#1a5c48';
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isUpdating) {
+                          e.currentTarget.style.background = '#0B3B2F';
+                          e.currentTarget.style.transform = 'translateY(0)';
+                        }
+                      }}
+                    >
+                      {isUpdating ? (
+                        <>
+                          <i className="fas fa-spinner fa-spin"></i>
+                          Updating...
+                        </>
+                      ) : (
+                        <>
+                          <i className="fas fa-save"></i>
+                          Update
+                        </>
+                      )}
+                    </button>
                   </div>
                 </>
               ) : (
@@ -596,8 +779,39 @@ const AdminPartners = () => {
                   )}
                   
                   <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
-                    <button onClick={closeModal} style={{ flex: 1, background: '#f1f5f9', border: 'none', padding: '0.5rem', borderRadius: '8px', fontWeight: 500, cursor: 'pointer', fontSize: '0.813rem' }}>Close</button>
-                    <button onClick={() => openEditModal(selectedPartner)} style={{ flex: 1, background: '#0B3B2F', color: 'white', border: 'none', padding: '0.5rem', borderRadius: '8px', fontWeight: 500, cursor: 'pointer', fontSize: '0.813rem' }}>Edit</button>
+                    <button onClick={closeModal} style={{ 
+                      flex: 1, background: '#f1f5f9', border: 'none', padding: '0.5rem', borderRadius: '8px', 
+                      fontWeight: 500, cursor: 'pointer', fontSize: '0.813rem',
+                      transition: 'background 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = '#e2e8f0'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = '#f1f5f9'}
+                    >
+                      Close
+                    </button>
+                    <button 
+                      onClick={() => openEditModal(selectedPartner)} 
+                      style={{ 
+                        flex: 1, background: '#0B3B2F', color: 'white', border: 'none', padding: '0.5rem', 
+                        borderRadius: '8px', fontWeight: 500, cursor: 'pointer', fontSize: '0.813rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#1a5c48';
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = '#0B3B2F';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                      }}
+                    >
+                      <i className="fas fa-edit"></i>
+                      Edit
+                    </button>
                   </div>
                 </>
               )}
@@ -606,37 +820,41 @@ const AdminPartners = () => {
         </div>
       )}
 
-      {/* Add Partner Modal */}
+      {/* Add Partner Modal - Enhanced */}
       {showAddModal && (
         <div className="modal-overlay" onClick={closeAddModal} style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)',
-          zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', animation: 'fadeIn 0.2s ease'
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)',
+          zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', animation: 'fadeIn 0.3s ease'
         }}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{
-            background: 'white', borderRadius: '16px', maxWidth: '480px', width: '100%',
-            maxHeight: '85vh', display: 'flex', flexDirection: 'column',
-            position: 'relative', animation: 'slideInUp 0.2s ease'
+            background: 'white', borderRadius: '20px', maxWidth: '480px', width: '100%',
+            maxHeight: '90vh', display: 'flex', flexDirection: 'column',
+            position: 'relative', animation: 'slideInUp 0.3s ease'
           }}>
             <button onClick={closeAddModal} style={{
               position: 'absolute', top: '12px', right: '12px', background: 'rgba(0,0,0,0.5)', border: 'none',
               width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', color: 'white', fontSize: '0.875rem',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10
-            }}><i className="fas fa-times"></i></button>
+              display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10,
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.8)'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.5)'}
+            ><i className="fas fa-times"></i></button>
             
             <div style={{ 
               background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)', 
-              padding: '1rem 1rem', 
+              padding: '1.25rem 1.25rem', 
               textAlign: 'center', 
-              borderRadius: '16px 16px 0 0',
+              borderRadius: '20px 20px 0 0',
               flexShrink: 0
             }}>
               <div style={{ width: '56px', height: '56px', margin: '0 auto', borderRadius: '50%', background: '#F9C74F', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <i className="fas fa-handshake" style={{ fontSize: '1.5rem', color: '#0B3B2F' }}></i>
               </div>
-              <h2 style={{ color: 'white', marginTop: '0.5rem', fontSize: '1rem', fontWeight: 600 }}>Add Partner</h2>
+              <h2 style={{ color: 'white', marginTop: '0.5rem', fontSize: '1.1rem', fontWeight: 600 }}>Add New Partner</h2>
             </div>
             
-            <div style={{ padding: '1rem', overflowY: 'auto', flex: 1, maxHeight: 'calc(85vh - 100px)' }}>
+            <div style={{ padding: '1.25rem', overflowY: 'auto', flex: 1, maxHeight: 'calc(90vh - 120px)' }}>
               <div style={{ marginBottom: '0.75rem' }}>
                 <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500, fontSize: '0.75rem', color: '#475569' }}>Logo</label>
                 <input type="file" accept="image/*" onChange={handleLogoChange} style={{ width: '100%', padding: '0.375rem', fontSize: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
@@ -684,8 +902,61 @@ const AdminPartners = () => {
               </div>
               
               <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
-                <button onClick={closeAddModal} style={{ flex: 1, background: '#f1f5f9', border: 'none', padding: '0.5rem', borderRadius: '8px', fontWeight: 500, cursor: 'pointer', fontSize: '0.813rem' }}>Cancel</button>
-                <button onClick={handleAddPartner} style={{ flex: 1, background: '#0B3B2F', color: 'white', border: 'none', padding: '0.5rem', borderRadius: '8px', fontWeight: 500, cursor: 'pointer', fontSize: '0.813rem' }}>Add</button>
+                <button onClick={closeAddModal} style={{ 
+                  flex: 1, background: '#f1f5f9', border: 'none', padding: '0.5rem', borderRadius: '8px', 
+                  fontWeight: 500, cursor: 'pointer', fontSize: '0.813rem',
+                  transition: 'background 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#e2e8f0'}
+                onMouseLeave={(e) => e.currentTarget.style.background = '#f1f5f9'}
+                disabled={isAdding}
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleAddPartner}
+                  disabled={isAdding}
+                  style={{ 
+                    flex: 1, 
+                    background: isAdding ? '#94a3b8' : '#0B3B2F', 
+                    color: 'white', 
+                    border: 'none', 
+                    padding: '0.5rem', 
+                    borderRadius: '8px', 
+                    fontWeight: 500, 
+                    cursor: isAdding ? 'not-allowed' : 'pointer', 
+                    fontSize: '0.813rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isAdding) {
+                      e.currentTarget.style.background = '#1a5c48';
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isAdding) {
+                      e.currentTarget.style.background = '#0B3B2F';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                    }
+                  }}
+                >
+                  {isAdding ? (
+                    <>
+                      <i className="fas fa-spinner fa-spin"></i>
+                      Adding...
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-plus"></i>
+                      Add Partner
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           </div>
@@ -695,11 +966,33 @@ const AdminPartners = () => {
       <style>{`
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes fadeInScale {
+          from {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+          }
+        }
+        @keyframes scaleIn {
+          from {
+            transform: scale(0);
+          }
+          to {
+            transform: scale(1);
+          }
+        }
         
         .modal-content div::-webkit-scrollbar { width: 4px; }
         .modal-content div::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
         .modal-content div::-webkit-scrollbar-thumb { background: #0B3B2F; border-radius: 10px; }
+        
+        button:disabled {
+          opacity: 0.7;
+          cursor: not-allowed !important;
+        }
       `}</style>
     </div>
   );

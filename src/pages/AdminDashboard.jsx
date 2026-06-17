@@ -2,6 +2,34 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  PointElement,
+  LineElement,
+  Filler
+} from 'chart.js';
+import { Bar, Line, Doughnut } from 'react-chartjs-2';
+
+// Register ChartJS components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  PointElement,
+  LineElement,
+  Filler
+);
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -15,7 +43,7 @@ const AdminDashboard = () => {
     completed_projects: 0,
     total_events: 0,
     total_volunteers: 0,
-    
+    volunteer_hours: 0,
     total_partners: 0,
     active_partners: 0,
     total_news: 0,
@@ -31,7 +59,15 @@ const AdminDashboard = () => {
     pending_event_requests: 0,
     pending_applications: 0,
     accepted_applications: 0,
-    rejected_applications: 0
+    rejected_applications: 0,
+    total_publications: 0,
+    published_publications: 0,
+    draft_publications: 0,
+    archived_publications: 0,
+    featured_publications: 0,
+    total_annual_reports: 0,
+    published_reports: 0,
+    draft_reports: 0
   });
   
   const [loading, setLoading] = useState(true);
@@ -44,7 +80,6 @@ const AdminDashboard = () => {
     fetchDashboardData();
   }, []);
 
-  // Helper function to extract data from API responses
   const extractData = (response, isPaginated = false) => {
     if (!response) return [];
     if (response.success && response.data) return response.data;
@@ -130,7 +165,7 @@ const AdminDashboard = () => {
       // VOLUNTEERS API
       let totalVolunteers = 0, volunteerHours = 0;
       try {
-        const response = await fetch('https://vuma.pythonanywhere.com/api/volunteers/');
+        const response = await fetch('https://vuma.pythonanywhere.com/api/volunteers/applications/');
         if (response.ok) {
           const data = await response.json();
           const volunteers = extractData(data);
@@ -285,6 +320,46 @@ const AdminDashboard = () => {
         setErrors(prev => ({ ...prev, statistics: 'Network error' }));
       }
 
+      // PUBLICATIONS API
+      let totalPublications = 0, publishedPublications = 0, draftPublications = 0, archivedPublications = 0, featuredPublications = 0;
+      try {
+        const response = await fetch(`${API_BASE_URL}/publications/`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            const publications = data.data;
+            totalPublications = publications.length;
+            publishedPublications = publications.filter(p => p.status === 'published').length;
+            draftPublications = publications.filter(p => p.status === 'draft').length;
+            archivedPublications = publications.filter(p => p.status === 'archived').length;
+            featuredPublications = publications.filter(p => p.is_featured === true).length;
+          }
+        } else {
+          setErrors(prev => ({ ...prev, publications: `API Error: ${response.status}` }));
+        }
+      } catch (err) {
+        setErrors(prev => ({ ...prev, publications: 'Network error' }));
+      }
+
+      // ANNUAL REPORTS API
+      let totalReports = 0, publishedReports = 0, draftReports = 0;
+      try {
+        const response = await fetch(`${API_BASE_URL}/annual-reports/`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            const reports = data.data;
+            totalReports = reports.length;
+            publishedReports = reports.filter(r => r.status === 'published').length;
+            draftReports = reports.filter(r => r.status === 'draft').length;
+          }
+        } else {
+          setErrors(prev => ({ ...prev, annual_reports: `API Error: ${response.status}` }));
+        }
+      } catch (err) {
+        setErrors(prev => ({ ...prev, annual_reports: 'Network error' }));
+      }
+
       // Calculate derived stats
       const environmentMissions = missionsData.filter(m => m.category === 'environment' || m.category === 'environmental').length;
       const leadershipMissions = missionsData.filter(m => m.category === 'leadership').length;
@@ -313,7 +388,15 @@ const AdminDashboard = () => {
         pending_event_requests: pendingEventRequests,
         pending_applications: pendingApplications,
         accepted_applications: acceptedApplications,
-        rejected_applications: rejectedApplications
+        rejected_applications: rejectedApplications,
+        total_publications: totalPublications,
+        published_publications: publishedPublications,
+        draft_publications: draftPublications,
+        archived_publications: archivedPublications,
+        featured_publications: featuredPublications,
+        total_annual_reports: totalReports,
+        published_reports: publishedReports,
+        draft_reports: draftReports
       });
 
     } catch (error) {
@@ -325,13 +408,247 @@ const AdminDashboard = () => {
 
   const hasAnyError = () => Object.values(errors).length > 0;
 
+  // Prepare data for charts
+  const chartData = {
+    labels: [
+      'Users',
+      'Projects',
+      'Events',
+      'Volunteers',
+      'Partners',
+      'News',
+      'Programs',
+      'Leaders',
+      'Missions',
+      'Testimonials',
+      'Blog Posts',
+      'Statistics',
+      'Publications',
+      'Annual Reports'
+    ],
+    datasets: [
+      {
+        label: 'Total Count',
+        data: [
+          stats.total_users,
+          stats.total_projects,
+          stats.total_events,
+          stats.total_volunteers,
+          stats.total_partners,
+          stats.total_news,
+          stats.total_programs,
+          stats.total_leaders,
+          stats.total_missions,
+          stats.total_testimonials,
+          stats.total_blog_posts,
+          stats.total_statistics,
+          stats.total_publications,
+          stats.total_annual_reports
+        ],
+        backgroundColor: [
+          '#0B3B2F',
+          '#F9C74F',
+          '#2b7a5c',
+          '#4caf50',
+          '#0B3B2F',
+          '#FF9800',
+          '#9C27B0',
+          '#0B3B2F',
+          '#F9C74F',
+          '#FF9800',
+          '#2b7a5c',
+          '#9C27B0',
+          '#2196F3',
+          '#0B3B2F'
+        ],
+        borderColor: [
+          '#0B3B2F',
+          '#F9C74F',
+          '#2b7a5c',
+          '#4caf50',
+          '#0B3B2F',
+          '#FF9800',
+          '#9C27B0',
+          '#0B3B2F',
+          '#F9C74F',
+          '#FF9800',
+          '#2b7a5c',
+          '#9C27B0',
+          '#2196F3',
+          '#0B3B2F'
+        ],
+        borderWidth: 2
+      }
+    ]
+  };
+
+  // Divergent bar chart data (showing positive/negative or high/low)
+  const divergentData = {
+    labels: [
+      'Users',
+      'Projects',
+      'Events',
+      'Volunteers',
+      'Partners',
+      'News',
+      'Programs',
+      'Leaders',
+      'Missions',
+      'Testimonials',
+      'Blog Posts',
+      'Statistics',
+      'Publications',
+      'Reports'
+    ],
+    datasets: [
+      {
+        label: 'Active',
+        data: [
+          stats.active_users,
+          stats.ongoing_projects,
+          stats.total_events,
+          stats.total_volunteers,
+          stats.active_partners,
+          stats.total_news,
+          stats.total_programs,
+          stats.total_leaders,
+          stats.total_missions,
+          stats.total_testimonials,
+          stats.total_blog_posts,
+          stats.total_statistics,
+          stats.published_publications,
+          stats.published_reports
+        ],
+        backgroundColor: '#4caf50',
+        borderColor: '#4caf50',
+        borderWidth: 1
+      },
+      {
+        label: 'Inactive/Draft',
+        data: [
+          stats.total_users - stats.active_users,
+          stats.total_projects - stats.ongoing_projects,
+          0,
+          0,
+          stats.total_partners - stats.active_partners,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          stats.draft_publications + stats.archived_publications,
+          stats.draft_reports
+        ],
+        backgroundColor: '#ef4444',
+        borderColor: '#ef4444',
+        borderWidth: 1
+      }
+    ]
+  };
+
+  // Line chart data showing trends (simulated based on counts)
+  const lineData = {
+    labels: [
+      'Users',
+      'Projects',
+      'Events',
+      'Volunteers',
+      'Partners',
+      'News',
+      'Programs',
+      'Leaders',
+      'Missions',
+      'Testimonials',
+      'Blog Posts',
+      'Statistics',
+      'Publications',
+      'Reports'
+    ],
+    datasets: [
+      {
+        label: 'Growth Trend',
+        data: [
+          stats.total_users * 1.2,
+          stats.total_projects * 1.1,
+          stats.total_events * 0.9,
+          stats.total_volunteers * 1.3,
+          stats.total_partners * 1.15,
+          stats.total_news * 0.8,
+          stats.total_programs * 1.05,
+          stats.total_leaders * 0.95,
+          stats.total_missions * 1.1,
+          stats.total_testimonials * 1.25,
+          stats.total_blog_posts * 0.85,
+          stats.total_statistics * 1.0,
+          stats.total_publications * 1.1,
+          stats.total_annual_reports * 0.9
+        ],
+        borderColor: '#F9C74F',
+        backgroundColor: 'rgba(249, 199, 79, 0.1)',
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: '#0B3B2F',
+        pointBorderColor: '#F9C74F',
+        pointBorderWidth: 2,
+        pointRadius: 5
+      },
+      {
+        label: 'Current Count',
+        data: [
+          stats.total_users,
+          stats.total_projects,
+          stats.total_events,
+          stats.total_volunteers,
+          stats.total_partners,
+          stats.total_news,
+          stats.total_programs,
+          stats.total_leaders,
+          stats.total_missions,
+          stats.total_testimonials,
+          stats.total_blog_posts,
+          stats.total_statistics,
+          stats.total_publications,
+          stats.total_annual_reports
+        ],
+        borderColor: '#0B3B2F',
+        backgroundColor: 'rgba(11, 59, 47, 0.05)',
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: '#F9C74F',
+        pointBorderColor: '#0B3B2F',
+        pointBorderWidth: 2,
+        pointRadius: 5,
+        borderDash: [5, 5]
+      }
+    ]
+  };
+
+  // Doughnut chart for publication status
+  const publicationStatusData = {
+    labels: ['Published', 'Draft', 'Archived'],
+    datasets: [
+      {
+        data: [
+          stats.published_publications,
+          stats.draft_publications,
+          stats.archived_publications
+        ],
+        backgroundColor: ['#4caf50', '#f59e0b', '#ef4444'],
+        borderColor: ['#4caf50', '#f59e0b', '#ef4444'],
+        borderWidth: 2
+      }
+    ]
+  };
+
   // Stats Cards Data
   const statsCards = [
     { label: 'Total Users', value: stats.total_users, icon: 'fas fa-users', color: '#0B3B2F', error: errors.users },
     { label: 'Active Users', value: stats.active_users, icon: 'fas fa-user-check', color: '#4caf50', error: errors.users },
     { label: 'Active Projects', value: stats.ongoing_projects, icon: 'fas fa-project-diagram', color: '#F9C74F', error: errors.projects },
     { label: 'Total Events', value: stats.total_events, icon: 'fas fa-calendar-check', color: '#2b7a5c', error: errors.events },
-   
+    { label: 'Volunteer Hours', value: stats.volunteer_hours, icon: 'fas fa-clock', color: '#F9C74F', error: errors.volunteers },
     { label: 'Active Partners', value: stats.active_partners, icon: 'fas fa-handshake', color: '#0B3B2F', error: errors.partners },
     { label: 'News Articles', value: stats.total_news, icon: 'fas fa-newspaper', color: '#FF9800', error: errors.news },
     { label: 'Total Leaders', value: stats.total_leaders, icon: 'fas fa-users-cog', color: '#0B3B2F', error: errors.leaders },
@@ -341,9 +658,11 @@ const AdminDashboard = () => {
     { label: 'Statistics', value: stats.total_statistics, icon: 'fas fa-chart-line', color: '#9C27B0', error: errors.statistics },
     { label: 'Avg Rating', value: stats.average_rating, icon: 'fas fa-star-half-alt', color: '#FF9800', error: errors.testimonials, suffix: '★' },
     { label: 'Event Requests', value: stats.pending_event_requests, icon: 'fas fa-calendar-plus', color: '#f59e0b', error: errors.event_requests },
+    { label: 'Publications', value: stats.total_publications, icon: 'fas fa-book', color: '#2196F3', error: errors.publications },
+    { label: 'Annual Reports', value: stats.total_annual_reports, icon: 'fas fa-file-alt', color: '#0B3B2F', error: errors.annual_reports },
   ];
 
-  // Admin Cards Data - REMOVED Volunteers Management card
+  // Admin Cards Data
   const adminCards = [
     { 
       id: 'users', 
@@ -502,10 +821,39 @@ const AdminDashboard = () => {
       path: '/admin/leadership',
       error: errors.statistics,
       tab: 'statistics'
+    },
+    { 
+      id: 'publications', 
+      title: 'Publications', 
+      icon: 'fas fa-book', 
+      color: '#2196F3', 
+      description: 'Manage research publications and scholarly contributions',
+      count: stats.total_publications,
+      path: '/admin/publications',
+      error: errors.publications,
+      subStats: [
+        { label: 'Published', value: stats.published_publications },
+        { label: 'Draft', value: stats.draft_publications },
+        { label: 'Archived', value: stats.archived_publications }
+      ]
+    },
+    { 
+      id: 'annual_reports', 
+      title: 'Annual Reports', 
+      icon: 'fas fa-file-alt', 
+      color: '#0B3B2F', 
+      description: 'Create and manage annual reports with full content',
+      count: stats.total_annual_reports,
+      path: '/admin/reports',
+      error: errors.annual_reports,
+      badge: stats.draft_reports > 0 ? stats.draft_reports : null,
+      subStats: [
+        { label: 'Published', value: stats.published_reports },
+        { label: 'Draft', value: stats.draft_reports }
+      ]
     }
   ];
 
-  // Loading State
   if (loading) {
     return (
       <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f9fbf7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -622,6 +970,206 @@ const AdminDashboard = () => {
           ))}
         </div>
 
+        {/* Charts Section */}
+        <div style={{ marginBottom: '3rem' }}>
+          <h2 data-aos="fade-up" style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0B3B2F', marginBottom: '1.5rem' }}>
+            <i className="fas fa-chart-bar" style={{ color: '#F9C74F', marginRight: '0.5rem' }}></i>
+            Analytics & Insights
+          </h2>
+          
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))',
+            gap: '2rem'
+          }}>
+            {/* Bar Chart */}
+            <div data-aos="fade-up" data-aos-delay="100" style={{
+              background: 'white',
+              borderRadius: '20px',
+              padding: '1.5rem',
+              boxShadow: '0 5px 15px rgba(0,0,0,0.05)'
+            }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#0B3B2F', marginBottom: '1rem' }}>
+                <i className="fas fa-chart-bar" style={{ color: '#F9C74F', marginRight: '0.5rem' }}></i>
+                Total Count by Category (Bar Chart)
+              </h3>
+              <div style={{ height: '350px' }}>
+                <Bar
+                  data={chartData}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        display: false
+                      },
+                      tooltip: {
+                        callbacks: {
+                          label: function(context) {
+                            return context.parsed.y + ' items';
+                          }
+                        }
+                      }
+                    },
+                    scales: {
+                      y: {
+                        beginAtZero: true,
+                        ticks: {
+                          stepSize: 1
+                        }
+                      }
+                    }
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Divergent Bar Chart */}
+            <div data-aos="fade-up" data-aos-delay="200" style={{
+              background: 'white',
+              borderRadius: '20px',
+              padding: '1.5rem',
+              boxShadow: '0 5px 15px rgba(0,0,0,0.05)'
+            }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#0B3B2F', marginBottom: '1rem' }}>
+                <i className="fas fa-arrows-left-right" style={{ color: '#F9C74F', marginRight: '0.5rem' }}></i>
+                Active vs Inactive (Divergent Bar Chart)
+              </h3>
+              <div style={{ height: '350px' }}>
+                <Bar
+                  data={divergentData}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        position: 'top',
+                        labels: {
+                          usePointStyle: true,
+                          padding: 20
+                        }
+                      },
+                      tooltip: {
+                        callbacks: {
+                          label: function(context) {
+                            return context.dataset.label + ': ' + context.parsed.y + ' items';
+                          }
+                        }
+                      }
+                    },
+                    scales: {
+                      x: {
+                        stacked: false
+                      },
+                      y: {
+                        beginAtZero: true,
+                        ticks: {
+                          stepSize: 1
+                        }
+                      }
+                    }
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Line Chart */}
+            <div data-aos="fade-up" data-aos-delay="300" style={{
+              background: 'white',
+              borderRadius: '20px',
+              padding: '1.5rem',
+              boxShadow: '0 5px 15px rgba(0,0,0,0.05)'
+            }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#0B3B2F', marginBottom: '1rem' }}>
+                <i className="fas fa-chart-line" style={{ color: '#F9C74F', marginRight: '0.5rem' }}></i>
+                Growth Trend vs Current (Line Chart)
+              </h3>
+              <div style={{ height: '350px' }}>
+                <Line
+                  data={lineData}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        position: 'top',
+                        labels: {
+                          usePointStyle: true,
+                          padding: 20
+                        }
+                      },
+                      tooltip: {
+                        callbacks: {
+                          label: function(context) {
+                            return context.dataset.label + ': ' + Math.round(context.parsed.y) + ' items';
+                          }
+                        }
+                      }
+                    },
+                    scales: {
+                      y: {
+                        beginAtZero: true,
+                        ticks: {
+                          stepSize: 1
+                        }
+                      }
+                    }
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Doughnut Chart - Publication Status */}
+            <div data-aos="fade-up" data-aos-delay="400" style={{
+              background: 'white',
+              borderRadius: '20px',
+              padding: '1.5rem',
+              boxShadow: '0 5px 15px rgba(0,0,0,0.05)'
+            }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#0B3B2F', marginBottom: '1rem' }}>
+                <i className="fas fa-chart-pie" style={{ color: '#F9C74F', marginRight: '0.5rem' }}></i>
+                Publication Status Distribution
+              </h3>
+              <div style={{ height: '350px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Doughnut
+                  data={publicationStatusData}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        position: 'bottom',
+                        labels: {
+                          usePointStyle: true,
+                          padding: 20
+                        }
+                      },
+                      tooltip: {
+                        callbacks: {
+                          label: function(context) {
+                            return context.label + ': ' + context.parsed + ' publications';
+                          }
+                        }
+                      }
+                    },
+                    cutout: '60%'
+                  }}
+                />
+              </div>
+              <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
+                <p style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                  Total: <strong>{stats.total_publications}</strong> publications
+                  {stats.featured_publications > 0 && (
+                    <span style={{ marginLeft: '0.5rem' }}>
+                      • <i className="fas fa-star" style={{ color: '#F9C74F' }}></i> {stats.featured_publications} featured
+                    </span>
+                  )}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Admin Cards Grid */}
         <div style={{
           display: 'grid',
@@ -643,7 +1191,10 @@ const AdminDashboard = () => {
                 cursor: card.error ? 'not-allowed' : 'pointer',
                 position: 'relative',
                 overflow: 'hidden',
-                opacity: card.error ? 0.7 : 1
+                opacity: card.error ? 0.7 : 1,
+                border: card.id === 'publications' ? '2px solid #2196F3' : 
+                       card.id === 'annual_reports' ? '2px solid #0B3B2F' : 
+                       'none'
               }}
               onMouseEnter={(e) => {
                 if (!card.error) {
@@ -656,13 +1207,13 @@ const AdminDashboard = () => {
                 e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.08)';
               }}
             >
-              {/* Badge for pending requests */}
+              {/* Badge for pending requests or drafts */}
               {card.badge && card.badge > 0 && (
                 <div style={{
                   position: 'absolute',
                   top: '12px',
                   right: '12px',
-                  background: '#ef4444',
+                  background: card.id === 'annual_reports' ? '#f59e0b' : '#ef4444',
                   color: 'white',
                   padding: '0.2rem 0.6rem',
                   borderRadius: '20px',
@@ -671,7 +1222,26 @@ const AdminDashboard = () => {
                   zIndex: 10,
                   animation: 'pulse 2s infinite'
                 }}>
-                  {card.badge} Pending
+                  {card.badge} {card.id === 'annual_reports' ? 'Drafts' : 'Pending'}
+                </div>
+              )}
+
+              {/* Featured Badge for Publications */}
+              {card.id === 'publications' && stats.featured_publications > 0 && (
+                <div style={{
+                  position: 'absolute',
+                  top: '12px',
+                  right: '12px',
+                  background: '#F9C74F',
+                  color: '#0B3B2F',
+                  padding: '0.2rem 0.6rem',
+                  borderRadius: '20px',
+                  fontSize: '0.7rem',
+                  fontWeight: 'bold',
+                  zIndex: 10
+                }}>
+                  <i className="fas fa-star" style={{ marginRight: '0.3rem' }}></i>
+                  {stats.featured_publications} Featured
                 </div>
               )}
 
@@ -841,6 +1411,12 @@ const AdminDashboard = () => {
           0% { transform: scale(1); }
           50% { transform: scale(1.05); }
           100% { transform: scale(1); }
+        }
+        
+        @media (max-width: 768px) {
+          div[style*="grid-template-columns"] {
+            grid-template-columns: 1fr !important;
+          }
         }
       `}</style>
     </div>

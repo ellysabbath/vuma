@@ -27,6 +27,8 @@ import EventRegister from './pages/EventRegister';
 import Leadership from './pages/Leadership';
 import Pro from './components/programs'
 import EventRegistrationConfirmation from './pages/EventRegistrationConfirmation';
+import Publications from './pages/Publications';
+import PublicationDetails from './pages/PubDetails';
 
 
 import AdminTestimonials from './admin/AdminTestmonials';
@@ -46,10 +48,12 @@ import Partners from './pages/partners';
 import AdminPrograms from './admin/AdminPrograms';
 import ProgramDetails from './admin/ProgramsDetails';
 import AdminNews from './admin/AdminNews';
+import AdminPublications from './admin/AdminPublications';
 import NewsDetails from './admin/NewsDetails';
 import AdminLeadership from './admin/AdminLeaderShip';
 import AdminDonations from './admin/AdminDonations';
 import What from './pages/What';
+import AdminReports from './admin/AdminReports';
 // ScrollToTop component to reset scroll on page change
 
 
@@ -140,6 +144,8 @@ function App() {
             <Route path="/leadership" element={<Leadership />} />
             <Route path="/events/requests" element={<EventsRequests />} />
             <Route path="/say-about-us" element={<What />} />
+            <Route path="/publications" element={<Publications />} />
+            <Route path="/publications/:id" element={<PublicationDetails />} />
 
 
 
@@ -157,6 +163,7 @@ function App() {
 <Route path="/admin/leadership" element={<AdminLeadership />} />
 <Route path="/events/register/confirmation/:id" element={<EventRegistrationConfirmation />} />
 <Route path="/admin/testimonials" element={<AdminTestimonials />} />
+<Route path="/admin/reports" element={<AdminReports />} />
 
 
 <Route path="/admin/users/:id" element={<UserDetails />} />
@@ -169,6 +176,7 @@ function App() {
 <Route path="/admin/news/:id" element={<NewsDetails />} />
 <Route path="/events/register/:id" element={<EventRegister />} />
 <Route path="/admin/donations" element={<AdminDonations />} />
+<Route path="/admin/publications" element={<AdminPublications />} />
           </Routes>
         </main>
         

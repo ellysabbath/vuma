@@ -245,7 +245,8 @@ const Navbar = () => {
     { id: 'leaders', label: 'Our Leaders', icon: 'fas fa-users', path: '/leadership' },
     { id: 'mission', label: 'Our Mission', icon: 'fas fa-bullseye', path: '/about#mission' },
     { id: 'events', label: 'Events', icon: 'fas fa-calendar-alt', path: '/events' },
-    { id: 'volunteers', label: 'Volunteers', icon: 'fas fa-hands-helping', path: '/volunteers' }
+    { id: 'volunteers', label: 'Volunteers', icon: 'fas fa-hands-helping', path: '/volunteers' },
+    { id: 'publications', label: 'Publications', icon: 'fas fa-file-alt', path: '/publications' }
   ];
 
   const servicesItems = [
@@ -395,9 +396,9 @@ const Navbar = () => {
             >
               <button
                 style={{
-                  background: isActive('/about') ? 'rgba(249,199,79,0.1)' : 'none',
+                  background: isActive('/about') || isActive('/publications') || isActive('/leadership') || isActive('/volunteers') ? 'rgba(249,199,79,0.1)' : 'none',
                   border: 'none',
-                  color: isActive('/about') ? '#F9C74F' : 'white',
+                  color: isActive('/about') || isActive('/publications') || isActive('/leadership') || isActive('/volunteers') ? '#F9C74F' : 'white',
                   fontSize: '0.9rem',
                   fontWeight: 500,
                   padding: '0.4rem 0.8rem',
@@ -413,7 +414,7 @@ const Navbar = () => {
                   e.currentTarget.style.color = '#F9C74F';
                 }}
                 onMouseLeave={(e) => {
-                  if (!isActive('/about')) {
+                  if (!isActive('/about') && !isActive('/publications') && !isActive('/leadership') && !isActive('/volunteers')) {
                     e.currentTarget.style.backgroundColor = 'transparent';
                     e.currentTarget.style.color = 'white';
                   }
@@ -552,6 +553,38 @@ const Navbar = () => {
                 </div>
               )}
             </div>
+
+            {/* Publications Link - Added in Desktop Nav */}
+            <Link 
+              to="/publications"
+              className="desktop-nav-link"
+              style={{
+                color: isActive('/publications') ? '#F9C74F' : 'white',
+                textDecoration: 'none',
+                fontSize: '0.9rem',
+                fontWeight: 500,
+                padding: '0.4rem 0.8rem',
+                borderRadius: '8px',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: isActive('/publications') ? 'rgba(249,199,79,0.1)' : 'transparent'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)';
+                e.currentTarget.style.color = '#F9C74F';
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive('/publications')) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = 'white';
+                }
+              }}
+            >
+              <i className="fas fa-file-alt" style={{ fontSize: '0.8rem' }}></i>
+              Publications
+            </Link>
 
             <Link 
               to="/news"
@@ -1125,7 +1158,28 @@ const Navbar = () => {
                   <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
                 </Link>
                 
-                {/* Share Your Story link in user menu */}
+                <Link
+                  to="/publications"
+                  onClick={() => setIsUserMenuOpen(false)}
+                  className="dropdown-item"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '0.8rem 1rem',
+                    color: '#333',
+                    textDecoration: 'none',
+                    transition: 'all 0.3s ease',
+                    borderBottom: '1px solid #f0f0f0'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                >
+                  <i className="fas fa-file-alt" style={{ width: '20px', color: '#F9C74F' }}></i>
+                  <span style={{ flex: 1 }}>Publications</span>
+                  <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
+                </Link>
+                
                 <Link
                   to="/say-about-us"
                   onClick={() => setIsUserMenuOpen(false)}
@@ -1202,6 +1256,28 @@ const Navbar = () => {
                           {pendingTestimonials}
                         </span>
                       )}
+                      <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
+                    </Link>
+
+                    <Link
+                      to="/admin/publications"
+                      onClick={() => setIsUserMenuOpen(false)}
+                      className="dropdown-item"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        padding: '0.8rem 1rem',
+                        color: '#333',
+                        textDecoration: 'none',
+                        transition: 'all 0.3s ease',
+                        borderBottom: '1px solid #f0f0f0'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                    >
+                      <i className="fas fa-file-alt" style={{ width: '20px', color: '#F9C74F' }}></i>
+                      <span style={{ flex: 1 }}>Manage Publications</span>
                       <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
                     </Link>
                   </>
@@ -1324,6 +1400,7 @@ const Navbar = () => {
               { to: '/about', icon: 'fas fa-info-circle', label: 'About Us' },
               { to: '/programs', icon: 'fas fa-chalkboard-user', label: 'Programs' },
               { to: '/events', icon: 'fas fa-calendar-alt', label: 'Events' },
+              { to: '/publications', icon: 'fas fa-file-alt', label: 'Publications' },
               { to: '/news', icon: 'fas fa-newspaper', label: 'News & Stories' },
               { to: '/volunteers', icon: 'fas fa-hands-helping', label: 'Volunteers' },
               { to: '/partners', icon: 'fas fa-handshake', label: 'Partners' },
@@ -1438,6 +1515,16 @@ const Navbar = () => {
                   <span>My Profile</span>
                 </Link>
                 
+                <Link to="/publications" onClick={closeSidebar} style={{
+                  display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
+                  margin: '0 0.5rem', borderRadius: '12px', color: 'white', textDecoration: 'none',
+                  transition: 'all 0.3s ease'
+                }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
+                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                  <i className="fas fa-file-alt" style={{ width: '20px', color: '#F9C74F' }}></i>
+                  <span>Publications</span>
+                </Link>
+                
                 <Link to="/say-about-us" onClick={closeSidebar} style={{
                   display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
                   margin: '0 0.5rem', borderRadius: '12px', color: 'white', textDecoration: 'none',
@@ -1480,6 +1567,16 @@ const Navbar = () => {
                           {pendingTestimonials}
                         </span>
                       )}
+                    </Link>
+
+                    <Link to="/admin/publications" onClick={closeSidebar} style={{
+                      display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
+                      margin: '0 0.5rem', borderRadius: '12px', color: 'white', textDecoration: 'none',
+                      transition: 'all 0.3s ease'
+                    }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
+                       onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                      <i className="fas fa-file-alt" style={{ width: '20px', color: '#F9C74F' }}></i>
+                      <span>Manage Publications</span>
                     </Link>
                   </>
                 )}

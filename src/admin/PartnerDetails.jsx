@@ -16,6 +16,11 @@ const PartnerDetails = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [editLogoPreview, setEditLogoPreview] = useState('');
   const [editLogoFile, setEditLogoFile] = useState(null);
+  
+  // New loading states for actions
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
 
   useEffect(() => {
     AOS.init({ duration: 800, once: true });
@@ -23,6 +28,7 @@ const PartnerDetails = () => {
   }, [id]);
 
   const fetchPartner = async () => {
+    setIsFetching(true);
     setLoading(true);
     setError('');
     try {
@@ -37,6 +43,7 @@ const PartnerDetails = () => {
       setError('Network error. Please check your connection.');
     } finally {
       setLoading(false);
+      setIsFetching(false);
     }
   };
 
@@ -61,6 +68,7 @@ const PartnerDetails = () => {
   };
 
   const handleDelete = async () => {
+    setIsDeleting(true);
     try {
       const response = await fetch(`https://vuma.pythonanywhere.com/api/partners/${partner.id}/`, {
         method: 'DELETE',
@@ -74,9 +82,11 @@ const PartnerDetails = () => {
         }, 2000);
       } else {
         alert(data.error || 'Failed to delete partner');
+        setIsDeleting(false);
       }
     } catch (error) {
       alert('Network error. Please try again.');
+      setIsDeleting(false);
     }
   };
 
@@ -95,6 +105,7 @@ const PartnerDetails = () => {
     setEditLogoFile(null);
     setEditLogoPreview('');
     document.body.style.overflow = 'unset';
+    setIsUpdating(false);
   };
 
   const handleEditChange = (e) => {
@@ -118,6 +129,7 @@ const PartnerDetails = () => {
       return;
     }
     
+    setIsUpdating(true);
     try {
       const response = await fetch(`https://vuma.pythonanywhere.com/api/partners/${editingPartner.id}/`, {
         method: 'PUT',
@@ -132,13 +144,17 @@ const PartnerDetails = () => {
         setPartner(editingPartner);
         setSuccessMessage('Partner updated successfully!');
         setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 3000);
-        closeEditModal();
+        setTimeout(() => {
+          setShowSuccess(false);
+          closeEditModal();
+        }, 2000);
       } else {
         alert(data.error || 'Failed to update partner');
+        setIsUpdating(false);
       }
     } catch (error) {
       alert('Network error. Please try again.');
+      setIsUpdating(false);
     }
   };
 
@@ -418,22 +434,104 @@ const PartnerDetails = () => {
               </div>
             )}
 
-            {/* Action Icons */}
-            <div style={{ display: 'flex', gap: '2rem', justifyContent: 'flex-end', marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid #e0e0e0' }}>
-              <div onClick={handleBack} style={{ cursor: 'pointer', textAlign: 'center', transition: 'transform 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
-                <i className="fas fa-arrow-left" style={{ fontSize: '1.5rem', color: '#666' }}></i>
-                <p style={{ fontSize: '0.7rem', color: '#666', marginTop: '0.3rem' }}>Back</p>
-              </div>
+            {/* Action Buttons - Enhanced with better UX */}
+            <div style={{ 
+              display: 'flex', 
+              gap: '1rem', 
+              justifyContent: 'flex-end', 
+              marginTop: '2rem', 
+              paddingTop: '1rem', 
+              borderTop: '1px solid #e0e0e0',
+              flexWrap: 'wrap'
+            }}>
+              <button
+                onClick={handleBack}
+                style={{
+                  padding: '0.8rem 1.5rem',
+                  background: '#f0f0f0',
+                  border: 'none',
+                  borderRadius: '50px',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#e0e0e0';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#f0f0f0';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                <i className="fas fa-arrow-left"></i>
+                Back
+              </button>
               
-              <div onClick={openEditModal} style={{ cursor: 'pointer', textAlign: 'center', transition: 'transform 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
-                <i className="fas fa-edit" style={{ fontSize: '1.5rem', color: '#2196F3' }}></i>
-                <p style={{ fontSize: '0.7rem', color: '#2196F3', marginTop: '0.3rem' }}>Edit</p>
-              </div>
+              <button
+                onClick={openEditModal}
+                style={{
+                  padding: '0.8rem 2rem',
+                  background: '#2196F3',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '50px',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 4px 12px rgba(33, 150, 243, 0.3)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#1976D2';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(33, 150, 243, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#2196F3';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(33, 150, 243, 0.3)';
+                }}
+              >
+                <i className="fas fa-edit"></i>
+                Edit Partner
+              </button>
               
-              <div onClick={() => setShowDeleteConfirm(true)} style={{ cursor: 'pointer', textAlign: 'center', transition: 'transform 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
-                <i className="fas fa-trash-alt" style={{ fontSize: '1.5rem', color: '#d32f2f' }}></i>
-                <p style={{ fontSize: '0.7rem', color: '#d32f2f', marginTop: '0.3rem' }}>Delete</p>
-              </div>
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                style={{
+                  padding: '0.8rem 2rem',
+                  background: '#d32f2f',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '50px',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 4px 12px rgba(211, 47, 47, 0.3)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#C62828';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(211, 47, 47, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#d32f2f';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(211, 47, 47, 0.3)';
+                }}
+              >
+                <i className="fas fa-trash-alt"></i>
+                Delete Partner
+              </button>
             </div>
           </div>
         </div>
@@ -460,7 +558,7 @@ const PartnerDetails = () => {
         </div>
       </div>
 
-      {/* Edit Partner Modal */}
+      {/* Edit Partner Modal - Enhanced */}
       {showEditModal && editingPartner && (
         <div className="modal-overlay" onClick={closeEditModal} style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)',
@@ -474,8 +572,12 @@ const PartnerDetails = () => {
             <div onClick={closeEditModal} style={{
               position: 'absolute', top: '16px', right: '16px', background: 'rgba(0,0,0,0.5)', border: 'none',
               width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', color: 'white', fontSize: '1.2rem',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10
-            }}>
+              display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10,
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.8)'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.5)'}
+            >
               <i className="fas fa-times"></i>
             </div>
             
@@ -645,34 +747,161 @@ const PartnerDetails = () => {
                 />
               </div>
               
+              {/* Enhanced Update Button with Loading State */}
               <div style={{ display: 'flex', gap: '0.8rem', marginTop: '1rem' }}>
-                <div onClick={closeEditModal} style={{ flex: 1, background: '#f0f0f0', border: 'none', padding: '0.7rem', borderRadius: '50px', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem', textAlign: 'center' }}>
+                <button
+                  onClick={closeEditModal}
+                  style={{ 
+                    flex: 1, 
+                    background: '#f0f0f0', 
+                    border: 'none', 
+                    padding: '0.8rem', 
+                    borderRadius: '50px', 
+                    fontWeight: 600, 
+                    cursor: 'pointer', 
+                    fontSize: '0.9rem',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#e0e0e0'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = '#f0f0f0'}
+                  disabled={isUpdating}
+                >
                   Cancel
-                </div>
-                <div onClick={handleUpdatePartner} style={{ flex: 1, background: '#0B3B2F', color: 'white', border: 'none', padding: '0.7rem', borderRadius: '50px', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem', textAlign: 'center' }}>
-                  Update Partner
-                </div>
+                </button>
+                <button
+                  onClick={handleUpdatePartner}
+                  disabled={isUpdating}
+                  style={{ 
+                    flex: 1, 
+                    background: isUpdating ? '#ccc' : '#0B3B2F', 
+                    color: 'white', 
+                    border: 'none', 
+                    padding: '0.8rem', 
+                    borderRadius: '50px', 
+                    fontWeight: 600, 
+                    cursor: isUpdating ? 'not-allowed' : 'pointer',
+                    fontSize: '0.9rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isUpdating) {
+                      e.currentTarget.style.background = '#1a5c48';
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isUpdating) {
+                      e.currentTarget.style.background = '#0B3B2F';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                    }
+                  }}
+                >
+                  {isUpdating ? (
+                    <>
+                      <i className="fas fa-spinner fa-spin"></i>
+                      Updating...
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-save"></i>
+                      Update Partner
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Confirmation Modal - Enhanced */}
       {showDeleteConfirm && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)',
-          zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
+          zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px',
+          animation: 'fadeIn 0.3s ease'
         }}>
-          <div style={{ background: 'white', borderRadius: '20px', maxWidth: '400px', width: '100%', padding: '2rem', textAlign: 'center' }}>
+          <div style={{ 
+            background: 'white', 
+            borderRadius: '20px', 
+            maxWidth: '400px', 
+            width: '100%', 
+            padding: '2rem', 
+            textAlign: 'center',
+            animation: 'slideInUp 0.3s ease'
+          }}>
             <div style={{ width: '60px', height: '60px', margin: '0 auto', borderRadius: '50%', background: '#ffebee', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
               <i className="fas fa-exclamation-triangle" style={{ fontSize: '1.5rem', color: '#d32f2f' }}></i>
             </div>
             <h3 style={{ marginBottom: '0.5rem' }}>Delete Partner</h3>
-            <p style={{ color: '#666', marginBottom: '1.5rem' }}>Are you sure you want to delete "{partner.name}"? This action cannot be undone.</p>
+            <p style={{ color: '#666', marginBottom: '1.5rem' }}>
+              Are you sure you want to delete <strong>"{partner.name}"</strong>? <br />
+              This action cannot be undone.
+            </p>
             <div style={{ display: 'flex', gap: '1rem' }}>
-              <div onClick={() => setShowDeleteConfirm(false)} style={{ flex: 1, padding: '0.8rem', background: '#f0f0f0', borderRadius: '10px', cursor: 'pointer', fontWeight: 600, textAlign: 'center' }}>Cancel</div>
-              <div onClick={handleDelete} style={{ flex: 1, padding: '0.8rem', background: '#d32f2f', color: 'white', borderRadius: '10px', cursor: 'pointer', fontWeight: 600, textAlign: 'center' }}>Delete</div>
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+                style={{ 
+                  flex: 1, 
+                  padding: '0.8rem', 
+                  background: '#f0f0f0', 
+                  border: 'none',
+                  borderRadius: '10px', 
+                  cursor: 'pointer', 
+                  fontWeight: 600,
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#e0e0e0'}
+                onMouseLeave={(e) => e.currentTarget.style.background = '#f0f0f0'}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                style={{ 
+                  flex: 1, 
+                  padding: '0.8rem', 
+                  background: isDeleting ? '#ccc' : '#d32f2f', 
+                  color: 'white', 
+                  border: 'none',
+                  borderRadius: '10px', 
+                  cursor: isDeleting ? 'not-allowed' : 'pointer',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isDeleting) {
+                    e.currentTarget.style.background = '#C62828';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isDeleting) {
+                    e.currentTarget.style.background = '#d32f2f';
+                  }
+                }}
+              >
+                {isDeleting ? (
+                  <>
+                    <i className="fas fa-spinner fa-spin"></i>
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <i className="fas fa-trash-alt"></i>
+                    Delete
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>
@@ -718,6 +947,11 @@ const PartnerDetails = () => {
         .modal-content div::-webkit-scrollbar-thumb {
           background: #0B3B2F;
           border-radius: 10px;
+        }
+
+        button:disabled {
+          opacity: 0.7;
+          cursor: not-allowed !important;
         }
       `}</style>
     </div>
