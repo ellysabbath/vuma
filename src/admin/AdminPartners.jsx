@@ -26,9 +26,16 @@ const AdminPartners = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
   
+  // Status choices
+  const statusOptions = [
+    { value: 'active', label: 'Active' },
+    { value: 'pending', label: 'Pending' },
+    { value: 'inactive', label: 'Inactive' }
+  ];
+
   const [newPartner, setNewPartner] = useState({
     name: '',
-    type: 'development',
+    type: '',
     status: 'pending',
     since: new Date().getFullYear().toString(),
     description: '',
@@ -192,7 +199,7 @@ const AdminPartners = () => {
     setShowAddModal(false);
     setNewPartner({
       name: '',
-      type: 'development',
+      type: '',
       status: 'pending',
       since: new Date().getFullYear().toString(),
       description: '',
@@ -285,44 +292,32 @@ const AdminPartners = () => {
     });
   };
 
+  // Get status color based on status string
   const getStatusColor = (status) => {
-    const colors = {
-      'active': '#10b981',
-      'pending': '#f59e0b',
-      'inactive': '#ef4444'
-    };
-    return colors[status] || '#6b7280';
+    const statusLower = status?.toLowerCase() || '';
+    if (statusLower === 'active') return '#10b981';
+    if (statusLower === 'pending') return '#f59e0b';
+    if (statusLower === 'inactive') return '#ef4444';
+    return '#6b7280';
   };
 
   const getStatusLabel = (status) => {
-    const labels = {
-      'active': 'Active',
-      'pending': 'Pending',
-      'inactive': 'Inactive'
-    };
-    return labels[status] || status;
+    return status || 'Not specified';
   };
 
+  // Get type color based on type string
   const getTypeColor = (type) => {
-    const colors = {
-      'development': '#3b82f6',
-      'environmental': '#10b981',
-      'corporate': '#8b5cf6',
-      'ngo': '#f59e0b',
-      'government': '#ef4444'
-    };
-    return colors[type] || '#6b7280';
+    const typeLower = type?.toLowerCase() || '';
+    if (typeLower === 'development' || typeLower.includes('development')) return '#3b82f6';
+    if (typeLower === 'environmental' || typeLower.includes('environmental')) return '#10b981';
+    if (typeLower === 'corporate' || typeLower.includes('corporate')) return '#8b5cf6';
+    if (typeLower === 'ngo' || typeLower.includes('ngo')) return '#f59e0b';
+    if (typeLower === 'government' || typeLower.includes('government')) return '#ef4444';
+    return '#6b7280';
   };
 
   const getTypeLabel = (type) => {
-    const labels = {
-      'development': 'Development',
-      'environmental': 'Environmental',
-      'corporate': 'Corporate',
-      'ngo': 'NGO',
-      'government': 'Government'
-    };
-    return labels[type] || type;
+    return type || 'Not specified';
   };
 
   if (loading) {
@@ -641,21 +636,22 @@ const AdminPartners = () => {
                   
                   <div style={{ marginBottom: '0.75rem' }}>
                     <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500, fontSize: '0.75rem', color: '#475569' }}>Type</label>
-                    <select name="type" value={editingPartner.type} onChange={handleEditChange} style={{ width: '100%', padding: '0.5rem', fontSize: '0.813rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
-                      <option value="development">Development</option>
-                      <option value="environmental">Environmental</option>
-                      <option value="corporate">Corporate</option>
-                      <option value="ngo">NGO</option>
-                      <option value="government">Government</option>
-                    </select>
+                    <input type="text" name="type" value={editingPartner.type || ''} onChange={handleEditChange} placeholder="e.g., Development, Environmental, Corporate, NGO, Government" style={{ width: '100%', padding: '0.5rem', fontSize: '0.813rem', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
                   </div>
                   
                   <div style={{ marginBottom: '0.75rem' }}>
                     <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500, fontSize: '0.75rem', color: '#475569' }}>Status</label>
-                    <select name="status" value={editingPartner.status} onChange={handleEditChange} style={{ width: '100%', padding: '0.5rem', fontSize: '0.813rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
-                      <option value="active">Active</option>
-                      <option value="pending">Pending</option>
-                      <option value="inactive">Inactive</option>
+                    <select 
+                      name="status" 
+                      value={editingPartner.status || 'pending'} 
+                      onChange={handleEditChange}
+                      style={{ width: '100%', padding: '0.5rem', fontSize: '0.813rem', border: '1px solid #e2e8f0', borderRadius: '8px', background: 'white' }}
+                    >
+                      {statusOptions.map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   
@@ -667,6 +663,31 @@ const AdminPartners = () => {
                   <div style={{ marginBottom: '0.75rem' }}>
                     <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500, fontSize: '0.75rem', color: '#475569' }}>Description</label>
                     <textarea name="description" value={editingPartner.description || ''} onChange={handleEditChange} rows="3" style={{ width: '100%', padding: '0.5rem', fontSize: '0.813rem', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
+                  </div>
+                  
+                  <div style={{ marginBottom: '0.75rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500, fontSize: '0.75rem', color: '#475569' }}>Website</label>
+                    <input type="url" name="website" value={editingPartner.website || ''} onChange={handleEditChange} style={{ width: '100%', padding: '0.5rem', fontSize: '0.813rem', border: '1px solid #e2e8f0', borderRadius: '8px' }} placeholder="https://example.com" />
+                  </div>
+                  
+                  <div style={{ marginBottom: '0.75rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500, fontSize: '0.75rem', color: '#475569' }}>Contact Person</label>
+                    <input type="text" name="contact_person" value={editingPartner.contact_person || ''} onChange={handleEditChange} style={{ width: '100%', padding: '0.5rem', fontSize: '0.813rem', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
+                  </div>
+                  
+                  <div style={{ marginBottom: '0.75rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500, fontSize: '0.75rem', color: '#475569' }}>Email</label>
+                    <input type="email" name="email" value={editingPartner.email || ''} onChange={handleEditChange} style={{ width: '100%', padding: '0.5rem', fontSize: '0.813rem', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
+                  </div>
+                  
+                  <div style={{ marginBottom: '0.75rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500, fontSize: '0.75rem', color: '#475569' }}>Phone</label>
+                    <input type="text" name="phone" value={editingPartner.phone || ''} onChange={handleEditChange} style={{ width: '100%', padding: '0.5rem', fontSize: '0.813rem', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
+                  </div>
+                  
+                  <div style={{ marginBottom: '0.75rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500, fontSize: '0.75rem', color: '#475569' }}>Projects Count</label>
+                    <input type="number" name="projects_count" value={editingPartner.projects_count || 0} onChange={handleEditChange} style={{ width: '100%', padding: '0.5rem', fontSize: '0.813rem', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
                   </div>
                   
                   <div style={{ marginBottom: '0.75rem' }}>
@@ -759,6 +780,38 @@ const AdminPartners = () => {
                     <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500, fontSize: '0.75rem', color: '#64748b' }}>Since</label>
                     <div style={{ padding: '0.5rem', fontSize: '0.813rem', background: '#f8fafc', borderRadius: '8px' }}>{selectedPartner?.since}</div>
                   </div>
+                  
+                  {selectedPartner?.website && (
+                    <div style={{ marginBottom: '0.75rem' }}>
+                      <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500, fontSize: '0.75rem', color: '#64748b' }}>Website</label>
+                      <div style={{ padding: '0.5rem', fontSize: '0.813rem', background: '#f8fafc', borderRadius: '8px' }}>
+                        <a href={selectedPartner.website} target="_blank" rel="noopener noreferrer" style={{ color: '#0B3B2F', textDecoration: 'none' }}>
+                          {selectedPartner.website}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {selectedPartner?.contact_person && (
+                    <div style={{ marginBottom: '0.75rem' }}>
+                      <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500, fontSize: '0.75rem', color: '#64748b' }}>Contact Person</label>
+                      <div style={{ padding: '0.5rem', fontSize: '0.813rem', background: '#f8fafc', borderRadius: '8px' }}>{selectedPartner.contact_person}</div>
+                    </div>
+                  )}
+                  
+                  {selectedPartner?.email && (
+                    <div style={{ marginBottom: '0.75rem' }}>
+                      <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500, fontSize: '0.75rem', color: '#64748b' }}>Email</label>
+                      <div style={{ padding: '0.5rem', fontSize: '0.813rem', background: '#f8fafc', borderRadius: '8px' }}>{selectedPartner.email}</div>
+                    </div>
+                  )}
+                  
+                  {selectedPartner?.phone && (
+                    <div style={{ marginBottom: '0.75rem' }}>
+                      <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500, fontSize: '0.75rem', color: '#64748b' }}>Phone</label>
+                      <div style={{ padding: '0.5rem', fontSize: '0.813rem', background: '#f8fafc', borderRadius: '8px' }}>{selectedPartner.phone}</div>
+                    </div>
+                  )}
                   
                   {selectedPartner?.description && (
                     <div style={{ marginBottom: '0.75rem' }}>
@@ -868,21 +921,22 @@ const AdminPartners = () => {
               
               <div style={{ marginBottom: '0.75rem' }}>
                 <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500, fontSize: '0.75rem', color: '#475569' }}>Type</label>
-                <select name="type" value={newPartner.type} onChange={handleInputChange} style={{ width: '100%', padding: '0.5rem', fontSize: '0.813rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
-                  <option value="development">Development</option>
-                  <option value="environmental">Environmental</option>
-                  <option value="corporate">Corporate</option>
-                  <option value="ngo">NGO</option>
-                  <option value="government">Government</option>
-                </select>
+                <input type="text" name="type" value={newPartner.type} onChange={handleInputChange} placeholder="e.g., Development, Environmental, Corporate, NGO, Government" style={{ width: '100%', padding: '0.5rem', fontSize: '0.813rem', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
               </div>
               
               <div style={{ marginBottom: '0.75rem' }}>
                 <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500, fontSize: '0.75rem', color: '#475569' }}>Status</label>
-                <select name="status" value={newPartner.status} onChange={handleInputChange} style={{ width: '100%', padding: '0.5rem', fontSize: '0.813rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
-                  <option value="active">Active</option>
-                  <option value="pending">Pending</option>
-                  <option value="inactive">Inactive</option>
+                <select 
+                  name="status" 
+                  value={newPartner.status} 
+                  onChange={handleInputChange}
+                  style={{ width: '100%', padding: '0.5rem', fontSize: '0.813rem', border: '1px solid #e2e8f0', borderRadius: '8px', background: 'white' }}
+                >
+                  {statusOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
               </div>
               
@@ -894,6 +948,31 @@ const AdminPartners = () => {
               <div style={{ marginBottom: '0.75rem' }}>
                 <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500, fontSize: '0.75rem', color: '#475569' }}>Description</label>
                 <textarea name="description" value={newPartner.description} onChange={handleInputChange} rows="3" style={{ width: '100%', padding: '0.5rem', fontSize: '0.813rem', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
+              </div>
+              
+              <div style={{ marginBottom: '0.75rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500, fontSize: '0.75rem', color: '#475569' }}>Website</label>
+                <input type="url" name="website" value={newPartner.website} onChange={handleInputChange} style={{ width: '100%', padding: '0.5rem', fontSize: '0.813rem', border: '1px solid #e2e8f0', borderRadius: '8px' }} placeholder="https://example.com" />
+              </div>
+              
+              <div style={{ marginBottom: '0.75rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500, fontSize: '0.75rem', color: '#475569' }}>Contact Person</label>
+                <input type="text" name="contact_person" value={newPartner.contact_person} onChange={handleInputChange} style={{ width: '100%', padding: '0.5rem', fontSize: '0.813rem', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
+              </div>
+              
+              <div style={{ marginBottom: '0.75rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500, fontSize: '0.75rem', color: '#475569' }}>Email</label>
+                <input type="email" name="email" value={newPartner.email} onChange={handleInputChange} style={{ width: '100%', padding: '0.5rem', fontSize: '0.813rem', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
+              </div>
+              
+              <div style={{ marginBottom: '0.75rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500, fontSize: '0.75rem', color: '#475569' }}>Phone</label>
+                <input type="text" name="phone" value={newPartner.phone} onChange={handleInputChange} style={{ width: '100%', padding: '0.5rem', fontSize: '0.813rem', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
+              </div>
+              
+              <div style={{ marginBottom: '0.75rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500, fontSize: '0.75rem', color: '#475569' }}>Projects Count</label>
+                <input type="number" name="projects_count" value={newPartner.projects_count} onChange={handleInputChange} style={{ width: '100%', padding: '0.5rem', fontSize: '0.813rem', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
               </div>
               
               <div style={{ marginBottom: '0.75rem' }}>

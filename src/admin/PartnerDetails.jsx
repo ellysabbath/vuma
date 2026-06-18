@@ -22,6 +22,13 @@ const PartnerDetails = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
 
+  // Status options
+  const statusOptions = [
+    { value: 'active', label: 'Active' },
+    { value: 'pending', label: 'Pending' },
+    { value: 'inactive', label: 'Inactive' }
+  ];
+
   useEffect(() => {
     AOS.init({ duration: 800, once: true });
     fetchPartner();
@@ -163,43 +170,29 @@ const PartnerDetails = () => {
   };
 
   const getStatusColor = (status) => {
-    const colors = {
-      'active': '#4caf50',
-      'pending': '#ff9800',
-      'inactive': '#d32f2f'
-    };
-    return colors[status] || '#757575';
+    const statusLower = status?.toLowerCase() || '';
+    if (statusLower === 'active') return '#10b981';
+    if (statusLower === 'pending') return '#f59e0b';
+    if (statusLower === 'inactive') return '#ef4444';
+    return '#6b7280';
   };
 
   const getStatusLabel = (status) => {
-    const labels = {
-      'active': 'Active',
-      'pending': 'Pending',
-      'inactive': 'Inactive'
-    };
-    return labels[status] || status;
+    return status || 'Not specified';
   };
 
   const getTypeColor = (type) => {
-    const colors = {
-      'development': '#2196F3',
-      'environmental': '#4caf50',
-      'corporate': '#9C27B0',
-      'ngo': '#FF9800',
-      'government': '#d32f2f'
-    };
-    return colors[type] || '#757575';
+    const typeLower = type?.toLowerCase() || '';
+    if (typeLower === 'development' || typeLower.includes('development')) return '#3b82f6';
+    if (typeLower === 'environmental' || typeLower.includes('environmental')) return '#10b981';
+    if (typeLower === 'corporate' || typeLower.includes('corporate')) return '#8b5cf6';
+    if (typeLower === 'ngo' || typeLower.includes('ngo')) return '#f59e0b';
+    if (typeLower === 'government' || typeLower.includes('government')) return '#ef4444';
+    return '#6b7280';
   };
 
   const getTypeLabel = (type) => {
-    const labels = {
-      'development': 'Development Partner',
-      'environmental': 'Environmental Partner',
-      'corporate': 'Corporate Partner',
-      'ngo': 'NGO Partner',
-      'government': 'Government Partner'
-    };
-    return labels[type] || type;
+    return type || 'Not specified';
   };
 
   if (loading) {
@@ -558,7 +551,7 @@ const PartnerDetails = () => {
         </div>
       </div>
 
-      {/* Edit Partner Modal - Enhanced */}
+      {/* Edit Partner Modal - Enhanced with Status Dropdown */}
       {showEditModal && editingPartner && (
         <div className="modal-overlay" onClick={closeEditModal} style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)',
@@ -632,31 +625,29 @@ const PartnerDetails = () => {
               
               <div style={{ marginBottom: '0.8rem' }}>
                 <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600, fontSize: '0.9rem' }}>Partner Type</label>
-                <select
+                <input
+                  type="text"
                   name="type"
-                  value={editingPartner.type}
+                  value={editingPartner.type || ''}
                   onChange={handleEditChange}
+                  placeholder="e.g., Development, Environmental, Corporate, NGO, Government"
                   style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid #ddd', fontSize: '0.9rem' }}
-                >
-                  <option value="development">Development Partner</option>
-                  <option value="environmental">Environmental Partner</option>
-                  <option value="corporate">Corporate Partner</option>
-                  <option value="ngo">NGO Partner</option>
-                  <option value="government">Government Partner</option>
-                </select>
+                />
               </div>
               
               <div style={{ marginBottom: '0.8rem' }}>
                 <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600, fontSize: '0.9rem' }}>Status</label>
                 <select
                   name="status"
-                  value={editingPartner.status}
+                  value={editingPartner.status || 'pending'}
                   onChange={handleEditChange}
-                  style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid #ddd', fontSize: '0.9rem' }}
+                  style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid #ddd', fontSize: '0.9rem', background: 'white' }}
                 >
-                  <option value="active">Active</option>
-                  <option value="pending">Pending</option>
-                  <option value="inactive">Inactive</option>
+                  {statusOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
               </div>
               

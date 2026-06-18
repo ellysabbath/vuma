@@ -34,6 +34,19 @@ const Donate = () => {
   const [transactionCode, setTransactionCode] = useState('');
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
 
+  // Testimonials state
+  const [testimonials, setTestimonials] = useState([]);
+  const [loadingTestimonials, setLoadingTestimonials] = useState(true);
+
+  // Impact stats state - static values from API
+  const [impactStats, setImpactStats] = useState([
+    { value: '0', label: 'Youth Reached', icon: 'fas fa-users' },
+    { value: '0', label: 'Trees Planted', icon: 'fas fa-tree' },
+    { value: '0', label: 'Projects Completed', icon: 'fas fa-project-diagram' },
+    { value: '0', label: 'Active Volunteers', icon: 'fas fa-users' }
+  ]);
+  const [loadingStats, setLoadingStats] = useState(true);
+
   // API Base URL
   const API_BASE_URL = 'https://vuma.pythonanywhere.com/api';
 
@@ -60,7 +73,110 @@ const Donate = () => {
       }
       if (storedUser.city) setLocation(storedUser.city);
     }
+
+    // Fetch testimonials
+    fetchTestimonials();
+    // Fetch impact stats
+    fetchImpactStats();
   }, []);
+
+  // Fetch impact stats from API - static values, no counting
+  const fetchImpactStats = async () => {
+    setLoadingStats(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/impacts/`);
+      if (response.ok) {
+        const data = await response.json();
+        let impactData = null;
+        
+        if (Array.isArray(data) && data.length > 0) {
+          impactData = data[0];
+        } else if (data.results && data.results.length > 0) {
+          impactData = data.results[0];
+        } else if (data.data && data.data.length > 0) {
+          impactData = data.data[0];
+        }
+        
+        if (impactData) {
+          const stats = [
+            { 
+              value: impactData.youth_reached_target?.toLocaleString() || '0', 
+              label: 'Youth Reached', 
+              icon: 'fas fa-users',
+              active: impactData.youth_reached_active
+            },
+            { 
+              value: impactData.trees_planted_target?.toLocaleString() || '0', 
+              label: 'Trees Planted', 
+              icon: 'fas fa-tree',
+              active: impactData.trees_planted_active
+            },
+            { 
+              value: impactData.ideas_generated_target?.toLocaleString() || '0', 
+              label: 'Projects Completed', 
+              icon: 'fas fa-project-diagram',
+              active: impactData.ideas_generated_active
+            },
+            { 
+              value: impactData.volunteers_target?.toLocaleString() || '0', 
+              label: 'Active Volunteers', 
+              icon: 'fas fa-users',
+              active: impactData.volunteers_active
+            }
+          ];
+          
+          // Only show active stats
+          const activeStats = stats.filter(s => s.active !== false);
+          setImpactStats(activeStats.length > 0 ? activeStats : stats);
+        }
+      } else {
+        console.error('Error fetching impact stats:', response.status);
+        // Use default stats if API fails
+        setImpactStats([
+          { value: '30,000', label: 'Youth Reached', icon: 'fas fa-users' },
+          { value: '50,000', label: 'Trees Planted', icon: 'fas fa-tree' },
+          { value: '742', label: 'Projects Completed', icon: 'fas fa-project-diagram' },
+          { value: '435', label: 'Active Volunteers', icon: 'fas fa-users' }
+        ]);
+      }
+    } catch (error) {
+      console.error('Error fetching impact stats:', error);
+      // Use default stats if API fails
+      setImpactStats([
+        { value: '30,000', label: 'Youth Reached', icon: 'fas fa-users' },
+        { value: '50,000', label: 'Trees Planted', icon: 'fas fa-tree' },
+        { value: '742', label: 'Projects Completed', icon: 'fas fa-project-diagram' },
+        { value: '435', label: 'Active Volunteers', icon: 'fas fa-users' }
+      ]);
+    } finally {
+      setLoadingStats(false);
+    }
+  };
+
+  // Fetch testimonials from backend
+  const fetchTestimonials = async () => {
+    setLoadingTestimonials(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/estimonials/active/`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setTestimonials(data.data);
+        } else {
+          console.error('Failed to fetch testimonials:', data);
+          setTestimonials([]);
+        }
+      } else {
+        console.error('Error fetching testimonials:', response.status);
+        setTestimonials([]);
+      }
+    } catch (error) {
+      console.error('Error fetching testimonials:', error);
+      setTestimonials([]);
+    } finally {
+      setLoadingTestimonials(false);
+    }
+  };
 
   // Preset amounts in TZS
   const presetAmounts = [5000, 10000, 25000, 50000, 100000, 250000];
@@ -92,13 +208,12 @@ const Donate = () => {
 
   // Fetch pending (unconfirmed) donations for the logged-in user
   const fetchPendingDonations = async () => {
-    // Get user data from localStorage
     const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
     const userEmail = storedUser.email || email;
     const userMobile = storedUser.phone || mobileNumber;
     
     if (!userEmail && !userMobile) {
-      setConfirmError('Please login or enter your email/mobile number to fetch your pending donations');
+      showTemporaryAlert('Please login or enter your email/mobile number to fetch your pending donations', 'error');
       return;
     }
     
@@ -110,8 +225,6 @@ const Donate = () => {
       
       if (response.ok) {
         const data = await response.json();
-        console.log('All donations response:', data);
-        
         let allDonations = [];
         if (data.results && Array.isArray(data.results)) {
           allDonations = data.results;
@@ -119,7 +232,6 @@ const Donate = () => {
           allDonations = data;
         }
         
-        // Filter donations by email or mobile number and status = pending
         const userPendingDonations = allDonations.filter(donation => {
           const matchesEmail = donation.email && donation.email.toLowerCase() === (userEmail || '').toLowerCase();
           const matchesMobile = donation.mobile_number && donation.mobile_number === userMobile;
@@ -127,11 +239,10 @@ const Donate = () => {
           return (matchesEmail || matchesMobile) && isPending;
         });
         
-        console.log('User pending donations:', userPendingDonations);
         setPendingDonations(userPendingDonations);
         
         if (userPendingDonations.length === 0) {
-          setConfirmError('No pending donations found for your account. Please make a donation first.');
+          showTemporaryAlert('No pending donations found for your account. Please make a donation first.', 'info');
         } else {
           setShowPendingModal(true);
         }
@@ -140,7 +251,7 @@ const Donate = () => {
       }
     } catch (error) {
       console.error('Error fetching pending donations:', error);
-      setConfirmError('Failed to fetch your pending donations. Please try again.');
+      showTemporaryAlert('Failed to fetch your pending donations. Please try again.', 'error');
     } finally {
       setLoadingPending(false);
     }
@@ -153,10 +264,8 @@ const Donate = () => {
     setShowPendingModal(false);
     setShowInstructions(true);
     
-    // Show a toast notification that donation is loaded
     showTemporaryAlert(`✅ Donation ID ${donation.id} loaded! Enter your transaction code to confirm.`, 'info');
     
-    // Scroll to instructions
     setTimeout(() => {
       const instructionsSection = document.getElementById('donation-instructions');
       if (instructionsSection) {
@@ -165,18 +274,15 @@ const Donate = () => {
     }, 100);
   };
 
-  // Close modal
   const closePendingModal = () => {
     setShowPendingModal(false);
     setPendingDonations([]);
   };
 
-  // Show temporary alert/toast notification
   const showTemporaryAlert = (message, type = 'success') => {
     setSuccessAlertMessage(message);
     setShowSuccessAlert(true);
     
-    // Auto-hide after 5 seconds
     setTimeout(() => {
       setShowSuccessAlert(false);
       setSuccessAlertMessage('');
@@ -276,21 +382,29 @@ VUMA Organization - www.vuma.org
       }
 
       const data = await response.json();
-      console.log('Donation save response:', data);
+      console.log('Donation save response:', JSON.stringify(data, null, 2));
       
       let donationObject = null;
       
-      if (data.results && Array.isArray(data.results) && data.results.length > 0) {
-        donationObject = data.results[0];
-      } else if (Array.isArray(data) && data.length > 0) {
-        donationObject = data[0];
-      } else if (data.id) {
+      if (data.id) {
         donationObject = data;
       } else if (data.data && data.data.id) {
         donationObject = data.data;
+      } else if (data.results && Array.isArray(data.results) && data.results.length > 0) {
+        donationObject = data.results[0];
+      } else if (Array.isArray(data) && data.length > 0) {
+        donationObject = data[0];
+      } else if (data.donation && data.donation.id) {
+        donationObject = data.donation;
+      } else if (data.donation_id) {
+        const donationResponse = await fetch(`${API_BASE_URL}/donations/${data.donation_id}/`);
+        if (donationResponse.ok) {
+          const donationData = await donationResponse.json();
+          donationObject = donationData;
+        }
       }
       
-      if (!donationObject || !donationObject.id) {
+      if (!donationObject || !donationObject) {
         console.error('Could not extract donation with ID from response:', data);
         throw new Error('Donation created but could not retrieve ID. Please contact support.');
       }
@@ -376,15 +490,15 @@ VUMA Organization - www.vuma.org
     const amount = selectedAmount || customAmount;
     
     if (!amount) {
-      alert('Please select or enter a donation amount');
+      showTemporaryAlert('Please select or enter a donation amount', 'error');
       return;
     }
     if (parseFloat(amount) < 1000) {
-      alert('Minimum donation amount is 1,000 TZS');
+      showTemporaryAlert('Minimum donation amount is 1,000 TZS', 'error');
       return;
     }
     if (!fullName || !email || !mobileNumber || !location) {
-      alert('Please fill in all required fields (Name, Email, Mobile Number, Location)');
+      showTemporaryAlert('Please fill in all required fields (Name, Email, Mobile Number, Location)', 'error');
       return;
     }
     
@@ -413,7 +527,8 @@ VUMA Organization - www.vuma.org
       
       setShowInstructions(true);
       
-      showTemporaryAlert(`✅ Donation created successfully! Reference: ${savedDonation.reference_number}`, 'success');
+      // SUCCESS MESSAGE SHOWS IMMEDIATELY AFTER DONATION
+      showTemporaryAlert(`✅ Donation created successfully! Reference: ${savedDonation.reference_number}. Please complete payment using the instructions below.`, 'success');
       
       setTimeout(() => {
         const instructionsSection = document.getElementById('donation-instructions');
@@ -423,8 +538,8 @@ VUMA Organization - www.vuma.org
       }, 100);
       
     } catch (error) {
+      showTemporaryAlert(`❌ ${error.message || 'Failed to process donation'}`, 'error');
       setApiError(error.message || 'Failed to process donation. Please try again.');
-      showTemporaryAlert(`❌ Error: ${error.message || 'Failed to process donation'}`, 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -435,36 +550,30 @@ VUMA Organization - www.vuma.org
     setConfirmSuccess('');
     
     if (!selectedPaymentMethod) {
-      setConfirmError('Please select a payment method (M-PESA or Bank Transfer)');
-      showTemporaryAlert('⚠️ Please select a payment method', 'error');
+      showTemporaryAlert('⚠️ Please select a payment method (M-PESA or Bank Transfer)', 'error');
       return;
     }
     if (!transactionCode) {
-      setConfirmError('Please enter your transaction code');
       showTemporaryAlert('⚠️ Please enter your transaction code', 'error');
       return;
     }
     if (!currentDonation || !currentDonation.id) {
-      setConfirmError('Donation ID is missing. Please select a pending donation or create a new one.');
       showTemporaryAlert('❌ Donation ID is missing. Please try again.', 'error');
       return;
     }
     
     if (transactionCode.trim().length < 4) {
-      setConfirmError('Transaction code should be at least 4 characters long');
       showTemporaryAlert('⚠️ Transaction code should be at least 4 characters long', 'error');
       return;
     }
     
     setPaymentConfirmed(true);
     
-    // Show confirming status
     showTemporaryAlert('⏳ Confirming your payment... Please wait.', 'info');
     
     try {
       const result = await confirmPaymentAPI(currentDonation.id, selectedPaymentMethod, transactionCode.trim());
       
-      // Fetch the updated donation data
       const updatedDonation = await fetchDonationById(currentDonation.id);
       if (updatedDonation) {
         setCurrentDonation(updatedDonation);
@@ -473,15 +582,11 @@ VUMA Organization - www.vuma.org
       const successMsg = `✅ Payment confirmed successfully! Amount: ${currentDonation.formatted_amount || formatCurrency(parseFloat(currentDonation.amount))} via ${selectedPaymentMethod === 'mpesa' ? 'M-PESA' : 'CRDB Bank'}`;
       
       setConfirmSuccess(successMsg);
-      
-      // Show success alert
       showTemporaryAlert(successMsg, 'success');
       
-      // Clear form
       setTransactionCode('');
       setSelectedPaymentMethod('');
       
-      // Auto-clear success message after 5 seconds
       setTimeout(() => {
         setConfirmSuccess('');
       }, 5000);
@@ -491,11 +596,8 @@ VUMA Organization - www.vuma.org
       
       let userFriendlyMessage = error.message || 'Failed to confirm payment';
       
-      if (error.message.includes('404')) {
-        userFriendlyMessage = `Donation not found. Please check your donation ID and try again.`;
-      } else if (error.message.includes('already confirmed')) {
+      if (error.message.includes('already confirmed')) {
         userFriendlyMessage = '✅ This payment has already been confirmed. No further action needed.';
-        // Refresh donation data
         const updatedDonation = await fetchDonationById(currentDonation.id);
         if (updatedDonation) {
           setCurrentDonation(updatedDonation);
@@ -529,12 +631,70 @@ VUMA Organization - www.vuma.org
     }
   };
 
-  const impactStats = [
-    { value: '5,000+', label: 'Youth Reached', icon: 'fas fa-users' },
-    { value: '12,450', label: 'Trees Planted', icon: 'fas fa-tree' },
-    { value: '50+', label: 'Projects Completed', icon: 'fas fa-project-diagram' },
-    { value: '450+', label: 'Tons of Waste Removed', icon: 'fas fa-trash-alt' }
-  ];
+  // Display loading state for testimonials
+  const renderTestimonials = () => {
+    if (loadingTestimonials) {
+      return (
+        <div style={{ textAlign: 'center', padding: '2rem' }}>
+          <div style={{
+            width: '40px',
+            height: '40px',
+            border: '3px solid #F9C74F',
+            borderTopColor: '#0B3B2F',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto'
+          }} />
+          <p style={{ marginTop: '0.5rem', color: '#666', fontSize: '0.85rem' }}>Loading testimonials...</p>
+        </div>
+      );
+    }
+
+    if (testimonials.length === 0) {
+      return (
+        <div style={{ textAlign: 'center', padding: '2rem', color: '#999' }}>
+          <i className="fas fa-quote-left" style={{ fontSize: '2rem', opacity: 0.3 }}></i>
+          <p style={{ marginTop: '0.5rem' }}>No testimonials yet. Be the first to share your experience!</p>
+        </div>
+      );
+    }
+
+    return (
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+        {testimonials.map((testimonial, idx) => (
+          <div key={testimonial.id} data-aos="fade-up" data-aos-delay={idx * 100} style={{
+            background: 'white',
+            borderRadius: '20px',
+            padding: '1.5rem',
+            textAlign: 'center',
+            boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
+            transition: 'transform 0.3s ease'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+          onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
+            <i className="fas fa-quote-left" style={{ fontSize: '2rem', color: '#F9C74F', opacity: 0.5, marginBottom: '1rem' }}></i>
+            <p style={{ color: '#666', fontStyle: 'italic', marginBottom: '1rem', lineHeight: '1.6' }}>"{testimonial.text}"</p>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.2rem', marginBottom: '0.3rem' }}>
+              {[...Array(5)].map((_, i) => (
+                <i 
+                  key={i} 
+                  className="fas fa-star" 
+                  style={{ 
+                    color: i < testimonial.rating ? '#F9C74F' : '#ddd',
+                    fontSize: '0.9rem'
+                  }}
+                ></i>
+              ))}
+            </div>
+            <h4 style={{ color: '#0B3B2F', marginBottom: '0.2rem' }}>{testimonial.name}</h4>
+            {testimonial.location && (
+              <p style={{ fontSize: '0.8rem', color: '#888' }}>{testimonial.location}</p>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f9fbf7' }}>
@@ -590,8 +750,6 @@ VUMA Organization - www.vuma.org
         .reference-card { background: linear-gradient(135deg, #0B3B2F, #1a5c48); animation: fadeInUp 0.5s ease; }
         .stat-card { transition: all 0.3s ease; }
         .stat-card:hover { transform: translateY(-5px); background: rgba(11,59,47,0.03); }
-        .error-message { animation: fadeInUp 0.3s ease; }
-        .success-message { animation: fadeInUp 0.3s ease; }
         .log-entry { transition: background 0.2s ease; }
         .log-entry:hover { background: rgba(249,199,79,0.1); }
         .donation-id-box { background: linear-gradient(135deg, #F9C74F, #f8b500); color: #0B3B2F; padding: 0.5rem 1rem; border-radius: 12px; font-weight: bold; font-size: 1.2rem; text-align: center; }
@@ -616,12 +774,18 @@ VUMA Organization - www.vuma.org
       {/* Success Alert Toast Notification */}
       {showSuccessAlert && (
         <div className={`success-alert ${!showSuccessAlert ? 'fade-out' : ''}`} style={{
-          background: successAlertMessage.includes('✅') ? '#e8f5e9' : (successAlertMessage.includes('❌') ? '#ffebee' : (successAlertMessage.includes('⚠️') ? '#fff3e0' : '#e3f2fd')),
-          color: successAlertMessage.includes('✅') ? '#2e7d32' : (successAlertMessage.includes('❌') ? '#c62828' : (successAlertMessage.includes('⚠️') ? '#e65100' : '#1565c0')),
+          background: successAlertMessage.includes('✅') ? '#e8f5e9' : 
+                     (successAlertMessage.includes('❌') ? '#ffebee' : 
+                     (successAlertMessage.includes('⚠️') ? '#fff3e0' : '#e3f2fd')),
+          color: successAlertMessage.includes('✅') ? '#2e7d32' : 
+                 (successAlertMessage.includes('❌') ? '#c62828' : 
+                 (successAlertMessage.includes('⚠️') ? '#e65100' : '#1565c0')),
           padding: '1rem',
           borderRadius: '12px',
           boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
-          borderLeft: `4px solid ${successAlertMessage.includes('✅') ? '#4caf50' : (successAlertMessage.includes('❌') ? '#d32f2f' : (successAlertMessage.includes('⚠️') ? '#ff9800' : '#2196f3'))}`,
+          borderLeft: `4px solid ${successAlertMessage.includes('✅') ? '#4caf50' : 
+                                   (successAlertMessage.includes('❌') ? '#d32f2f' : 
+                                   (successAlertMessage.includes('⚠️') ? '#ff9800' : '#2196f3'))}`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -684,7 +848,7 @@ VUMA Organization - www.vuma.org
         </div>
       </div>
 
-      {/* Impact Stats */}
+      {/* Impact Stats - Fetched from API (Static Values - No Counting) */}
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '3rem 2rem' }}>
         <div style={{
           display: 'grid',
@@ -692,20 +856,65 @@ VUMA Organization - www.vuma.org
           gap: '1.5rem',
           marginBottom: '3rem'
         }}>
-          {impactStats.map((stat, idx) => (
-            <div key={idx} data-aos="zoom-in" data-aos-delay={idx * 100} className="stat-card" style={{
-              background: 'white',
-              borderRadius: '20px',
-              padding: '1.5rem',
-              textAlign: 'center',
-              boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
-              cursor: 'pointer'
-            }}>
-              <i className={stat.icon} style={{ fontSize: '2rem', color: '#F9C74F', marginBottom: '0.5rem' }}></i>
-              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0B3B2F' }}>{stat.value}</div>
-              <div style={{ color: '#666', fontSize: '0.85rem' }}>{stat.label}</div>
-            </div>
-          ))}
+          {loadingStats ? (
+            // Loading skeleton for stats
+            Array(4).fill(0).map((_, idx) => (
+              <div key={idx} style={{
+                background: 'white',
+                borderRadius: '20px',
+                padding: '1.5rem',
+                textAlign: 'center',
+                boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
+                minHeight: '120px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
+                  backgroundSize: '200% 100%',
+                  animation: 'shimmer 1.5s infinite',
+                  marginBottom: '0.5rem'
+                }} />
+                <div style={{
+                  width: '80%',
+                  height: '20px',
+                  background: 'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
+                  backgroundSize: '200% 100%',
+                  animation: 'shimmer 1.5s infinite',
+                  borderRadius: '4px',
+                  marginBottom: '0.3rem'
+                }} />
+                <div style={{
+                  width: '60%',
+                  height: '14px',
+                  background: 'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
+                  backgroundSize: '200% 100%',
+                  animation: 'shimmer 1.5s infinite',
+                  borderRadius: '4px'
+                }} />
+              </div>
+            ))
+          ) : (
+            impactStats.map((stat, idx) => (
+              <div key={idx} data-aos="zoom-in" data-aos-delay={idx * 100} className="stat-card" style={{
+                background: 'white',
+                borderRadius: '20px',
+                padding: '1.5rem',
+                textAlign: 'center',
+                boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
+                cursor: 'pointer'
+              }}>
+                <i className={stat.icon} style={{ fontSize: '2rem', color: '#F9C74F', marginBottom: '0.5rem' }}></i>
+                <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0B3B2F' }}>{stat.value}</div>
+                <div style={{ color: '#666', fontSize: '0.85rem' }}>{stat.label}</div>
+              </div>
+            ))
+          )}
         </div>
 
         {/* Button to View Pending Donations */}
@@ -770,17 +979,22 @@ VUMA Organization - www.vuma.org
             <h2 style={{ color: '#0B3B2F', marginBottom: '0.5rem' }}>Make a Donation</h2>
             <p style={{ color: '#666', marginBottom: '1.5rem' }}>Fill out the form to receive a reference number and payment instructions</p>
 
+            {/* Error message styled like success alert */}
             {apiError && (
               <div style={{
                 background: '#ffebee',
-                color: '#d32f2f',
+                color: '#c62828',
                 padding: '0.8rem',
                 borderRadius: '12px',
                 marginBottom: '1rem',
-                fontSize: '0.85rem'
+                fontSize: '0.85rem',
+                border: '1px solid #ffcdd2',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
               }}>
-                <i className="fas fa-exclamation-circle" style={{ marginRight: '0.5rem' }}></i>
-                {apiError}
+                <i className="fas fa-exclamation-circle" style={{ fontSize: '1rem' }}></i>
+                <span>{apiError}</span>
               </div>
             )}
 
@@ -1369,27 +1583,38 @@ VUMA Organization - www.vuma.org
                   Confirm Your Payment
                 </h3>
                 
+                {/* Error message styled like success alert */}
                 {confirmError && (
-                  <div className="error-message" style={{
+                  <div style={{
                     background: '#ffebee',
-                    color: '#d32f2f',
+                    color: '#c62828',
                     padding: '0.8rem',
                     borderRadius: '12px',
-                    marginBottom: '1rem'
+                    marginBottom: '1rem',
+                    border: '1px solid #ffcdd2',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
                   }}>
-                    <i className="fas fa-exclamation-triangle"></i> {confirmError}
+                    <i className="fas fa-exclamation-triangle" style={{ fontSize: '1rem' }}></i>
+                    <span>{confirmError}</span>
                   </div>
                 )}
                 
                 {confirmSuccess && (
-                  <div className="success-message" style={{
+                  <div style={{
                     background: '#e8f5e9',
                     color: '#2e7d32',
                     padding: '0.8rem',
                     borderRadius: '12px',
-                    marginBottom: '1rem'
+                    marginBottom: '1rem',
+                    border: '1px solid #c8e6c9',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
                   }}>
-                    <i className="fas fa-check-circle"></i> {confirmSuccess}
+                    <i className="fas fa-check-circle" style={{ fontSize: '1rem' }}></i>
+                    <span>{confirmSuccess}</span>
                   </div>
                 )}
                 
@@ -1511,7 +1736,6 @@ VUMA Organization - www.vuma.org
             overflow: 'hidden',
             position: 'relative'
           }}>
-            {/* Modal Header */}
             <div style={{
               background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)',
               padding: '1.5rem',
@@ -1557,7 +1781,6 @@ VUMA Organization - www.vuma.org
               </p>
             </div>
 
-            {/* Modal Body - List of Pending Donations */}
             <div style={{
               flex: 1,
               overflowY: 'auto',
@@ -1615,7 +1838,6 @@ VUMA Organization - www.vuma.org
               )}
             </div>
 
-            {/* Modal Footer */}
             <div style={{
               padding: '1rem',
               borderTop: '1px solid #e0e0e0',
@@ -1640,32 +1862,24 @@ VUMA Organization - www.vuma.org
         </div>
       )}
 
-      {/* Testimonials */}
+      {/* Testimonials - Dynamically Fetched from Backend */}
       <div style={{ background: '#f0f5ee', padding: '3rem 2rem' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
-          <h2 data-aos="fade-up" style={{ color: '#0B3B2F', marginBottom: '2rem' }}>What Donors Say</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
-            {[
-              { text: "I've seen firsthand how VUMA transforms communities around Lake Victoria. My donation is making a real difference.", author: "Mr. Johnbosco", location: "United Republic of Tanzania" },
-              { text: "Supporting VUMA is the best investment I've made in Africa's environmental future.", author: "Mr.Laban ", location: "United Republic of Tanzania" },
-              { text: "The payment confirmation process was very easy. I just entered my transaction code and got confirmation instantly.", author: "Grace A.", location: "United Republic of Tanzania" }
-            ].map((testimonial, idx) => (
-              <div key={idx} data-aos="fade-up" data-aos-delay={idx * 100} style={{
-                background: 'white',
-                borderRadius: '20px',
-                padding: '1.5rem',
-                textAlign: 'center',
-                boxShadow: '0 5px 15px rgba(0,0,0,0.05)'
-              }}>
-                <i className="fas fa-quote-left" style={{ fontSize: '2rem', color: '#F9C74F', opacity: 0.5, marginBottom: '1rem' }}></i>
-                <p style={{ color: '#666', fontStyle: 'italic', marginBottom: '1rem' }}>"{testimonial.text}"</p>
-                <h4 style={{ color: '#0B3B2F', marginBottom: '0.2rem' }}>{testimonial.author}</h4>
-                <p style={{ fontSize: '0.8rem', color: '#888' }}>{testimonial.location}</p>
-              </div>
-            ))}
-          </div>
+          <h2 data-aos="fade-up" style={{ color: '#0B3B2F', marginBottom: '2rem' }}>
+            <i className="fas fa-star" style={{ color: '#F9C74F', marginRight: '0.5rem' }}></i>
+            What Donors Say
+          </h2>
+          {renderTestimonials()}
         </div>
       </div>
+
+      {/* Shimmer animation for loading skeletons */}
+      <style>{`
+        @keyframes shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+      `}</style>
     </div>
   );
 };

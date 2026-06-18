@@ -1089,25 +1089,27 @@ const Navbar = () => {
                 top: '50px',
                 right: '0',
                 width: '240px',
+                maxHeight: '400px', // Reduced height with scroll
+                overflowY: 'auto', // Enable scrolling
                 background: 'white',
                 borderRadius: '12px',
                 boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
-                overflow: 'hidden',
                 zIndex: 1001,
                 animation: 'fadeInUp 0.3s ease'
               }}>
                 <div style={{
-                  padding: '1rem',
+                  padding: '0.8rem',
                   background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)',
                   color: 'white',
-                  textAlign: 'center'
+                  textAlign: 'center',
+                  flexShrink: 0
                 }}>
                   {user.profile_picture ? (
                     <div style={{
-                      width: '50px',
-                      height: '50px',
+                      width: '40px',
+                      height: '40px',
                       borderRadius: '50%',
-                      margin: '0 auto 8px',
+                      margin: '0 auto 6px',
                       overflow: 'hidden',
                       border: '2px solid #F9C74F'
                     }}>
@@ -1119,21 +1121,21 @@ const Navbar = () => {
                     </div>
                   ) : (
                     <div style={{
-                      width: '50px',
-                      height: '50px',
+                      width: '40px',
+                      height: '40px',
                       borderRadius: '50%',
                       background: '#F9C74F',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      margin: '0 auto 8px',
-                      fontSize: '1.3rem'
+                      margin: '0 auto 6px',
+                      fontSize: '1rem'
                     }}>
                       <i className="fas fa-user" style={{ color: '#0B3B2F' }}></i>
                     </div>
                   )}
-                  <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>Welcome Back!</div>
-                  <div style={{ fontSize: '0.7rem', opacity: 0.8 }}>{user.email || user.username}</div>
+                  <div style={{ fontSize: '0.7rem', fontWeight: 600 }}>Welcome Back!</div>
+                  <div style={{ fontSize: '0.6rem', opacity: 0.8 }}>{user.email || user.username}</div>
                 </div>
 
                 <Link
@@ -1143,19 +1145,20 @@ const Navbar = () => {
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '12px',
-                    padding: '0.8rem 1rem',
+                    gap: '10px',
+                    padding: '0.6rem 0.8rem',
                     color: '#333',
                     textDecoration: 'none',
                     transition: 'all 0.3s ease',
-                    borderBottom: '1px solid #f0f0f0'
+                    borderBottom: '1px solid #f0f0f0',
+                    fontSize: '0.75rem'
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
                 >
-                  <i className="fas fa-user-circle" style={{ width: '20px', color: '#F9C74F' }}></i>
+                  <i className="fas fa-user-circle" style={{ width: '16px', color: '#F9C74F', fontSize: '0.8rem' }}></i>
                   <span style={{ flex: 1 }}>My Profile</span>
-                  <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
+                  <i className="fas fa-chevron-right" style={{ fontSize: '0.6rem', opacity: 0.5 }}></i>
                 </Link>
                 
                 <Link
@@ -1165,19 +1168,20 @@ const Navbar = () => {
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '12px',
-                    padding: '0.8rem 1rem',
+                    gap: '10px',
+                    padding: '0.6rem 0.8rem',
                     color: '#333',
                     textDecoration: 'none',
                     transition: 'all 0.3s ease',
-                    borderBottom: '1px solid #f0f0f0'
+                    borderBottom: '1px solid #f0f0f0',
+                    fontSize: '0.75rem'
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
                 >
-                  <i className="fas fa-file-alt" style={{ width: '20px', color: '#F9C74F' }}></i>
+                  <i className="fas fa-file-alt" style={{ width: '16px', color: '#F9C74F', fontSize: '0.8rem' }}></i>
                   <span style={{ flex: 1 }}>Publications</span>
-                  <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
+                  <i className="fas fa-chevron-right" style={{ fontSize: '0.6rem', opacity: 0.5 }}></i>
                 </Link>
                 
                 <Link
@@ -1187,19 +1191,20 @@ const Navbar = () => {
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '12px',
-                    padding: '0.8rem 1rem',
+                    gap: '10px',
+                    padding: '0.6rem 0.8rem',
                     color: '#333',
                     textDecoration: 'none',
                     transition: 'all 0.3s ease',
-                    borderBottom: '1px solid #f0f0f0'
+                    borderBottom: '1px solid #f0f0f0',
+                    fontSize: '0.75rem'
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
                 >
-                  <i className="fas fa-star" style={{ width: '20px', color: '#F9C74F' }}></i>
+                  <i className="fas fa-star" style={{ width: '16px', color: '#F9C74F', fontSize: '0.8rem' }}></i>
                   <span style={{ flex: 1 }}>Share Your Story</span>
-                  <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
+                  <i className="fas fa-chevron-right" style={{ fontSize: '0.6rem', opacity: 0.5 }}></i>
                 </Link>
                 
                 {isAdmin && (
@@ -1211,19 +1216,89 @@ const Navbar = () => {
                       style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '12px',
-                        padding: '0.8rem 1rem',
+                        gap: '10px',
+                        padding: '0.6rem 0.8rem',
                         color: '#333',
                         textDecoration: 'none',
                         transition: 'all 0.3s ease',
-                        borderBottom: '1px solid #f0f0f0'
+                        borderBottom: '1px solid #f0f0f0',
+                        fontSize: '0.75rem'
                       }}
                       onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
                       onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
                     >
-                      <i className="fas fa-tachometer-alt" style={{ width: '20px', color: '#F9C74F' }}></i>
+                      <i className="fas fa-tachometer-alt" style={{ width: '16px', color: '#F9C74F', fontSize: '0.8rem' }}></i>
                       <span style={{ flex: 1 }}>Admin Dashboard</span>
-                      <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
+                      <i className="fas fa-chevron-right" style={{ fontSize: '0.6rem', opacity: 0.5 }}></i>
+                    </Link>
+
+                    <Link
+                      to="/admin/users"
+                      onClick={() => setIsUserMenuOpen(false)}
+                      className="dropdown-item"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '0.6rem 0.8rem',
+                        color: '#333',
+                        textDecoration: 'none',
+                        transition: 'all 0.3s ease',
+                        borderBottom: '1px solid #f0f0f0',
+                        fontSize: '0.75rem'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                    >
+                      <i className="fas fa-users" style={{ width: '16px', color: '#F9C74F', fontSize: '0.8rem' }}></i>
+                      <span style={{ flex: 1 }}>Manage Users</span>
+                      <i className="fas fa-chevron-right" style={{ fontSize: '0.6rem', opacity: 0.5 }}></i>
+                    </Link>
+
+                    <Link
+                      to="/admin/donations"
+                      onClick={() => setIsUserMenuOpen(false)}
+                      className="dropdown-item"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '0.6rem 0.8rem',
+                        color: '#333',
+                        textDecoration: 'none',
+                        transition: 'all 0.3s ease',
+                        borderBottom: '1px solid #f0f0f0',
+                        fontSize: '0.75rem'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                    >
+                      <i className="fas fa-hand-holding-heart" style={{ width: '16px', color: '#F9C74F', fontSize: '0.8rem' }}></i>
+                      <span style={{ flex: 1 }}>Manage Donations</span>
+                      <i className="fas fa-chevron-right" style={{ fontSize: '0.6rem', opacity: 0.5 }}></i>
+                    </Link>
+
+                    <Link
+                      to="/admin/impacts"
+                      onClick={() => setIsUserMenuOpen(false)}
+                      className="dropdown-item"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '0.6rem 0.8rem',
+                        color: '#333',
+                        textDecoration: 'none',
+                        transition: 'all 0.3s ease',
+                        borderBottom: '1px solid #f0f0f0',
+                        fontSize: '0.75rem'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                    >
+                      <i className="fas fa-chart-line" style={{ width: '16px', color: '#F9C74F', fontSize: '0.8rem' }}></i>
+                      <span style={{ flex: 1 }}>Manage Impacts</span>
+                      <i className="fas fa-chevron-right" style={{ fontSize: '0.6rem', opacity: 0.5 }}></i>
                     </Link>
 
                     <Link
@@ -1233,30 +1308,31 @@ const Navbar = () => {
                       style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '12px',
-                        padding: '0.8rem 1rem',
+                        gap: '10px',
+                        padding: '0.6rem 0.8rem',
                         color: '#333',
                         textDecoration: 'none',
                         transition: 'all 0.3s ease',
-                        borderBottom: '1px solid #f0f0f0'
+                        borderBottom: '1px solid #f0f0f0',
+                        fontSize: '0.75rem'
                       }}
                       onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
                       onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
                     >
-                      <i className="fas fa-star" style={{ width: '20px', color: '#F9C74F' }}></i>
+                      <i className="fas fa-star" style={{ width: '16px', color: '#F9C74F', fontSize: '0.8rem' }}></i>
                       <span style={{ flex: 1 }}>Manage Testimonials</span>
                       {pendingTestimonials > 0 && (
                         <span style={{
                           background: '#f59e0b',
                           color: 'white',
-                          padding: '0.1rem 0.4rem',
+                          padding: '0.05rem 0.4rem',
                           borderRadius: '10px',
-                          fontSize: '0.6rem'
+                          fontSize: '0.55rem'
                         }}>
                           {pendingTestimonials}
                         </span>
                       )}
-                      <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
+                      <i className="fas fa-chevron-right" style={{ fontSize: '0.6rem', opacity: 0.5 }}></i>
                     </Link>
 
                     <Link
@@ -1266,22 +1342,22 @@ const Navbar = () => {
                       style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '12px',
-                        padding: '0.8rem 1rem',
+                        gap: '10px',
+                        padding: '0.6rem 0.8rem',
                         color: '#333',
                         textDecoration: 'none',
                         transition: 'all 0.3s ease',
-                        borderBottom: '1px solid #f0f0f0'
+                        borderBottom: '1px solid #f0f0f0',
+                        fontSize: '0.75rem'
                       }}
                       onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
                       onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
                     >
-                      <i className="fas fa-file-alt" style={{ width: '20px', color: '#F9C74F' }}></i>
+                      <i className="fas fa-file-alt" style={{ width: '16px', color: '#F9C74F', fontSize: '0.8rem' }}></i>
                       <span style={{ flex: 1 }}>Manage Publications</span>
-                      <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
+                      <i className="fas fa-chevron-right" style={{ fontSize: '0.6rem', opacity: 0.5 }}></i>
                     </Link>
 
-                    {/* NEW: Admin Stats Link - Only for Admin */}
                     <Link
                       to="/admin/stats"
                       onClick={() => setIsUserMenuOpen(false)}
@@ -1289,19 +1365,20 @@ const Navbar = () => {
                       style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '12px',
-                        padding: '0.8rem 1rem',
+                        gap: '10px',
+                        padding: '0.6rem 0.8rem',
                         color: '#333',
                         textDecoration: 'none',
                         transition: 'all 0.3s ease',
-                        borderBottom: '1px solid #f0f0f0'
+                        borderBottom: '1px solid #f0f0f0',
+                        fontSize: '0.75rem'
                       }}
                       onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
                       onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
                     >
-                      <i className="fas fa-chart-bar" style={{ width: '20px', color: '#F9C74F' }}></i>
+                      <i className="fas fa-chart-bar" style={{ width: '16px', color: '#F9C74F', fontSize: '0.8rem' }}></i>
                       <span style={{ flex: 1 }}>Manage Stats</span>
-                      <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
+                      <i className="fas fa-chevron-right" style={{ fontSize: '0.6rem', opacity: 0.5 }}></i>
                     </Link>
                   </>
                 )}
@@ -1312,23 +1389,42 @@ const Navbar = () => {
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '12px',
-                    padding: '0.8rem 1rem',
+                    gap: '10px',
+                    padding: '0.6rem 0.8rem',
                     color: '#d32f2f',
                     textDecoration: 'none',
                     transition: 'all 0.3s ease',
                     width: '100%',
                     background: 'none',
                     border: 'none',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    fontSize: '0.75rem'
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ffebee'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
                 >
-                  <i className="fas fa-sign-out-alt" style={{ width: '20px', color: '#d32f2f' }}></i>
+                  <i className="fas fa-sign-out-alt" style={{ width: '16px', color: '#d32f2f', fontSize: '0.8rem' }}></i>
                   <span style={{ flex: 1 }}>Logout</span>
-                  <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
+                  <i className="fas fa-chevron-right" style={{ fontSize: '0.6rem', opacity: 0.5 }}></i>
                 </button>
+
+                {/* Scrollbar styling */}
+                <style>{`
+                  .dropdown-item:last-child {
+                    border-bottom: none;
+                  }
+                  div[style*="maxHeight: 400px"]::-webkit-scrollbar {
+                    width: 4px;
+                  }
+                  div[style*="maxHeight: 400px"]::-webkit-scrollbar-track {
+                    background: #f1f1f1;
+                    border-radius: 2px;
+                  }
+                  div[style*="maxHeight: 400px"]::-webkit-scrollbar-thumb {
+                    background: #F9C74F;
+                    border-radius: 2px;
+                  }
+                `}</style>
               </div>
             )}
           </div>
@@ -1570,6 +1666,36 @@ const Navbar = () => {
                       <span>Admin Dashboard</span>
                     </Link>
                     
+                    <Link to="/admin/users" onClick={closeSidebar} style={{
+                      display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
+                      margin: '0 0.5rem', borderRadius: '12px', color: 'white', textDecoration: 'none',
+                      transition: 'all 0.3s ease'
+                    }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
+                       onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                      <i className="fas fa-users" style={{ width: '20px', color: '#F9C74F' }}></i>
+                      <span>Manage Users</span>
+                    </Link>
+
+                    <Link to="/admin/donations" onClick={closeSidebar} style={{
+                      display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
+                      margin: '0 0.5rem', borderRadius: '12px', color: 'white', textDecoration: 'none',
+                      transition: 'all 0.3s ease'
+                    }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
+                       onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                      <i className="fas fa-hand-holding-heart" style={{ width: '20px', color: '#F9C74F' }}></i>
+                      <span>Manage Donations</span>
+                    </Link>
+
+                    <Link to="/admin/impacts" onClick={closeSidebar} style={{
+                      display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
+                      margin: '0 0.5rem', borderRadius: '12px', color: 'white', textDecoration: 'none',
+                      transition: 'all 0.3s ease'
+                    }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
+                       onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                      <i className="fas fa-chart-line" style={{ width: '20px', color: '#F9C74F' }}></i>
+                      <span>Manage Impacts</span>
+                    </Link>
+                    
                     <Link to="/admin/testimonials" onClick={closeSidebar} style={{
                       display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
                       margin: '0 0.5rem', borderRadius: '12px', color: 'white', textDecoration: 'none',
@@ -1602,7 +1728,6 @@ const Navbar = () => {
                       <span>Manage Publications</span>
                     </Link>
 
-                    {/* NEW: Admin Stats Link - Only for Admin in Sidebar */}
                     <Link to="/admin/stats" onClick={closeSidebar} style={{
                       display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
                       margin: '0 0.5rem', borderRadius: '12px', color: 'white', textDecoration: 'none',

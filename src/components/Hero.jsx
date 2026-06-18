@@ -13,6 +13,18 @@ const Hero = ({ onLoginClick }) => {
     img.onload = () => setImageLoaded(true);
   }, []);
 
+  const handleLoginClick = () => {
+    navigate('/login');
+  };
+
+  const handleShareStory = () => {
+    navigate('/say-about-us');
+  };
+
+  const handleJoinMovement = () => {
+    navigate('/volunteers');
+  };
+
   return (
     <div style={{
       position: 'relative',
@@ -221,7 +233,7 @@ const Hero = ({ onLoginClick }) => {
         }}>
           <button 
             className="btn-cta"
-            onClick={() => document.getElementById('volunteer')?.scrollIntoView({ behavior: 'smooth' })}
+            onClick={handleJoinMovement}
             style={{
               background: '#F9C74F',
               border: 'none',
@@ -233,7 +245,8 @@ const Hero = ({ onLoginClick }) => {
               transition: 'all 0.3s ease',
               fontSize: 'clamp(0.8rem, 3.5vw, 1rem)',
               flex: '0 1 auto',
-              minWidth: '140px'
+              minWidth: '140px',
+              color: '#0B3B2F'
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = 'scale(1.05)';
@@ -247,10 +260,10 @@ const Hero = ({ onLoginClick }) => {
             Join Movement →
           </button>
 
-          {/* NEW: Share Your Story Button */}
+          {/* Share Your Story Button - Navigates to /say-about-us */}
           <button 
             className="btn-cta"
-            onClick={() => navigate('/say-about-us')}
+            onClick={handleShareStory}
             style={{
               background: 'transparent',
               border: '2px solid #F9C74F',
@@ -279,9 +292,10 @@ const Hero = ({ onLoginClick }) => {
             Share Your Story
           </button>
 
+          {/* Login Button - Navigates to /login */}
           <button 
             className="btn-cta btn-outline-light"
-            onClick={onLoginClick}
+            onClick={handleLoginClick}
             style={{
               background: 'transparent',
               border: '2px solid #F9C74F',
@@ -305,7 +319,8 @@ const Hero = ({ onLoginClick }) => {
               e.currentTarget.style.backgroundColor = 'transparent';
             }}
           >
-            <i className="fas fa-sign-in-alt"></i> Login
+            <i className="fas fa-sign-in-alt" style={{ marginRight: '0.5rem' }}></i>
+            Login
           </button>
         </div>
       </div>

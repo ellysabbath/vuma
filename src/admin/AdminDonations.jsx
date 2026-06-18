@@ -35,6 +35,7 @@ ChartJS.register(
 const AdminTransactions = () => {
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState([]);
+  const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -47,6 +48,14 @@ const AdminTransactions = () => {
   const [selectedQuarter, setSelectedQuarter] = useState(1);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showTestimonialModal, setShowTestimonialModal] = useState(false);
+  const [editingTestimonial, setEditingTestimonial] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deletingTestimonial, setDeletingTestimonial] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [stats, setStats] = useState({
     total: 0,
     completed: 0,
@@ -58,6 +67,20 @@ const AdminTransactions = () => {
   const [viewType, setViewType] = useState('charts');
   const [lineGraphView, setLineGraphView] = useState('monthly');
 
+  // Transaction delete states
+  const [showTransactionDeleteConfirm, setShowTransactionDeleteConfirm] = useState(false);
+  const [deletingTransaction, setDeletingTransaction] = useState(null);
+
+  // New testimonial form state
+  const [newTestimonial, setNewTestimonial] = useState({
+    name: '',
+    location: '',
+    text: '',
+    rating: 5,
+    is_active: true,
+    order: 0
+  });
+
   const API_BASE_URL = 'https://vuma.pythonanywhere.com/api';
   const availableYears = [2023, 2024, 2025, 2026];
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -65,6 +88,7 @@ const AdminTransactions = () => {
   useEffect(() => {
     AOS.init({ duration: 500, once: true });
     fetchTransactions();
+    fetchTestimonials();
   }, []);
 
   const fetchTransactions = async () => {
@@ -93,6 +117,241 @@ const AdminTransactions = () => {
       setError('Failed to load transactions.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // ============ TRANSACTION CRUD OPERATIONS ============
+
+  // DELETE Transaction
+  const handleDeleteTransaction = async () => {
+    if (!deletingTransaction) return;
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/donations/${deletingTransaction.id}/`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        await fetchTransactions();
+        showActionFeedback('Transaction deleted successfully!', 'success');
+        setShowTransactionDeleteConfirm(false);
+        setDeletingTransaction(null);
+        setShowModal(false);
+      } else {
+        const errorData = await response.json();
+        showActionFeedback(errorData.error || 'Failed to delete transaction', 'error');
+      }
+    } catch (error) {
+      showActionFeedback('Network error. Please try again.', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // EDIT Transaction (Update status)
+  const handleUpdateTransactionStatus = async (transactionId, newStatus) => {
+    try {
+      const transaction = transactions.find(t => t.id === transactionId);
+      if (!transaction) return;
+
+      const updatedTransaction = {
+        ...transaction,
+        status: newStatus
+      };
+
+      const response = await fetch(`${API_BASE_URL}/donations/${transactionId}/`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedTransaction),
+      });
+
+      if (response.ok) {
+        await fetchTransactions();
+        showActionFeedback(`Transaction status updated to ${newStatus}!`, 'success');
+        setShowModal(false);
+      } else {
+        const errorData = await response.json();
+        showActionFeedback(errorData.error || 'Failed to update transaction', 'error');
+      }
+    } catch (error) {
+      showActionFeedback('Network error. Please try again.', 'error');
+    }
+  };
+
+  // ============ TESTIMONIAL CRUD OPERATIONS ============
+
+  const fetchTestimonials = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/estimonials/`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setTestimonials(data.data);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching testimonials:', error);
+    }
+  };
+
+  const showActionFeedback = (message, type = 'success') => {
+    setSuccessMessage(message);
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 3000);
+  };
+
+  const openAddTestimonialModal = () => {
+    setIsEditMode(false);
+    setEditingTestimonial(null);
+    setNewTestimonial({
+      name: '',
+      location: '',
+      text: '',
+      rating: 5,
+      is_active: true,
+      order: testimonials.length
+    });
+    setShowTestimonialModal(true);
+    document.body.style.overflow = 'hidden';
+  };
+
+  const openEditTestimonialModal = (testimonial) => {
+    setIsEditMode(true);
+    setEditingTestimonial(testimonial);
+    setNewTestimonial({
+      name: testimonial.name || '',
+      location: testimonial.location || '',
+      text: testimonial.text || '',
+      rating: testimonial.rating || 5,
+      is_active: testimonial.is_active !== undefined ? testimonial.is_active : true,
+      order: testimonial.order || 0
+    });
+    setShowTestimonialModal(true);
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeTestimonialModal = () => {
+    setShowTestimonialModal(false);
+    setEditingTestimonial(null);
+    setNewTestimonial({
+      name: '',
+      location: '',
+      text: '',
+      rating: 5,
+      is_active: true,
+      order: 0
+    });
+    setIsSubmitting(false);
+    document.body.style.overflow = 'unset';
+  };
+
+  const handleTestimonialChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setNewTestimonial({
+      ...newTestimonial,
+      [name]: type === 'checkbox' ? checked : value
+    });
+  };
+
+  const handleAddTestimonial = async () => {
+    if (!newTestimonial.name || !newTestimonial.text) {
+      showActionFeedback('Please fill in name and testimonial text', 'error');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/estimonials/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newTestimonial),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        await fetchTestimonials();
+        showActionFeedback('Testimonial added successfully!', 'success');
+        closeTestimonialModal();
+      } else {
+        showActionFeedback(data.errors || 'Failed to add testimonial', 'error');
+      }
+    } catch (error) {
+      showActionFeedback('Network error. Please try again.', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleUpdateTestimonial = async () => {
+    if (!newTestimonial.name || !newTestimonial.text) {
+      showActionFeedback('Please fill in name and testimonial text', 'error');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/estimonials/${editingTestimonial.id}/`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newTestimonial),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        await fetchTestimonials();
+        showActionFeedback('Testimonial updated successfully!', 'success');
+        closeTestimonialModal();
+      } else {
+        showActionFeedback(data.errors || 'Failed to update testimonial', 'error');
+      }
+    } catch (error) {
+      showActionFeedback('Network error. Please try again.', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteTestimonial = async () => {
+    if (!deletingTestimonial) return;
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/estimonials/${deletingTestimonial.id}/`, {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        await fetchTestimonials();
+        showActionFeedback('Testimonial deleted successfully!', 'success');
+        setShowDeleteConfirm(false);
+        setDeletingTestimonial(null);
+      } else {
+        showActionFeedback(data.error || 'Failed to delete testimonial', 'error');
+      }
+    } catch (error) {
+      showActionFeedback('Network error. Please try again.', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleToggleTestimonialStatus = async (testimonial) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/estimonials/${testimonial.id}/toggle-active/`, {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        await fetchTestimonials();
+        showActionFeedback(`Testimonial ${data.data.is_active ? 'activated' : 'deactivated'} successfully!`, 'success');
+      } else {
+        showActionFeedback(data.error || 'Failed to toggle status', 'error');
+      }
+    } catch (error) {
+      showActionFeedback('Network error. Please try again.', 'error');
     }
   };
 
@@ -547,6 +806,10 @@ const AdminTransactions = () => {
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes shadowPulse { 0%, 100% { box-shadow: 0 5px 20px rgba(0,0,0,0.08); } 50% { box-shadow: 0 8px 30px rgba(0,0,0,0.15); } }
+        @keyframes fadeInScale {
+          from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+          to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
         
         .stat-card { transition: all 0.3s ease; cursor: pointer; background: white; border-radius: 12px; padding: 0.7rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); background: linear-gradient(135deg, #fff, #fef9e8); }
@@ -571,23 +834,195 @@ const AdminTransactions = () => {
         }
       `}</style>
 
+      {/* Success Alert */}
+      {showSuccess && (
+        <div style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: 9999,
+          animation: 'fadeInScale 0.3s ease'
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '20px',
+            padding: '2rem',
+            textAlign: 'center',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+            minWidth: '300px'
+          }}>
+            <div style={{
+              width: '80px',
+              height: '80px',
+              borderRadius: '50%',
+              background: successMessage.includes('success') || successMessage.includes('Success') || successMessage.includes('✅') ? '#4caf50' : '#f44336',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 1rem',
+              animation: 'scaleIn 0.5s ease'
+            }}>
+              <i className={`fas ${successMessage.includes('success') || successMessage.includes('Success') || successMessage.includes('✅') ? 'fa-check' : 'fa-times'}`} style={{ fontSize: '2.5rem', color: 'white' }}></i>
+            </div>
+            <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem' }}>
+              {successMessage.includes('success') || successMessage.includes('Success') || successMessage.includes('✅') ? 'Success!' : 'Error!'}
+            </h3>
+            <p style={{ color: '#666', fontSize: '0.9rem' }}>{successMessage}</p>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div style={{ background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)', color: 'white', padding: '1rem 1.5rem' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <i className="fas fa-arrow-left" style={{ cursor: 'pointer', fontSize: '1rem' }} onClick={() => navigate('/admin')} />
-            <h1 style={{ fontSize: '1.3rem', margin: 0 }}><i className="fas fa-chart-line" style={{ marginRight: '0.4rem', color: '#F9C74F' }}></i>3D Transaction Analytics</h1>
+            <h1 style={{ fontSize: '1.3rem', margin: 0 }}><i className="fas fa-chart-line" style={{ marginRight: '0.4rem', color: '#F9C74F' }}></i>Transaction Analytics</h1>
           </div>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button onClick={() => setViewType('charts')} className="view-btn" style={{ background: viewType === 'charts' ? '#F9C74F' : 'rgba(255,255,255,0.2)', border: 'none', padding: '0.3rem 0.8rem', borderRadius: '6px', color: viewType === 'charts' ? '#0B3B2F' : 'white', cursor: 'pointer', fontSize: '0.75rem' }}><i className="fas fa-chart-bar"></i> 3D Charts</button>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <button onClick={() => setViewType('charts')} className="view-btn" style={{ background: viewType === 'charts' ? '#F9C74F' : 'rgba(255,255,255,0.2)', border: 'none', padding: '0.3rem 0.8rem', borderRadius: '6px', color: viewType === 'charts' ? '#0B3B2F' : 'white', cursor: 'pointer', fontSize: '0.75rem' }}><i className="fas fa-chart-bar"></i> Charts</button>
             <button onClick={() => setViewType('table')} className="view-btn" style={{ background: viewType === 'table' ? '#F9C74F' : 'rgba(255,255,255,0.2)', border: 'none', padding: '0.3rem 0.8rem', borderRadius: '6px', color: viewType === 'table' ? '#0B3B2F' : 'white', cursor: 'pointer', fontSize: '0.75rem' }}><i className="fas fa-table"></i> Table</button>
             <button onClick={exportCSV} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', padding: '0.3rem 0.8rem', borderRadius: '6px', color: 'white', cursor: 'pointer', fontSize: '0.75rem' }}><i className="fas fa-download"></i> Export</button>
           </div>
         </div>
       </div>
 
+      {/* Testimonials Management Section */}
       <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '1rem 1.5rem' }}>
-        {/* Stats Cards */}
+        <div style={{ background: 'white', borderRadius: '12px', padding: '1rem', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <h2 style={{ fontSize: '1rem', color: '#0B3B2F', margin: 0 }}>
+              <i className="fas fa-star" style={{ color: '#F9C74F', marginRight: '0.5rem' }}></i>
+              Testimonials Management
+              <span style={{ fontSize: '0.7rem', color: '#666', marginLeft: '0.5rem' }}>({testimonials.length})</span>
+            </h2>
+            <button
+              onClick={openAddTestimonialModal}
+              style={{
+                background: '#0B3B2F',
+                color: 'white',
+                border: 'none',
+                padding: '0.4rem 1rem',
+                borderRadius: '20px',
+                fontSize: '0.75rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.3rem',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = '#1a5c48'; e.currentTarget.style.transform = 'scale(1.02)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = '#0B3B2F'; e.currentTarget.style.transform = 'scale(1)'; }}
+            >
+              <i className="fas fa-plus"></i> Add Testimonial
+            </button>
+          </div>
+
+          {/* Testimonials List */}
+          <div style={{ marginTop: '0.8rem', overflowX: 'auto' }}>
+            {testimonials.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '1.5rem', color: '#999', fontSize: '0.8rem' }}>
+                <i className="fas fa-star" style={{ fontSize: '1.5rem', display: 'block', marginBottom: '0.5rem', opacity: 0.3 }}></i>
+                No testimonials yet. Add your first testimonial!
+              </div>
+            ) : (
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.7rem' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
+                    <th style={{ textAlign: 'left', padding: '0.4rem', color: '#666' }}>Name</th>
+                    <th style={{ textAlign: 'left', padding: '0.4rem', color: '#666' }}>Location</th>
+                    <th style={{ textAlign: 'left', padding: '0.4rem', color: '#666' }}>Rating</th>
+                    <th style={{ textAlign: 'left', padding: '0.4rem', color: '#666' }}>Testimonial</th>
+                    <th style={{ textAlign: 'left', padding: '0.4rem', color: '#666' }}>Status</th>
+                    <th style={{ textAlign: 'center', padding: '0.4rem', color: '#666' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {testimonials.map((t) => (
+                    <tr key={t.id} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                      <td style={{ padding: '0.4rem', fontWeight: 600, color: '#0B3B2F' }}>{t.name}</td>
+                      <td style={{ padding: '0.4rem', color: '#666' }}>{t.location || '-'}</td>
+                      <td style={{ padding: '0.4rem' }}>
+                        <div style={{ display: 'flex', gap: '0.1rem' }}>
+                          {[...Array(5)].map((_, i) => (
+                            <i key={i} className="fas fa-star" style={{ color: i < t.rating ? '#F9C74F' : '#ddd', fontSize: '0.6rem' }}></i>
+                          ))}
+                        </div>
+                      </td>
+                      <td style={{ padding: '0.4rem', color: '#666', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        "{t.text.length > 40 ? t.text.substring(0, 40) + '...' : t.text}"
+                      </td>
+                      <td style={{ padding: '0.4rem' }}>
+                        <span style={{
+                          display: 'inline-block',
+                          padding: '0.1rem 0.5rem',
+                          borderRadius: '12px',
+                          fontSize: '0.6rem',
+                          fontWeight: 600,
+                          background: t.is_active ? '#e8f5e9' : '#ffebee',
+                          color: t.is_active ? '#2e7d32' : '#c62828'
+                        }}>
+                          {t.is_active ? 'Active' : 'Inactive'}
+                        </span>
+                      </td>
+                      <td style={{ padding: '0.4rem', textAlign: 'center' }}>
+                        <div style={{ display: 'flex', gap: '0.3rem', justifyContent: 'center' }}>
+                          <button
+                            onClick={() => handleToggleTestimonialStatus(t)}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                              color: t.is_active ? '#f59e0b' : '#4caf50',
+                              fontSize: '0.7rem'
+                            }}
+                            title={t.is_active ? 'Deactivate' : 'Activate'}
+                          >
+                            <i className={`fas ${t.is_active ? 'fa-pause-circle' : 'fa-play-circle'}`}></i>
+                          </button>
+                          <button
+                            onClick={() => openEditTestimonialModal(t)}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                              color: '#2196F3',
+                              fontSize: '0.7rem'
+                            }}
+                            title="Edit"
+                          >
+                            <i className="fas fa-edit"></i>
+                          </button>
+                          <button
+                            onClick={() => {
+                              setDeletingTestimonial(t);
+                              setShowDeleteConfirm(true);
+                            }}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                              color: '#d32f2f',
+                              fontSize: '0.7rem'
+                            }}
+                            title="Delete"
+                          >
+                            <i className="fas fa-trash"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 1.5rem' }}>
         <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.8rem', marginBottom: '1rem' }}>
           <div className="stat-card"><div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><div><div style={{ color: '#666', fontSize: '0.65rem' }}>Total</div><div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0B3B2F' }}>{stats.total}</div></div><div style={{ width: '30px', height: '30px', borderRadius: '8px', background: 'rgba(11,59,47,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><i className="fas fa-receipt" style={{ fontSize: '0.8rem', color: '#0B3B2F' }}></i></div></div></div>
           <div className="stat-card"><div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><div><div style={{ color: '#666', fontSize: '0.65rem' }}>Completed</div><div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#2e7d32' }}>{stats.completed}</div></div><div style={{ width: '30px', height: '30px', borderRadius: '8px', background: 'rgba(76,175,80,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><i className="fas fa-check-circle" style={{ fontSize: '0.8rem', color: '#4caf50' }}></i></div></div></div>
@@ -610,12 +1045,12 @@ const AdminTransactions = () => {
         </div>
 
         {viewType === 'charts' ? (
-          /* 3D Charts View */
+          /* Charts View */
           <div>
-            {/* Main 3D Line Area Chart */}
+            {/* Main Line Area Chart */}
             <div className="chart-card" style={{ marginBottom: '1rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                <h3 style={{ color: '#0B3B2F', fontSize: '0.8rem', margin: 0 }}><i className="fas fa-chart-line" style={{ color: '#F9C74F' }}></i> 3D Trend Analysis</h3>
+                <h3 style={{ color: '#0B3B2F', fontSize: '0.8rem', margin: 0 }}><i className="fas fa-chart-line" style={{ color: '#F9C74F' }}></i> Trend Analysis</h3>
                 <select value={lineGraphView} onChange={(e) => setLineGraphView(e.target.value)} style={{ padding: '0.2rem 0.5rem', borderRadius: '15px', border: '1px solid #F9C74F', background: '#F9C74F10', fontSize: '0.7rem', cursor: 'pointer' }}>
                   <option value="monthly">📅 Monthly</option>
                   <option value="quarterly">📊 Quarterly</option>
@@ -625,33 +1060,29 @@ const AdminTransactions = () => {
               <div style={{ height: '240px' }}><Line data={getLineGraphData()} options={lineChartOptions} /></div>
             </div>
 
-            {/* Small 3D Charts Grid - 2x2 */}
+            {/* Small Charts Grid - 2x2 */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.8rem' }}>
-              {/* 3D Monthly Column Chart */}
               <div className="chart-card">
-                <h4 style={{ color: '#0B3B2F', fontSize: '0.7rem', marginBottom: '0.3rem' }}><i className="fas fa-chart-bar" style={{ color: '#F9C74F' }}></i> 3D Monthly Columns</h4>
+                <h4 style={{ color: '#0B3B2F', fontSize: '0.7rem', marginBottom: '0.3rem' }}><i className="fas fa-chart-bar" style={{ color: '#F9C74F' }}></i> Monthly Columns</h4>
                 <div style={{ height: '160px' }}><Bar data={monthlyColumnData} options={columnChartOptions} /></div>
               </div>
 
-              {/* 3D Pie Chart */}
               <div className="chart-card">
-                <h4 style={{ color: '#0B3B2F', fontSize: '0.7rem', marginBottom: '0.3rem' }}><i className="fas fa-chart-pie" style={{ color: '#F9C74F' }}></i> 3D Status Distribution</h4>
+                <h4 style={{ color: '#0B3B2F', fontSize: '0.7rem', marginBottom: '0.3rem' }}><i className="fas fa-chart-pie" style={{ color: '#F9C74F' }}></i> Status Distribution</h4>
                 <div style={{ height: '160px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                   <div style={{ width: '180px', height: '180px' }}><Pie data={statusPieData} options={pieChartOptions} /></div>
                 </div>
               </div>
 
-              {/* 3D Payment Methods Doughnut */}
               <div className="chart-card">
-                <h4 style={{ color: '#0B3B2F', fontSize: '0.7rem', marginBottom: '0.3rem' }}><i className="fas fa-credit-card" style={{ color: '#F9C74F' }}></i> 3D Payment Methods</h4>
+                <h4 style={{ color: '#0B3B2F', fontSize: '0.7rem', marginBottom: '0.3rem' }}><i className="fas fa-credit-card" style={{ color: '#F9C74F' }}></i> Payment Methods</h4>
                 <div style={{ height: '160px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                   <div style={{ width: '180px', height: '180px' }}><Doughnut data={paymentDoughnutData} options={doughnutChartOptions} /></div>
                 </div>
               </div>
 
-              {/* 3D Quarterly Column Chart */}
               <div className="chart-card">
-                <h4 style={{ color: '#0B3B2F', fontSize: '0.7rem', marginBottom: '0.3rem' }}><i className="fas fa-chart-simple" style={{ color: '#F9C74F' }}></i> 3D Quarterly Columns</h4>
+                <h4 style={{ color: '#0B3B2F', fontSize: '0.7rem', marginBottom: '0.3rem' }}><i className="fas fa-chart-simple" style={{ color: '#F9C74F' }}></i> Quarterly Columns</h4>
                 <div style={{ height: '160px' }}><Bar data={quarterlyColumnData} options={columnChartOptions} /></div>
               </div>
             </div>
@@ -662,7 +1093,7 @@ const AdminTransactions = () => {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.7rem' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
-                  <th style={{ textAlign: 'left', padding: '0.5rem', color: '#666' }}>ID</th><th style={{ textAlign: 'left', padding: '0.5rem', color: '#666' }}>Reference</th><th style={{ textAlign: 'left', padding: '0.5rem', color: '#666' }}>Donor</th><th style={{ textAlign: 'left', padding: '0.5rem', color: '#666' }}>Amount</th><th style={{ textAlign: 'left', padding: '0.5rem', color: '#666' }}>Status</th><th style={{ textAlign: 'left', padding: '0.5rem', color: '#666' }}>Payment</th><th style={{ textAlign: 'left', padding: '0.5rem', color: '#666' }}>Date</th><th style={{ textAlign: 'center', padding: '0.5rem', color: '#666' }}>Action</th>
+                  <th style={{ textAlign: 'left', padding: '0.5rem', color: '#666' }}>ID</th><th style={{ textAlign: 'left', padding: '0.5rem', color: '#666' }}>Reference</th><th style={{ textAlign: 'left', padding: '0.5rem', color: '#666' }}>Donor</th><th style={{ textAlign: 'left', padding: '0.5rem', color: '#666' }}>Amount</th><th style={{ textAlign: 'left', padding: '0.5rem', color: '#666' }}>Status</th><th style={{ textAlign: 'left', padding: '0.5rem', color: '#666' }}>Payment</th><th style={{ textAlign: 'left', padding: '0.5rem', color: '#666' }}>Date</th><th style={{ textAlign: 'center', padding: '0.5rem', color: '#666' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -678,10 +1109,59 @@ const AdminTransactions = () => {
                         <td style={{ padding: '0.5rem', fontSize: '0.65rem', color: '#666' }}>{t.reference_number}</td>
                         <td style={{ padding: '0.5rem' }}><div><div style={{ fontWeight: 600 }}>{t.full_name}</div><div style={{ fontSize: '0.6rem', color: '#999' }}>{t.email}</div></div></td>
                         <td style={{ padding: '0.5rem', fontWeight: 600, color: '#0B3B2F' }}>{formatCurrency(t.amount)}</td>
-                        <td style={{ padding: '0.5rem' }}><span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem', padding: '0.15rem 0.4rem', borderRadius: '12px', background: status.bg, color: status.color, fontSize: '0.6rem' }}><i className={`fas ${status.icon}`} style={{ fontSize: '0.5rem' }}></i>{status.text}</span></td>
-                        <td style={{ padding: '0.5rem' }}><span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem', padding: '0.15rem 0.4rem', borderRadius: '12px', background: payment.bg, color: payment.color, fontSize: '0.6rem' }}><i className={`fas ${payment.icon}`} style={{ fontSize: '0.5rem' }}></i>{payment.text}</span></td>
+                        <td style={{ padding: '0.5rem' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem', padding: '0.15rem 0.4rem', borderRadius: '12px', background: status.bg, color: status.color, fontSize: '0.6rem' }}>
+                            <i className={`fas ${status.icon}`} style={{ fontSize: '0.5rem' }}></i>{status.text}
+                          </span>
+                        </td>
+                        <td style={{ padding: '0.5rem' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem', padding: '0.15rem 0.4rem', borderRadius: '12px', background: payment.bg, color: payment.color, fontSize: '0.6rem' }}>
+                            <i className={`fas ${payment.icon}`} style={{ fontSize: '0.5rem' }}></i>{payment.text}
+                          </span>
+                        </td>
                         <td style={{ padding: '0.5rem', fontSize: '0.65rem', color: '#666' }}>{formatDate(t.created_at)}</td>
-                        <td style={{ padding: '0.5rem', textAlign: 'center' }}><button onClick={() => openModal(t)} style={{ background: 'rgba(249,199,79,0.1)', border: 'none', padding: '0.2rem 0.5rem', borderRadius: '5px', cursor: 'pointer', color: '#F9C74F', fontSize: '0.6rem' }}><i className="fas fa-eye"></i></button></td>
+                        <td style={{ padding: '0.5rem', textAlign: 'center' }}>
+                          <div style={{ display: 'flex', gap: '0.3rem', justifyContent: 'center' }}>
+                            <button 
+                              onClick={() => openModal(t)} 
+                              style={{ 
+                                background: 'rgba(249,199,79,0.1)', 
+                                border: 'none', 
+                                padding: '0.2rem 0.5rem', 
+                                borderRadius: '5px', 
+                                cursor: 'pointer', 
+                                color: '#F9C74F', 
+                                fontSize: '0.6rem',
+                                transition: 'all 0.2s ease'
+                              }}
+                              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(249,199,79,0.2)'; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(249,199,79,0.1)'; }}
+                            >
+                              <i className="fas fa-eye"></i>
+                            </button>
+                            <button
+                              onClick={() => {
+                                setDeletingTransaction(t);
+                                setShowTransactionDeleteConfirm(true);
+                              }}
+                              style={{
+                                background: 'rgba(244,67,54,0.1)',
+                                border: 'none',
+                                padding: '0.2rem 0.5rem',
+                                borderRadius: '5px',
+                                cursor: 'pointer',
+                                color: '#d32f2f',
+                                fontSize: '0.6rem',
+                                transition: 'all 0.2s ease'
+                              }}
+                              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(244,67,54,0.2)'; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(244,67,54,0.1)'; }}
+                              title="Delete Transaction"
+                            >
+                              <i className="fas fa-trash-alt"></i>
+                            </button>
+                          </div>
+                        </td>
                       </tr>
                     );
                   })
@@ -704,21 +1184,350 @@ const AdminTransactions = () => {
         )}
       </div>
 
-      {/* Modal */}
+      {/* Modal for Transaction Details */}
       {showModal && selectedTransaction && (
         <div className="modal-overlay" onClick={closeModal} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(4px)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ background: 'white', borderRadius: '16px', maxWidth: '400px', width: '100%', maxHeight: '80vh', overflowY: 'auto', position: 'relative' }}>
             <button onClick={closeModal} style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(0,0,0,0.5)', border: 'none', width: '28px', height: '28px', borderRadius: '50%', cursor: 'pointer', color: 'white', fontSize: '0.8rem' }}><i className="fas fa-times"></i></button>
             <div style={{ background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)', padding: '1rem', textAlign: 'center' }}>
               <div style={{ width: '45px', height: '45px', margin: '0 auto', borderRadius: '50%', background: '#F9C74F', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><i className="fas fa-receipt" style={{ fontSize: '1.2rem', color: '#0B3B2F' }}></i></div>
-              <h3 style={{ color: 'white', marginTop: '0.5rem', marginBottom: '0.2rem', fontSize: '1rem' }}>Transaction</h3>
+              <h3 style={{ color: 'white', marginTop: '0.5rem', marginBottom: '0.2rem', fontSize: '1rem' }}>Transaction Details</h3>
               <p style={{ color: '#F9C74F', fontSize: '0.65rem' }}>{selectedTransaction.reference_number}</p>
             </div>
             <div style={{ padding: '1rem' }}>
               <div style={{ background: getStatusBadge(selectedTransaction.status).bg, padding: '0.4rem', borderRadius: '10px', marginBottom: '0.8rem', textAlign: 'center', fontSize: '0.7rem' }}><i className={`fas ${getStatusBadge(selectedTransaction.status).icon}`}></i> Status: {getStatusBadge(selectedTransaction.status).text}</div>
-              <div style={{ marginBottom: '0.8rem' }}><div style={{ fontWeight: 600, fontSize: '0.7rem', marginBottom: '0.3rem' }}>Donor</div><div style={{ background: '#f9fbf7', borderRadius: '10px', padding: '0.5rem', fontSize: '0.7rem' }}><strong>Name:</strong> {selectedTransaction.full_name}<br/><strong>Email:</strong> {selectedTransaction.email}<br/><strong>Mobile:</strong> {selectedTransaction.mobile_number}</div></div>
-              <div style={{ marginBottom: '0.8rem' }}><div style={{ fontWeight: 600, fontSize: '0.7rem', marginBottom: '0.3rem' }}>Details</div><div style={{ background: '#f9fbf7', borderRadius: '10px', padding: '0.5rem', fontSize: '0.7rem' }}><strong>Amount:</strong> {formatCurrency(selectedTransaction.amount)}<br/><strong>Type:</strong> {selectedTransaction.donation_type}<br/><strong>Created:</strong> {formatDate(selectedTransaction.created_at)}</div></div>
-              <button onClick={closeModal} style={{ width: '100%', background: '#F9C74F', border: 'none', padding: '0.4rem', borderRadius: '20px', color: '#0B3B2F', fontWeight: 600, cursor: 'pointer', fontSize: '0.7rem' }}>Close</button>
+              <div style={{ marginBottom: '0.8rem' }}><div style={{ fontWeight: 600, fontSize: '0.7rem', marginBottom: '0.3rem' }}>Donor Information</div><div style={{ background: '#f9fbf7', borderRadius: '10px', padding: '0.5rem', fontSize: '0.7rem' }}><strong>Name:</strong> {selectedTransaction.full_name}<br/><strong>Email:</strong> {selectedTransaction.email}<br/><strong>Mobile:</strong> {selectedTransaction.mobile_number}</div></div>
+              <div style={{ marginBottom: '0.8rem' }}><div style={{ fontWeight: 600, fontSize: '0.7rem', marginBottom: '0.3rem' }}>Donation Details</div><div style={{ background: '#f9fbf7', borderRadius: '10px', padding: '0.5rem', fontSize: '0.7rem' }}><strong>Amount:</strong> {formatCurrency(selectedTransaction.amount)}<br/><strong>Type:</strong> {selectedTransaction.donation_type}<br/><strong>Created:</strong> {formatDate(selectedTransaction.created_at)}</div></div>
+              
+              {/* Update Status Section */}
+              <div style={{ marginBottom: '0.8rem' }}>
+                <div style={{ fontWeight: 600, fontSize: '0.7rem', marginBottom: '0.3rem' }}>Update Status</div>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button
+                    onClick={() => handleUpdateTransactionStatus(selectedTransaction.id, 'completed')}
+                    style={{ flex: 1, padding: '0.3rem', background: '#4caf50', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.65rem', fontWeight: 600 }}
+                  >
+                    <i className="fas fa-check"></i> Complete
+                  </button>
+                  <button
+                    onClick={() => handleUpdateTransactionStatus(selectedTransaction.id, 'pending')}
+                    style={{ flex: 1, padding: '0.3rem', background: '#ff9800', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.65rem', fontWeight: 600 }}
+                  >
+                    <i className="fas fa-clock"></i> Pending
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button onClick={closeModal} style={{ flex: 1, background: '#F9C74F', border: 'none', padding: '0.4rem', borderRadius: '20px', color: '#0B3B2F', fontWeight: 600, cursor: 'pointer', fontSize: '0.7rem' }}>Close</button>
+                <button
+                  onClick={() => {
+                    setShowModal(false);
+                    setDeletingTransaction(selectedTransaction);
+                    setShowTransactionDeleteConfirm(true);
+                  }}
+                  style={{ flex: 1, background: '#d32f2f', border: 'none', padding: '0.4rem', borderRadius: '20px', color: 'white', fontWeight: 600, cursor: 'pointer', fontSize: '0.7rem' }}
+                >
+                  <i className="fas fa-trash-alt"></i> Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Transaction Delete Confirmation Modal */}
+      {showTransactionDeleteConfirm && deletingTransaction && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)',
+          zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px',
+          animation: 'fadeIn 0.3s ease'
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '20px',
+            maxWidth: '400px',
+            width: '100%',
+            padding: '2rem',
+            textAlign: 'center',
+            animation: 'slideInUp 0.3s ease'
+          }}>
+            <div style={{ width: '60px', height: '60px', margin: '0 auto', borderRadius: '50%', background: '#ffebee', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+              <i className="fas fa-exclamation-triangle" style={{ fontSize: '1.5rem', color: '#d32f2f' }}></i>
+            </div>
+            <h3 style={{ marginBottom: '0.5rem' }}>Delete Transaction</h3>
+            <p style={{ color: '#666', marginBottom: '1.5rem' }}>
+              Are you sure you want to delete transaction <strong>#{deletingTransaction.id}</strong>? <br />
+              Reference: <strong>{deletingTransaction.reference_number}</strong><br />
+              This action cannot be undone.
+            </p>
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <button
+                onClick={() => { setShowTransactionDeleteConfirm(false); setDeletingTransaction(null); }}
+                disabled={isSubmitting}
+                style={{ flex: 1, padding: '0.8rem', background: '#f0f0f0', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteTransaction}
+                disabled={isSubmitting}
+                style={{
+                  flex: 1,
+                  padding: '0.8rem',
+                  background: isSubmitting ? '#ccc' : '#d32f2f',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '10px',
+                  cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem'
+                }}
+              >
+                {isSubmitting ? (
+                  <>
+                    <i className="fas fa-spinner fa-spin"></i>
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <i className="fas fa-trash-alt"></i>
+                    Delete
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add/Edit Testimonial Modal */}
+      {showTestimonialModal && (
+        <div className="modal-overlay" onClick={closeTestimonialModal} style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)',
+          zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', animation: 'fadeIn 0.3s ease'
+        }}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{
+            background: 'white', borderRadius: '20px', maxWidth: '500px', width: '100%', maxHeight: '85vh',
+            display: 'flex', flexDirection: 'column', position: 'relative', animation: 'slideInUp 0.3s ease'
+          }}>
+            <button onClick={closeTestimonialModal} style={{
+              position: 'absolute', top: '12px', right: '12px', background: 'rgba(0,0,0,0.5)', border: 'none',
+              width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', color: 'white', fontSize: '0.875rem',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10
+            }}>
+              <i className="fas fa-times"></i>
+            </button>
+
+            <div style={{
+              background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)',
+              padding: '1.25rem',
+              textAlign: 'center',
+              borderRadius: '20px 20px 0 0',
+              flexShrink: 0
+            }}>
+              <div style={{ width: '56px', height: '56px', margin: '0 auto', borderRadius: '50%', background: '#F9C74F', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <i className="fas fa-star" style={{ fontSize: '1.5rem', color: '#0B3B2F' }}></i>
+              </div>
+              <h2 style={{ color: 'white', marginTop: '0.5rem', fontSize: '1.1rem', fontWeight: 600 }}>
+                {isEditMode ? 'Edit Testimonial' : 'Add New Testimonial'}
+              </h2>
+            </div>
+
+            <div style={{ padding: '1.25rem', overflowY: 'auto', flex: 1 }}>
+              <div style={{ marginBottom: '0.75rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500, fontSize: '0.75rem', color: '#475569' }}>Name *</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={newTestimonial.name}
+                  onChange={handleTestimonialChange}
+                  style={{ width: '100%', padding: '0.5rem', fontSize: '0.813rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
+                  placeholder="Enter full name"
+                />
+              </div>
+
+              <div style={{ marginBottom: '0.75rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500, fontSize: '0.75rem', color: '#475569' }}>Location</label>
+                <input
+                  type="text"
+                  name="location"
+                  value={newTestimonial.location}
+                  onChange={handleTestimonialChange}
+                  style={{ width: '100%', padding: '0.5rem', fontSize: '0.813rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
+                  placeholder="e.g., Dar es Salaam, Tanzania"
+                />
+              </div>
+
+              <div style={{ marginBottom: '0.75rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500, fontSize: '0.75rem', color: '#475569' }}>Testimonial Text *</label>
+                <textarea
+                  name="text"
+                  value={newTestimonial.text}
+                  onChange={handleTestimonialChange}
+                  rows="4"
+                  style={{ width: '100%', padding: '0.5rem', fontSize: '0.813rem', border: '1px solid #e2e8f0', borderRadius: '8px', resize: 'vertical' }}
+                  placeholder="Share your experience..."
+                />
+              </div>
+
+              <div style={{ marginBottom: '0.75rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500, fontSize: '0.75rem', color: '#475569' }}>Rating</label>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setNewTestimonial({ ...newTestimonial, rating: star })}
+                      style={{
+                        padding: '0.3rem 0.6rem',
+                        borderRadius: '8px',
+                        border: newTestimonial.rating === star ? '2px solid #F9C74F' : '1px solid #ddd',
+                        background: newTestimonial.rating === star ? 'rgba(249,199,79,0.1)' : 'white',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
+                      <span style={{ fontSize: '0.8rem' }}>{star} ★</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '0.75rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 500, fontSize: '0.75rem', color: '#475569' }}>
+                  <input
+                    type="checkbox"
+                    name="is_active"
+                    checked={newTestimonial.is_active}
+                    onChange={handleTestimonialChange}
+                  />
+                  Active (visible on website)
+                </label>
+              </div>
+
+              <div style={{ marginBottom: '0.75rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500, fontSize: '0.75rem', color: '#475569' }}>Display Order</label>
+                <input
+                  type="number"
+                  name="order"
+                  value={newTestimonial.order}
+                  onChange={handleTestimonialChange}
+                  style={{ width: '100%', padding: '0.5rem', fontSize: '0.813rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
+                  placeholder="0"
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
+                <button
+                  onClick={closeTestimonialModal}
+                  disabled={isSubmitting}
+                  style={{ flex: 1, background: '#f1f5f9', border: 'none', padding: '0.5rem', borderRadius: '8px', fontWeight: 500, cursor: 'pointer', fontSize: '0.813rem' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={isEditMode ? handleUpdateTestimonial : handleAddTestimonial}
+                  disabled={isSubmitting}
+                  style={{
+                    flex: 1,
+                    background: isSubmitting ? '#94a3b8' : '#0B3B2F',
+                    color: 'white',
+                    border: 'none',
+                    padding: '0.5rem',
+                    borderRadius: '8px',
+                    fontWeight: 500,
+                    cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                    fontSize: '0.813rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem'
+                  }}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <i className="fas fa-spinner fa-spin"></i>
+                      {isEditMode ? 'Updating...' : 'Adding...'}
+                    </>
+                  ) : (
+                    <>
+                      <i className={`fas ${isEditMode ? 'fa-save' : 'fa-plus'}`}></i>
+                      {isEditMode ? 'Update' : 'Add'} Testimonial
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Testimonial Delete Confirmation Modal */}
+      {showDeleteConfirm && deletingTestimonial && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)',
+          zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px',
+          animation: 'fadeIn 0.3s ease'
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '20px',
+            maxWidth: '400px',
+            width: '100%',
+            padding: '2rem',
+            textAlign: 'center',
+            animation: 'slideInUp 0.3s ease'
+          }}>
+            <div style={{ width: '60px', height: '60px', margin: '0 auto', borderRadius: '50%', background: '#ffebee', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+              <i className="fas fa-exclamation-triangle" style={{ fontSize: '1.5rem', color: '#d32f2f' }}></i>
+            </div>
+            <h3 style={{ marginBottom: '0.5rem' }}>Delete Testimonial</h3>
+            <p style={{ color: '#666', marginBottom: '1.5rem' }}>
+              Are you sure you want to delete the testimonial from <strong>"{deletingTestimonial.name}"</strong>? <br />
+              This action cannot be undone.
+            </p>
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <button
+                onClick={() => { setShowDeleteConfirm(false); setDeletingTestimonial(null); }}
+                disabled={isSubmitting}
+                style={{ flex: 1, padding: '0.8rem', background: '#f0f0f0', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteTestimonial}
+                disabled={isSubmitting}
+                style={{
+                  flex: 1,
+                  padding: '0.8rem',
+                  background: isSubmitting ? '#ccc' : '#d32f2f',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '10px',
+                  cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem'
+                }}
+              >
+                {isSubmitting ? (
+                  <>
+                    <i className="fas fa-spinner fa-spin"></i>
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <i className="fas fa-trash-alt"></i>
+                    Delete
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>
