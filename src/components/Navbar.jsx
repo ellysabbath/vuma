@@ -1280,6 +1280,29 @@ const Navbar = () => {
                       <span style={{ flex: 1 }}>Manage Publications</span>
                       <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
                     </Link>
+
+                    {/* NEW: Admin Stats Link - Only for Admin */}
+                    <Link
+                      to="/admin/stats"
+                      onClick={() => setIsUserMenuOpen(false)}
+                      className="dropdown-item"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        padding: '0.8rem 1rem',
+                        color: '#333',
+                        textDecoration: 'none',
+                        transition: 'all 0.3s ease',
+                        borderBottom: '1px solid #f0f0f0'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                    >
+                      <i className="fas fa-chart-bar" style={{ width: '20px', color: '#F9C74F' }}></i>
+                      <span style={{ flex: 1 }}>Manage Stats</span>
+                      <i className="fas fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
+                    </Link>
                   </>
                 )}
                 
@@ -1577,6 +1600,17 @@ const Navbar = () => {
                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
                       <i className="fas fa-file-alt" style={{ width: '20px', color: '#F9C74F' }}></i>
                       <span>Manage Publications</span>
+                    </Link>
+
+                    {/* NEW: Admin Stats Link - Only for Admin in Sidebar */}
+                    <Link to="/admin/stats" onClick={closeSidebar} style={{
+                      display: 'flex', alignItems: 'center', gap: '12px', padding: '0.875rem 1.5rem',
+                      margin: '0 0.5rem', borderRadius: '12px', color: 'white', textDecoration: 'none',
+                      transition: 'all 0.3s ease'
+                    }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)'}
+                       onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                      <i className="fas fa-chart-bar" style={{ width: '20px', color: '#F9C74F' }}></i>
+                      <span>Manage Stats</span>
                     </Link>
                   </>
                 )}

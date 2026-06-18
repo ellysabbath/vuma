@@ -12,6 +12,7 @@ const AdminPrograms = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [newProgram, setNewProgram] = useState({
     name: '',
     category: 'youth_leadership',
@@ -19,8 +20,7 @@ const AdminPrograms = () => {
     icon: 'fas fa-lightbulb',
     color: '#F9C74F',
     order: 0,
-    is_active: true,
-    activities: []
+    is_active: true
   });
 
   const API_BASE_URL = 'https://vuma.pythonanywhere.com/api';
@@ -41,13 +41,30 @@ const AdminPrograms = () => {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch(`${API_BASE_URL}/prog/`);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      // Try both with and without trailing slash
+      let response = await fetch(`${API_BASE_URL}/prog/`);
+      
+      if (!response.ok) {
+        response = await fetch(`${API_BASE_URL}/prog`);
+      }
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      
       const data = await response.json();
-      if (Array.isArray(data)) setPrograms(data);
-      else if (data.results) setPrograms(data.results);
-      else if (data.data) setPrograms(data.data);
-      else setPrograms([]);
+      console.log('Fetched data:', data); // Debug log
+      
+      // Handle different response formats
+      if (Array.isArray(data)) {
+        setPrograms(data);
+      } else if (data.results) {
+        setPrograms(data.results);
+      } else if (data.data) {
+        setPrograms(data.data);
+      } else {
+        setPrograms([]);
+      }
     } catch (error) {
       console.error('Error fetching programs:', error);
       setError('Network error. Check if server is running.');
@@ -57,48 +74,101 @@ const AdminPrograms = () => {
   };
 
   const handleViewProgram = (programId) => navigate(`/admin/programs/${programId}`);
-  const handleEditProgram = (program) => navigate(`/admin/programs/${program.id}`, { state: { program } });
+  
+  const handleEditProgram = (program) => {
+    navigate(`/admin/programs/${program.id}`, { state: { program } });
+  };
 
-  const openAddModal = () => { setShowAddModal(true); document.body.style.overflow = 'hidden'; };
+  const openAddModal = () => { 
+    setShowAddModal(true); 
+    document.body.style.overflow = 'hidden'; 
+  };
+  
   const closeAddModal = () => {
     setShowAddModal(false);
-    setNewProgram({ name: '', category: 'youth_leadership', description: '', icon: 'fas fa-lightbulb', color: '#F9C74F', order: 0, is_active: true, activities: [] });
+    setNewProgram({ 
+      name: '', 
+      category: 'youth_leadership', 
+      description: '', 
+      icon: 'fas fa-lightbulb', 
+      color: '#F9C74F', 
+      order: 0, 
+      is_active: true
+    });
+    setIsSubmitting(false);
     document.body.style.overflow = 'unset';
   };
 
   const handleAddProgram = async () => {
-    if (!newProgram.name) { alert('Please fill in program name'); return; }
+    if (!newProgram.name) { 
+      alert('Please fill in program name'); 
+      return; 
+    }
+    
+    setIsSubmitting(true);
+    
     try {
+      const programData = {
+        name: newProgram.name.trim(),
+        category: newProgram.category,
+        description: newProgram.description || '',
+        icon: newProgram.icon,
+        color: newProgram.color,
+        order: parseInt(newProgram.order) || 0,
+        is_active: newProgram.is_active
+      };
+      
+      console.log('Sending data:', programData); // Debug log
+      
       const response = await fetch(`${API_BASE_URL}/prog/`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: newProgram.name, category: newProgram.category, description: newProgram.description,
-          icon: newProgram.icon, color: newProgram.color, order: newProgram.order, is_active: newProgram.is_active
-        }),
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(programData),
       });
-      if (response.ok) { 
+      
+      const responseData = await response.json();
+      console.log('Response:', responseData); // Debug log
+      
+      if (response.ok && responseData.success !== false) { 
         await fetchPrograms(); 
-        setSuccessMessage('Program added!'); 
+        setSuccessMessage('Program added successfully!'); 
         setShowSuccess(true); 
         setTimeout(() => setShowSuccess(false), 3000); 
         closeAddModal(); 
       } else { 
-        const errorData = await response.json(); 
-        alert(errorData.error || 'Failed to add'); 
+        // Show detailed error from backend
+        let errorMessage = 'Failed to add program';
+        if (responseData.errors) {
+          const errorDetails = Object.values(responseData.errors).flat().join(', ');
+          errorMessage = errorDetails || errorMessage;
+        } else if (responseData.error) {
+          errorMessage = responseData.error;
+        } else if (responseData.detail) {
+          errorMessage = responseData.detail;
+        }
+        alert(errorMessage);
+        setIsSubmitting(false);
       }
     } catch (error) { 
+      console.error('Error:', error);
       alert('Network error. Please try again.'); 
+      setIsSubmitting(false);
     }
   };
 
   const handleDelete = async (programId) => {
     if (window.confirm('Delete this program? All associated activities will be deleted.')) {
       try {
-        const response = await fetch(`${API_BASE_URL}/prog/${programId}/`, { method: 'DELETE' });
+        const response = await fetch(`${API_BASE_URL}/prog/${programId}/`, { 
+          method: 'DELETE' 
+        });
+        
         if (response.ok) { 
           await fetchPrograms(); 
-          setSuccessMessage('Program deleted!'); 
+          setSuccessMessage('Program deleted successfully!'); 
           setShowSuccess(true); 
           setTimeout(() => setShowSuccess(false), 3000); 
         } else { 
@@ -154,7 +224,7 @@ const AdminPrograms = () => {
       <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f9fbf7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
           <i className="fas fa-spinner fa-spin" style={{ fontSize: '2rem', color: '#0B3B2F' }}></i>
-          <p style={{ marginTop: '0.5rem', color: '#666', fontSize: '0.8rem' }}>Loading...</p>
+          <p style={{ marginTop: '0.5rem', color: '#666', fontSize: '0.8rem' }}>Loading programs...</p>
         </div>
       </div>
     );
@@ -303,7 +373,7 @@ const AdminPrograms = () => {
 
       {/* Add Program Modal - Compact */}
       {showAddModal && (
-        <div className="modal-overlay" onClick={closeAddModal} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+        <div className="modal-overlay" onClick={closeAddModal} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ background: 'white', borderRadius: '20px', maxWidth: '450px', width: '100%', maxHeight: '85vh', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
             <button onClick={closeAddModal} style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(0,0,0,0.5)', border: 'none', width: '28px', height: '28px', borderRadius: '50%', cursor: 'pointer', color: 'white', zIndex: 10 }}>
               <i className="fas fa-times"></i>
@@ -317,19 +387,48 @@ const AdminPrograms = () => {
             </div>
             
             <div style={{ padding: '1rem', overflowY: 'auto', flex: 1 }}>
-              <input type="text" name="name" placeholder="Program Name *" value={newProgram.name} onChange={handleInputChange} style={{ width: '100%', padding: '0.4rem', fontSize: '0.7rem', borderRadius: '6px', border: '1px solid #ddd', marginBottom: '0.5rem' }} />
+              <input 
+                type="text" 
+                name="name" 
+                placeholder="Program Name *" 
+                value={newProgram.name} 
+                onChange={handleInputChange} 
+                style={{ width: '100%', padding: '0.4rem', fontSize: '0.7rem', borderRadius: '6px', border: '1px solid #ddd', marginBottom: '0.5rem' }} 
+              />
               
-              <select name="category" value={newProgram.category} onChange={handleInputChange} style={{ width: '100%', padding: '0.4rem', fontSize: '0.7rem', borderRadius: '6px', border: '1px solid #ddd', marginBottom: '0.5rem' }}>
+              <select 
+                name="category" 
+                value={newProgram.category} 
+                onChange={handleInputChange} 
+                style={{ width: '100%', padding: '0.4rem', fontSize: '0.7rem', borderRadius: '6px', border: '1px solid #ddd', marginBottom: '0.5rem' }}
+              >
                 {categoryOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
               </select>
               
-              <textarea name="description" placeholder="Description" value={newProgram.description} onChange={handleInputChange} rows="2" style={{ width: '100%', padding: '0.4rem', fontSize: '0.7rem', borderRadius: '6px', border: '1px solid #ddd', marginBottom: '0.5rem' }} />
+              <textarea 
+                name="description" 
+                placeholder="Description" 
+                value={newProgram.description} 
+                onChange={handleInputChange} 
+                rows="2" 
+                style={{ width: '100%', padding: '0.4rem', fontSize: '0.7rem', borderRadius: '6px', border: '1px solid #ddd', marginBottom: '0.5rem' }} 
+              />
               
               <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                <select name="icon" value={newProgram.icon} onChange={handleInputChange} style={{ flex: 1, padding: '0.4rem', fontSize: '0.7rem', borderRadius: '6px', border: '1px solid #ddd' }}>
+                <select 
+                  name="icon" 
+                  value={newProgram.icon} 
+                  onChange={handleInputChange} 
+                  style={{ flex: 1, padding: '0.4rem', fontSize: '0.7rem', borderRadius: '6px', border: '1px solid #ddd' }}
+                >
                   {iconOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                 </select>
-                <select name="color" value={newProgram.color} onChange={handleInputChange} style={{ flex: 1, padding: '0.4rem', fontSize: '0.7rem', borderRadius: '6px', border: '1px solid #ddd' }}>
+                <select 
+                  name="color" 
+                  value={newProgram.color} 
+                  onChange={handleInputChange} 
+                  style={{ flex: 1, padding: '0.4rem', fontSize: '0.7rem', borderRadius: '6px', border: '1px solid #ddd' }}
+                >
                   {colorOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                 </select>
               </div>
@@ -338,9 +437,20 @@ const AdminPrograms = () => {
                 <div style={{ flex: 1, background: '#f5f5f5', borderRadius: '6px', padding: '0.3rem', textAlign: 'center' }}>
                   <i className={newProgram.icon} style={{ fontSize: '1rem', color: newProgram.color }}></i>
                 </div>
-                <input type="number" name="order" placeholder="Order" value={newProgram.order} onChange={handleInputChange} style={{ width: '60px', padding: '0.4rem', fontSize: '0.7rem', borderRadius: '6px', border: '1px solid #ddd' }} />
+                <input 
+                  type="number" 
+                  name="order" 
+                  placeholder="Order" 
+                  value={newProgram.order} 
+                  onChange={handleInputChange} 
+                  style={{ width: '60px', padding: '0.4rem', fontSize: '0.7rem', borderRadius: '6px', border: '1px solid #ddd' }} 
+                />
                 <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.7rem' }}>
-                  <input type="checkbox" checked={newProgram.is_active} onChange={(e) => setNewProgram({ ...newProgram, is_active: e.target.checked })} /> Active
+                  <input 
+                    type="checkbox" 
+                    checked={newProgram.is_active} 
+                    onChange={(e) => setNewProgram({ ...newProgram, is_active: e.target.checked })} 
+                  /> Active
                 </label>
               </div>
               
@@ -349,8 +459,26 @@ const AdminPrograms = () => {
               </div>
               
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button onClick={closeAddModal} style={{ flex: 1, background: '#f0f0f0', border: 'none', padding: '0.4rem', borderRadius: '20px', fontSize: '0.7rem', cursor: 'pointer' }}>Cancel</button>
-                <button onClick={handleAddProgram} style={{ flex: 1, background: '#0B3B2F', color: 'white', border: 'none', padding: '0.4rem', borderRadius: '20px', fontSize: '0.7rem', cursor: 'pointer' }}>Create</button>
+                <button 
+                  onClick={closeAddModal} 
+                  disabled={isSubmitting}
+                  style={{ flex: 1, background: '#f0f0f0', border: 'none', padding: '0.4rem', borderRadius: '20px', fontSize: '0.7rem', cursor: isSubmitting ? 'not-allowed' : 'pointer', opacity: isSubmitting ? 0.6 : 1 }}
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleAddProgram} 
+                  disabled={isSubmitting}
+                  style={{ flex: 1, background: isSubmitting ? '#94a3b8' : '#0B3B2F', color: 'white', border: 'none', padding: '0.4rem', borderRadius: '20px', fontSize: '0.7rem', cursor: isSubmitting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <i className="fas fa-spinner fa-spin"></i> Creating...
+                    </>
+                  ) : (
+                    'Create'
+                  )}
+                </button>
               </div>
             </div>
           </div>

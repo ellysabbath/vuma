@@ -54,6 +54,8 @@ import AdminLeadership from './admin/AdminLeaderShip';
 import AdminDonations from './admin/AdminDonations';
 import What from './pages/What';
 import AdminReports from './admin/AdminReports';
+import AdminImpacts from './admin/AdminImpacts';
+import AdminSttats from './admin/AdminStats';
 // ScrollToTop component to reset scroll on page change
 
 
@@ -158,12 +160,15 @@ function App() {
 <Route path="/admin/events" element={<AdminEvents />} />
 <Route path="/admin/volunteers" element={<AdminVolunteers />} />
 <Route path="/admin/partners" element={<AdminPartners />} />
+<Route path="/admin/impacts" element={<AdminImpacts />} />
 <Route path="/admin/messages" element={<AdminMessages />} />
 <Route path="/admin/news" element={<AdminNews />} />
 <Route path="/admin/leadership" element={<AdminLeadership />} />
 <Route path="/events/register/confirmation/:id" element={<EventRegistrationConfirmation />} />
 <Route path="/admin/testimonials" element={<AdminTestimonials />} />
 <Route path="/admin/reports" element={<AdminReports />} />
+
+<Route path="/admin/stats" element={<AdminSttats />} />
 
 
 <Route path="/admin/users/:id" element={<UserDetails />} />

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 // Import local images from assets folder - only event.jpg to eventf.jpg
 import event from '../assets/new/event.jpg';
@@ -124,6 +124,14 @@ const Leadership = () => {
   const statsRef = useRef(null);
   const carouselRef = useRef(null);
   
+  // Stats state - fetched from API
+  const [statsData, setStatsData] = useState({
+    years_experience: 0,
+    projects_completed: 0,
+    youth_empowered: 0,
+    community_partners: 0
+  });
+  
   const [counters, setCounters] = useState({
     experience: 0,
     projects: 0,
@@ -131,9 +139,41 @@ const Leadership = () => {
     partners: 0
   });
 
+  const API_BASE_URL = 'https://vuma.pythonanywhere.com/leaders';
+
   // Separate founder and team members
   const founder = leadershipData.find(leader => leader.isFounder === true);
   const teamMembers = leadershipData.filter(leader => leader.isFounder !== true);
+
+  // Fetch stats from API
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/stats/`);
+      const data = await response.json();
+      
+      if (data.success && data.data) {
+        setStatsData({
+          years_experience: data.data.years_experience || 0,
+          projects_completed: data.data.projects_completed || 0,
+          youth_empowered: data.data.youth_empowered || 0,
+          community_partners: data.data.community_partners || 0
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+      // Fallback to default values if API fails
+      setStatsData({
+        years_experience: 15,
+        projects_completed: 4,
+        youth_empowered: 50000,
+        community_partners: 25
+      });
+    }
+  };
 
   // Intersection Observer for section visibility
   React.useEffect(() => {
@@ -166,7 +206,7 @@ const Leadership = () => {
 
     let animationId;
     let startTime;
-    const duration = 25000; // 25 seconds for full scroll
+    const duration = 25000;
     const scrollDistance = carousel.scrollWidth - carousel.clientWidth;
 
     const scroll = (timestamp) => {
@@ -188,7 +228,7 @@ const Leadership = () => {
     };
   }, [teamMembers.length]);
 
-  // Stats counter observer
+  // Stats counter observer - uses fetched stats data
   React.useEffect(() => {
     const statsObserver = new IntersectionObserver(
       (entries) => {
@@ -211,20 +251,20 @@ const Leadership = () => {
         statsObserver.unobserve(statsRef.current);
       }
     };
-  }, [statsVisible]);
+  }, [statsVisible, statsData]); // Re-run when statsData changes
 
   const startCounters = () => {
     const duration = 2000;
     const stepTime = 20;
     
-    const statsData = [
-      { id: 'experience', target: 15 },
-      { id: 'projects', target: 4 },
-      { id: 'youth', target: 50000 },
-      { id: 'partners', target: 25 }
+    const statsTargets = [
+      { id: 'experience', target: statsData.years_experience || 15 },
+      { id: 'projects', target: statsData.projects_completed || 4 },
+      { id: 'youth', target: statsData.youth_empowered || 50000 },
+      { id: 'partners', target: statsData.community_partners || 25 }
     ];
     
-    statsData.forEach((stat) => {
+    statsTargets.forEach((stat) => {
       let currentValue = 0;
       const increment = stat.target / (duration / stepTime);
       
@@ -840,7 +880,7 @@ const Leadership = () => {
         </div>
       </div>
 
-      {/* Animated Stats Section */}
+      {/* Animated Stats Section - Fetched from API */}
       <div ref={statsRef} style={{
         margin: '2rem auto',
         padding: '3rem 2rem',
