@@ -20,7 +20,7 @@ const Home = ({ onLoginClick }) => {
       <InnovationShowcase />
       {/* <EventCountdown /> */}
       <div id="events">
-        <Timeline />
+        {/* <Timeline /> */}
       </div>
       <Testimonials />
       <div id="volunteer">
