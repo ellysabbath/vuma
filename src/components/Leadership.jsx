@@ -139,41 +139,93 @@ const Leadership = () => {
     partners: 0
   });
 
+  const [isStatsLoading, setIsStatsLoading] = useState(true);
+  const [statsError, setStatsError] = useState(null);
+  const fetchIntervalRef = useRef(null);
+  const isAnimatingRef = useRef(false);
+  const animationFrameRef = useRef(null);
+
   const API_BASE_URL = 'https://vuma.pythonanywhere.com/leaders';
 
   // Separate founder and team members
   const founder = leadershipData.find(leader => leader.isFounder === true);
   const teamMembers = leadershipData.filter(leader => leader.isFounder !== true);
 
-  // Fetch stats from API
-  useEffect(() => {
-    fetchStats();
-  }, []);
-
+  // Fetch stats from API with auto-refresh
   const fetchStats = async () => {
     try {
+      setStatsError(null);
       const response = await fetch(`${API_BASE_URL}/stats/`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
       
       if (data.success && data.data) {
-        setStatsData({
+        const newStatsData = {
           years_experience: data.data.years_experience || 0,
           projects_completed: data.data.projects_completed || 0,
           youth_empowered: data.data.youth_empowered || 0,
           community_partners: data.data.community_partners || 0
-        });
+        };
+        
+        setStatsData(newStatsData);
+        
+        // If stats are visible and not currently animating, restart counters with new values
+        if (statsVisible && !isAnimatingRef.current) {
+          // Reset counters to 0 before starting new animation
+          setCounters({
+            experience: 0,
+            projects: 0,
+            youth: 0,
+            partners: 0
+          });
+          // Start counters with new values after a small delay
+          setTimeout(() => {
+            startCounters(newStatsData);
+          }, 100);
+        }
+        
+        setIsStatsLoading(false);
+      } else {
+        throw new Error('Invalid data format from API');
       }
     } catch (error) {
       console.error('Error fetching stats:', error);
+      setStatsError(error.message);
       // Fallback to default values if API fails
-      setStatsData({
+      const fallbackData = {
         years_experience: 15,
         projects_completed: 4,
         youth_empowered: 50000,
         community_partners: 25
-      });
+      };
+      setStatsData(fallbackData);
+      setIsStatsLoading(false);
     }
   };
+
+  // Initial fetch and auto-fetch every 5 seconds
+  useEffect(() => {
+    fetchStats();
+    
+    // Set up interval for auto-fetch every 5 seconds
+    fetchIntervalRef.current = setInterval(() => {
+      fetchStats();
+    }, 5000);
+
+    // Cleanup interval on unmount
+    return () => {
+      if (fetchIntervalRef.current) {
+        clearInterval(fetchIntervalRef.current);
+      }
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, []);
 
   // Intersection Observer for section visibility
   React.useEffect(() => {
@@ -233,9 +285,12 @@ const Leadership = () => {
     const statsObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting && !statsVisible) {
+          if (entry.isIntersecting && !statsVisible && !isStatsLoading) {
             setStatsVisible(true);
-            startCounters();
+            startCounters(statsData);
+          } else if (entry.isIntersecting && !statsVisible && !isStatsLoading) {
+            // If stats are already visible but we need to restart
+            setStatsVisible(true);
           }
         });
       },
@@ -251,33 +306,64 @@ const Leadership = () => {
         statsObserver.unobserve(statsRef.current);
       }
     };
-  }, [statsVisible, statsData]); // Re-run when statsData changes
+  }, [statsData, isStatsLoading]);
 
-  const startCounters = () => {
-    const duration = 2000;
-    const stepTime = 20;
+  const startCounters = (data) => {
+    // Don't start if already animating
+    if (isAnimatingRef.current) return;
     
-    const statsTargets = [
-      { id: 'experience', target: statsData.years_experience || 15 },
-      { id: 'projects', target: statsData.projects_completed || 4 },
-      { id: 'youth', target: statsData.youth_empowered || 50000 },
-      { id: 'partners', target: statsData.community_partners || 25 }
-    ];
+    const duration = 2500; // 2.5 seconds
+    const startTime = performance.now();
+    const startValues = {
+      experience: 0,
+      projects: 0,
+      youth: 0,
+      partners: 0
+    };
     
-    statsTargets.forEach((stat) => {
-      let currentValue = 0;
-      const increment = stat.target / (duration / stepTime);
+    const targets = {
+      experience: data.years_experience || 0,
+      projects: data.projects_completed || 0,
+      youth: data.youth_empowered || 0,
+      partners: data.community_partners || 0
+    };
+    
+    isAnimatingRef.current = true;
+    
+    // Cancel any existing animation
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+    
+    const animate = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
       
-      const interval = setInterval(() => {
-        currentValue += increment;
-        if (currentValue >= stat.target) {
-          setCounters(prev => ({ ...prev, [stat.id]: stat.target }));
-          clearInterval(interval);
-        } else {
-          setCounters(prev => ({ ...prev, [stat.id]: Math.floor(currentValue) }));
-        }
-      }, stepTime);
-    });
+      // Ease out cubic function for smooth deceleration
+      const eased = 1 - Math.pow(1 - progress, 3);
+      
+      // Calculate current values
+      const currentValues = {};
+      Object.keys(targets).forEach(key => {
+        const target = targets[key];
+        const start = startValues[key] || 0;
+        currentValues[key] = Math.round(start + (target - start) * eased);
+      });
+      
+      setCounters(currentValues);
+      
+      if (progress < 1) {
+        // Continue animation
+        animationFrameRef.current = requestAnimationFrame(animate);
+      } else {
+        // Animation complete - set final values
+        setCounters(targets);
+        isAnimatingRef.current = false;
+        animationFrameRef.current = null;
+      }
+    };
+    
+    animationFrameRef.current = requestAnimationFrame(animate);
   };
 
   const openModal = (leader) => {
@@ -402,6 +488,11 @@ const Leadership = () => {
           @keyframes scrollLeftToRight {
             0% { transform: translateX(0); }
             100% { transform: translateX(-50%); }
+          }
+          
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
           }
           
           .leader-card {
@@ -880,7 +971,7 @@ const Leadership = () => {
         </div>
       </div>
 
-      {/* Animated Stats Section - Fetched from API */}
+      {/* Animated Stats Section - Fetched from API with Auto-Refresh */}
       <div ref={statsRef} style={{
         margin: '2rem auto',
         padding: '3rem 2rem',
@@ -889,58 +980,116 @@ const Leadership = () => {
         maxWidth: '1200px',
         marginLeft: 'auto',
         marginRight: 'auto',
-        display: 'flex',
-        flexWrap: 'wrap',
-        justifyContent: 'space-around',
-        gap: '2rem',
-        textAlign: 'center',
-        boxShadow: '0 10px 30px rgba(0,0,0,0.05)'
+        boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
+        position: 'relative'
       }}>
-        {[
-          { id: 'experience', icon: 'fas fa-calendar-alt', label: 'Years Combined Experience', value: counters.experience, suffix: '+' },
-          { id: 'projects', icon: 'fas fa-project-diagram', label: 'Projects Completed', value: counters.projects, suffix: '+' },
-          { id: 'youth', icon: 'fas fa-users', label: 'Youth Empowered', value: counters.youth.toLocaleString(), suffix: '+' },
-          { id: 'partners', icon: 'fas fa-handshake', label: 'Community Partners', value: counters.partners, suffix: '+' }
-        ].map((stat, idx) => (
-          <div 
-            key={stat.id}
-            className="stat-card"
-            style={{ 
-              flex: 1, 
-              minWidth: '150px',
-              padding: '1.5rem',
-              borderRadius: '24px',
-              cursor: 'pointer',
-              opacity: statsVisible ? 1 : 0,
-              transform: statsVisible ? 'translateY(0) scale(1)' : 'translateY(50px) scale(0.9)',
-              transition: `all 0.5s cubic-bezier(0.4, 0, 0.2, 1) ${idx * 0.1}s`
-            }}
-          >
+        {/* Auto-refresh indicator */}
+        <div style={{
+          position: 'absolute',
+          top: '1rem',
+          right: '1.5rem',
+          fontSize: '0.65rem',
+          color: '#888',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.4rem',
+          opacity: 0.6
+        }}>
+          <i className="fas fa-sync" style={{ fontSize: '0.5rem', animation: 'spin 2s linear infinite' }}></i>
+          <span>Live</span>
+          <style>{`
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `}</style>
+        </div>
+
+        {/* Stats loading state */}
+        {isStatsLoading && (
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: '2rem'
+          }}>
             <div style={{
-              width: '50px',
-              height: '50px',
-              background: 'rgba(249,199,79,0.15)',
+              width: '40px',
+              height: '40px',
+              border: '3px solid rgba(249,199,79,0.2)',
+              borderTop: '3px solid #F9C74F',
               borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto 0.8rem'
-            }}>
-              <i className={stat.icon} style={{ fontSize: '1.3rem', color: '#F9C74F' }}></i>
-            </div>
-            <div style={{ 
-              fontSize: 'clamp(1.8rem, 5vw, 2.5rem)', 
-              fontWeight: 800, 
-              color: '#0B3B2F',
-              fontFamily: 'monospace'
-            }}>
-              {stat.value}{stat.suffix}
-            </div>
-            <div style={{ color: '#555', fontSize: '0.8rem', fontWeight: 500 }}>
-              {stat.label}
-            </div>
+              animation: 'spin 0.8s linear infinite'
+            }} />
           </div>
-        ))}
+        )}
+
+        {/* Stats error state */}
+        {statsError && !isStatsLoading && (
+          <div style={{
+            textAlign: 'center',
+            padding: '1rem',
+            color: '#666'
+          }}>
+            <i className="fas fa-exclamation-circle" style={{ color: '#F9C74F', marginRight: '0.5rem' }}></i>
+            <span>Unable to load stats. Showing cached data.</span>
+          </div>
+        )}
+
+        {/* Stats grid */}
+        <div style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'space-around',
+          gap: '2rem',
+          textAlign: 'center'
+        }}>
+          {[
+            { id: 'experience', icon: 'fas fa-calendar-alt', label: 'Years Combined Experience', value: counters.experience, suffix: '+' },
+            { id: 'projects', icon: 'fas fa-project-diagram', label: 'Projects Completed', value: counters.projects, suffix: '+' },
+            { id: 'youth', icon: 'fas fa-users', label: 'Youth Empowered', value: counters.youth.toLocaleString(), suffix: '+' },
+            { id: 'partners', icon: 'fas fa-handshake', label: 'Community Partners', value: counters.partners, suffix: '+' }
+          ].map((stat, idx) => (
+            <div 
+              key={stat.id}
+              className="stat-card"
+              style={{ 
+                flex: 1, 
+                minWidth: '150px',
+                padding: '1.5rem',
+                borderRadius: '24px',
+                cursor: 'pointer',
+                opacity: statsVisible ? 1 : 0,
+                transform: statsVisible ? 'translateY(0) scale(1)' : 'translateY(50px) scale(0.9)',
+                transition: `all 0.5s cubic-bezier(0.4, 0, 0.2, 1) ${idx * 0.1}s`
+              }}
+            >
+              <div style={{
+                width: '50px',
+                height: '50px',
+                background: 'rgba(249,199,79,0.15)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 0.8rem'
+              }}>
+                <i className={stat.icon} style={{ fontSize: '1.3rem', color: '#F9C74F' }}></i>
+              </div>
+              <div style={{ 
+                fontSize: 'clamp(1.8rem, 5vw, 2.5rem)', 
+                fontWeight: 800, 
+                color: '#0B3B2F',
+                fontFamily: 'monospace'
+              }}>
+                {stat.value}{stat.suffix}
+              </div>
+              <div style={{ color: '#555', fontSize: '0.8rem', fontWeight: 500 }}>
+                {stat.label}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Leader Profile Modal */}

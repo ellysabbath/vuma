@@ -56,12 +56,12 @@ export const projects = [
     img: eventh,
     description: "Promoting waste reduction and recycling"
   },
-  { 
-    title: "Green Energy Solutions", 
-    cat: "environment", 
-    img: eventi,
-    description: "Renewable energy for rural communities"
-  },
+  // { 
+  //   title: "Green Energy Solutions", 
+  //   cat: "environment", 
+  //   img: eventi,
+  //   description: "Renewable energy for rural communities"
+  // },
   { 
     title: "Youth Entrepreneurship Program", 
     cat: "leadership", 

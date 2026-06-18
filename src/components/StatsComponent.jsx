@@ -27,7 +27,7 @@ const StatsComponent = () => {
   const animationFrameRef = useRef(null);
   const animationStartTimeRef = useRef(null);
 
-  const API_BASE_URL = 'https://vuma.pythonanywhere.com/api';
+  const API_BASE_URL = 'https://vuma.pythonanywhere.com/leaders';
 
   // Fetch stats from API
   const fetchStats = async () => {
