@@ -5,21 +5,37 @@ import 'aos/dist/aos.css';
 const About = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [counters, setCounters] = useState({
-    youth_reached: 0,
-    projects_completed: 0,
-    community_partners: 0
+    youth: 0,
+    projects: 0,
+    partners: 0
   });
-  const [impactData, setImpactData] = useState({
-    youth_reached: 0,
-    youth_label: 'Youth Reached',
-    youth_suffix: '+',
-    projects_completed: 0,
-    projects_label: 'Projects Completed',
-    projects_suffix: '+',
-    community_partners: 0,
-    partners_label: 'Community Partners',
-    partners_suffix: '+'
-  });
+  const [statsData, setStatsData] = useState([
+    { 
+      id: 'youth', 
+      label: 'Youth Reached', 
+      value: 0, 
+      suffix: '+', 
+      icon: 'fas fa-users', 
+      color: '#0B3B2F' 
+    },
+    { 
+      id: 'projects', 
+      label: 'Projects Completed', 
+      value: 0, 
+      suffix: '+', 
+      icon: 'fas fa-project-diagram', 
+      color: '#0B3B2F' 
+    },
+    { 
+      id: 'partners', 
+      label: 'Community Partners', 
+      value: 0, 
+      suffix: '+', 
+      icon: 'fas fa-handshake', 
+      color: '#0B3B2F' 
+    }
+  ]);
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
   
   const sectionRef = useRef(null);
   const hasAnimated = useRef(false);
@@ -28,83 +44,87 @@ const About = () => {
   const isAnimatingRef = useRef(false);
   const targetValuesRef = useRef(null);
   const animationFrameRef = useRef(null);
+  const animationStartTimeRef = useRef(null);
 
-  const API_BASE_URL = 'https://vuma.pythonanywhere.com/api';
+  const API_BASE_URL = 'https://vuma.pythonanywhere.com/leaders';
 
-  // Fetch impact data from API - Updated to use /impacts/ endpoint
-  const fetchImpactData = async () => {
+  // Fetch stats from API - Same method as StatsComponent
+  const fetchStats = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/stats/`);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
       const data = await response.json();
       
-      let impactData = [];
-      if (Array.isArray(data)) {
-        impactData = data;
-      } else if (data.results) {
-        impactData = data.results;
-      } else if (data.data) {
-        impactData = data.data;
-      }
-
-      if (impactData.length > 0) {
-        const impact = impactData[0];
-        const newImpactData = {
-          youth_reached: impact.youth_reached_target || 0,
-          youth_label: impact.youth_reached_label || 'Youth Reached',
-          youth_suffix: impact.youth_reached_suffix || '+',
-          projects_completed: impact.projects_completed_target || 0,
-          projects_label: impact.projects_completed_label || 'Projects Completed',
-          projects_suffix: impact.projects_completed_suffix || '+',
-          community_partners: impact.community_partners_target || 0,
-          partners_label: impact.community_partners_label || 'Community Partners',
-          partners_suffix: impact.community_partners_suffix || '+'
-        };
+      if (data.success && data.data) {
+        const newStatsData = [
+          { 
+            id: 'youth', 
+            label: 'Youth Reached', 
+            value: data.data.youth_empowered || 0, 
+            suffix: '+', 
+            icon: 'fas fa-users', 
+            color: '#0B3B2F' 
+          },
+          { 
+            id: 'projects', 
+            label: 'Projects Completed', 
+            value: data.data.projects_completed || 0, 
+            suffix: '+', 
+            icon: 'fas fa-project-diagram', 
+            color: '#0B3B2F' 
+          },
+          { 
+            id: 'partners', 
+            label: 'Community Partners', 
+            value: data.data.community_partners || 0, 
+            suffix: '+', 
+            icon: 'fas fa-handshake', 
+            color: '#0B3B2F' 
+          }
+        ];
         
-        setImpactData(newImpactData);
-        targetValuesRef.current = newImpactData;
+        setStatsData(newStatsData);
+        targetValuesRef.current = newStatsData;
         
         // If stats are visible and not currently animating, restart counters with new values
         if (statsVisibleRef.current && !isAnimatingRef.current) {
+          // Reset counters to 0 before starting new animation
           setCounters({
-            youth_reached: 0,
-            projects_completed: 0,
-            community_partners: 0
+            youth: 0,
+            projects: 0,
+            partners: 0
           });
+          // Start counters with new values after a small delay
           setTimeout(() => {
-            startCounters(newImpactData);
+            startCounters(newStatsData);
           }, 100);
+        }
+        
+        if (isFirstLoad) {
+          setIsFirstLoad(false);
         }
       }
     } catch (error) {
-      console.error('Error fetching impact data:', error);
+      console.error('Error fetching stats:', error);
       // Use default values if API fails
-      const defaultData = {
-        youth_reached: 10000,
-        youth_label: 'Youth Reached',
-        youth_suffix: '+',
-        projects_completed: 50,
-        projects_label: 'Projects Completed',
-        projects_suffix: '+',
-        community_partners: 20,
-        partners_label: 'Community Partners',
-        partners_suffix: '+'
-      };
-      setImpactData(defaultData);
-      targetValuesRef.current = defaultData;
+      const defaultStats = [
+        { id: 'youth', label: 'Youth Reached', value: 10000, suffix: '+', icon: 'fas fa-users', color: '#0B3B2F' },
+        { id: 'projects', label: 'Projects Completed', value: 50, suffix: '+', icon: 'fas fa-project-diagram', color: '#0B3B2F' },
+        { id: 'partners', label: 'Community Partners', value: 20, suffix: '+', icon: 'fas fa-handshake', color: '#0B3B2F' }
+      ];
+      setStatsData(defaultStats);
+      targetValuesRef.current = defaultStats;
     }
   };
 
-  // Auto-fetch every 1 second
+  // Auto-fetch every 1 second - Same as StatsComponent
   useEffect(() => {
     AOS.init({ duration: 800, once: false });
-    fetchImpactData();
+    // Initial fetch
+    fetchStats();
 
     // Set up interval for auto-fetch every 1 second
     fetchIntervalRef.current = setInterval(() => {
-      fetchImpactData();
+      fetchStats();
     }, 1000);
 
     // Cleanup interval on unmount
@@ -118,7 +138,7 @@ const About = () => {
     };
   }, []);
 
-  // Intersection Observer for section visibility
+  // Intersection Observer for section visibility - Same as StatsComponent
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -128,14 +148,14 @@ const About = () => {
             statsVisibleRef.current = true;
             if (!hasAnimated.current) {
               hasAnimated.current = true;
-              startCounters(impactData);
+              startCounters(statsData);
             } else if (!isAnimatingRef.current) {
               // Restart counters with current data when coming back into view
-              const currentData = targetValuesRef.current || impactData;
+              const currentData = targetValuesRef.current || statsData;
               setCounters({
-                youth_reached: 0,
-                projects_completed: 0,
-                community_partners: 0
+                youth: 0,
+                projects: 0,
+                partners: 0
               });
               setTimeout(() => {
                 startCounters(currentData);
@@ -159,29 +179,31 @@ const About = () => {
         observer.unobserve(sectionRef.current);
       }
     };
-  }, [impactData]);
+  }, [statsData]);
 
-  // Smooth animation using requestAnimationFrame
+  // Smooth animation using requestAnimationFrame - Same as StatsComponent
   const startCounters = (data) => {
+    // Don't start if already animating
     if (isAnimatingRef.current) return;
     
-    const duration = 2500;
+    const duration = 2500; // 2.5 seconds
     const startTime = performance.now();
     const startValues = {
-      youth_reached: 0,
-      projects_completed: 0,
-      community_partners: 0
+      youth: 0,
+      projects: 0,
+      partners: 0
     };
     
-    const targets = {
-      youth_reached: data.youth_reached || 0,
-      projects_completed: data.projects_completed || 0,
-      community_partners: data.community_partners || 0
-    };
+    // Get target values from data
+    const targets = {};
+    data.forEach(stat => {
+      targets[stat.id] = stat.value;
+    });
     
     targetValuesRef.current = data;
     isAnimatingRef.current = true;
     
+    // Cancel any existing animation
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
     }
@@ -189,19 +211,25 @@ const About = () => {
     const animate = (currentTime) => {
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1);
+      
+      // Ease out cubic function for smooth deceleration
       const eased = 1 - Math.pow(1 - progress, 3);
       
-      const currentValues = {
-        youth_reached: Math.round(targets.youth_reached * eased),
-        projects_completed: Math.round(targets.projects_completed * eased),
-        community_partners: Math.round(targets.community_partners * eased)
-      };
+      // Calculate current values
+      const currentValues = {};
+      Object.keys(targets).forEach(key => {
+        const target = targets[key];
+        const start = startValues[key] || 0;
+        currentValues[key] = Math.round(start + (target - start) * eased);
+      });
       
       setCounters(currentValues);
       
       if (progress < 1) {
+        // Continue animation
         animationFrameRef.current = requestAnimationFrame(animate);
       } else {
+        // Animation complete - set final values
         setCounters(targets);
         isAnimatingRef.current = false;
         animationFrameRef.current = null;
@@ -227,8 +255,10 @@ const About = () => {
           cursor: default;
         }
         .stat-card:hover {
-          transform: translateY(-5px) scale(1.02);
-          background: rgba(11,59,47,0.02);
+          transform: translateY(-10px);
+          background: rgba(255,255,255,1) !important;
+          box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+          border: 1px solid rgba(249,199,79,0.3) !important;
         }
         .stat-card:hover .icon-wrapper {
           transform: scale(1.1);
@@ -239,6 +269,12 @@ const About = () => {
         }
         .count-number {
           transition: all 0.1s ease;
+        }
+        .stat-card .underline {
+          transition: width 0.3s ease;
+        }
+        .stat-card:hover .underline {
+          width: 80px !important;
         }
       `}</style>
 
@@ -276,150 +312,95 @@ const About = () => {
             </p>
           </div>
 
-          {/* Our Impact Card - Fetches only integers from API */}
+          {/* Our Impact Card - Now using same data structure as StatsComponent */}
           <div data-aos="fade-left" style={{ 
-            background: 'white', 
+            background: 'rgba(255,255,255,0.9)',
+            backdropFilter: 'blur(10px)',
             borderRadius: '24px', 
             padding: '1.5rem', 
             boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
+            border: '1px solid rgba(11,59,47,0.1)',
             display: 'flex',
             flexDirection: 'column'
           }}>
-            <i className="fas fa-chart-line" style={{ fontSize: '2rem', color: '#F9C74F', marginBottom: '0.8rem' }}></i>
-            <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem', fontSize: '1.2rem' }}>Our Impact</h3>
+            <div style={{
+              display: 'inline-block',
+              background: 'rgba(11,59,47,0.1)',
+              padding: '0.2rem 0.8rem',
+              borderRadius: '50px',
+              marginBottom: '0.8rem',
+              alignSelf: 'flex-start'
+            }}>
+              <span style={{ color: '#0B3B2F', fontWeight: 600, fontSize: '0.7rem' }}>
+                <i className="fas fa-chart-line" style={{ marginRight: '0.3rem', color: '#F9C74F' }}></i>
+                OUR IMPACT
+              </span>
+            </div>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', flex: 1, justifyContent: 'center' }}>
-              {/* Youth Reached */}
-              <div className="stat-card" style={{
-                padding: '0.8rem',
-                borderRadius: '12px',
-                background: '#f9fbf7',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.8rem',
-                opacity: isVisible ? 1 : 0,
-                transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.95)',
-                transition: `all 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.1s`
-              }}>
-                <div className="icon-wrapper" style={{
-                  width: '40px',
-                  height: '40px',
-                  background: 'rgba(249,199,79,0.15)',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  <i className="fas fa-users" style={{ fontSize: '1rem', color: '#F9C74F' }}></i>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div className="count-number" style={{ 
-                    fontSize: '1.3rem', 
-                    fontWeight: 800, 
-                    color: '#0B3B2F',
-                    fontFamily: 'monospace'
+            <h3 style={{ color: '#0B3B2F', marginBottom: '1rem', fontSize: '1.2rem', fontWeight: 700 }}>
+              Making a Difference
+            </h3>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1, justifyContent: 'center' }}>
+              {statsData.map((stat, idx) => (
+                <div
+                  key={stat.id}
+                  className="stat-card"
+                  style={{
+                    padding: '0.8rem 1rem',
+                    borderRadius: '16px',
+                    background: 'rgba(255,255,255,0.9)',
+                    backdropFilter: 'blur(10px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    border: '1px solid rgba(11,59,47,0.1)',
+                    opacity: isVisible ? 1 : 0,
+                    transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.95)',
+                    transition: `all 0.6s cubic-bezier(0.4, 0, 0.2, 1) ${idx * 0.1}s`
+                  }}
+                >
+                  <div className="icon-wrapper" style={{
+                    width: '50px',
+                    height: '50px',
+                    background: 'rgba(11,59,47,0.1)',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
                   }}>
-                    {formatNumber(counters.youth_reached || 0)}{impactData.youth_suffix || '+'}
+                    <i className={stat.icon} style={{ fontSize: '1.2rem', color: '#0B3B2F' }}></i>
                   </div>
-                  <div style={{ 
-                    color: '#6a7a6a', 
-                    fontSize: '0.7rem', 
-                    fontWeight: 500,
-                    letterSpacing: '0.3px'
-                  }}>
-                    {impactData.youth_label || 'Youth Reached'}
-                  </div>
-                </div>
-              </div>
-
-              {/* Projects Completed */}
-              <div className="stat-card" style={{
-                padding: '0.8rem',
-                borderRadius: '12px',
-                background: '#f9fbf7',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.8rem',
-                opacity: isVisible ? 1 : 0,
-                transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.95)',
-                transition: `all 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.2s`
-              }}>
-                <div className="icon-wrapper" style={{
-                  width: '40px',
-                  height: '40px',
-                  background: 'rgba(249,199,79,0.15)',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  <i className="fas fa-project-diagram" style={{ fontSize: '1rem', color: '#F9C74F' }}></i>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div className="count-number" style={{ 
-                    fontSize: '1.3rem', 
-                    fontWeight: 800, 
-                    color: '#0B3B2F',
-                    fontFamily: 'monospace'
-                  }}>
-                    {formatNumber(counters.projects_completed || 0)}{impactData.projects_suffix || '+'}
-                  </div>
-                  <div style={{ 
-                    color: '#6a7a6a', 
-                    fontSize: '0.7rem', 
-                    fontWeight: 500,
-                    letterSpacing: '0.3px'
-                  }}>
-                    {impactData.projects_label || 'Projects Completed'}
+                  <div style={{ flex: 1 }}>
+                    <div className="count-number" style={{ 
+                      fontSize: '1.5rem', 
+                      fontWeight: 800, 
+                      color: '#0B3B2F',
+                      fontFamily: 'monospace',
+                      letterSpacing: '1px'
+                    }}>
+                      {formatNumber(counters[stat.id] || 0)}{stat.suffix}
+                    </div>
+                    <div style={{ 
+                      color: '#555', 
+                      fontSize: '0.75rem', 
+                      fontWeight: 600,
+                      letterSpacing: '0.3px'
+                    }}>
+                      {stat.label}
+                    </div>
+                    <div className="underline" style={{
+                      width: '40px',
+                      height: '3px',
+                      background: '#F9C74F',
+                      marginTop: '0.4rem',
+                      borderRadius: '2px',
+                      transition: 'width 0.3s ease'
+                    }} />
                   </div>
                 </div>
-              </div>
-
-              {/* Community Partners */}
-              <div className="stat-card" style={{
-                padding: '0.8rem',
-                borderRadius: '12px',
-                background: '#f9fbf7',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.8rem',
-                opacity: isVisible ? 1 : 0,
-                transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.95)',
-                transition: `all 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.3s`
-              }}>
-                <div className="icon-wrapper" style={{
-                  width: '40px',
-                  height: '40px',
-                  background: 'rgba(249,199,79,0.15)',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  <i className="fas fa-handshake" style={{ fontSize: '1rem', color: '#F9C74F' }}></i>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div className="count-number" style={{ 
-                    fontSize: '1.3rem', 
-                    fontWeight: 800, 
-                    color: '#0B3B2F',
-                    fontFamily: 'monospace'
-                  }}>
-                    {formatNumber(counters.community_partners || 0)}{impactData.partners_suffix || '+'}
-                  </div>
-                  <div style={{ 
-                    color: '#6a7a6a', 
-                    fontSize: '0.7rem', 
-                    fontWeight: 500,
-                    letterSpacing: '0.3px'
-                  }}>
-                    {impactData.partners_label || 'Community Partners'}
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
