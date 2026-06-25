@@ -55,7 +55,7 @@ const Donate = () => {
   const bankDetails = {
     bankName: "CRDB Bank",
     accountName: "VUMA Organization",
-    accountNumber: "01 1234567890",
+    accountNumber: "01 52316455500",
     branch: "Mwanza Branch",
     swiftCode: "CORUTZTZ"
   };
@@ -1452,7 +1452,7 @@ VUMA Organization - www.vuma.org
                   <i className="fas fa-mobile-alt" style={{ fontSize: '1.5rem', color: '#F9C74F' }}></i>
                 </div>
                 <div>
-                  <h3 style={{ color: '#0B3B2F', margin: 0 }}>M-PESA / Mobile Money</h3>
+                  <h3 style={{ color: '#0B3B2F', margin: 0 }}>M-PESA / Mobile Money   "you will see LABAN ABAS MAPABHA"</h3>
                   <p style={{ color: '#666', margin: 0, fontSize: '0.8rem' }}>Send money directly to our official number</p>
                 </div>
               </div>
@@ -1524,7 +1524,7 @@ VUMA Organization - www.vuma.org
                   <i className="fas fa-university" style={{ fontSize: '1.5rem', color: '#F9C74F' }}></i>
                 </div>
                 <div>
-                  <h3 style={{ color: '#0B3B2F', margin: 0 }}>CRDB Bank Transfer</h3>
+                  <h3 style={{ color: '#0B3B2F', margin: 0 }}>CRDB Bank Transfer    "you will see LABAN ABAS MAPABHA"</h3>
                   <p style={{ color: '#666', margin: 0, fontSize: '0.8rem' }}>Direct deposit to our bank account</p>
                 </div>
               </div>
