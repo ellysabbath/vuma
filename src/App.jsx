@@ -51,7 +51,7 @@ import AdminPublications from './admin/AdminPublications';
 import NewsDetails from './admin/NewsDetails';
 import AdminLeadership from './admin/AdminLeaderShip';
 import AdminDonations from './admin/AdminDonations';
-import What from './pages/What';
+import What from './pages/Whet';
 import AdminReports from './admin/AdminReports';
 import AdminImpacts from './admin/AdminImpacts';
 import AdminSttats from './admin/AdminStats';
