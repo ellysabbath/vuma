@@ -170,7 +170,7 @@ const Contact = () => {
                    onMouseLeave={(e) => { e.currentTarget.style.background = '#0B3B2F'; e.currentTarget.style.transform = 'scale(1)'; }}>
                   <i className="fab fa-instagram"></i>
                 </a>
-                <a href="#" style={{ background: '#0B3B2F', color: 'white', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s ease' }}
+                <a href="https://www.linkedin.com/posts/mapabha-mapabha-021531325_globallandscapeforum-ciforicraf-worldagroforest-activity-7458181866626564096-P9o5" style={{ background: '#0B3B2F', color: 'white', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s ease' }}
                    onMouseEnter={(e) => { e.currentTarget.style.background = '#F9C74F'; e.currentTarget.style.transform = 'scale(1.1)'; }}
                    onMouseLeave={(e) => { e.currentTarget.style.background = '#0B3B2F'; e.currentTarget.style.transform = 'scale(1)'; }}>
                   <i className="fab fa-linkedin-in"></i>
