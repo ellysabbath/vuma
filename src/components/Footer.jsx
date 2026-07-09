@@ -60,7 +60,7 @@ const Footer = () => {
       icon: 'fas fa-address-card',
       contacts: [
         { icon: 'fas fa-phone', text: '+255 759 913 433', link: 'tel:+255759913433' },
-        { icon: 'fas fa-envelope', text: 'vumainfo5@gmail.com', link: 'mailto:vumainfo5@gmail.com' },
+        { icon: 'fas fa-envelope', text: 'info@vumatanzania.or.tz', link: 'mailto:vumainfo5@gmail.com' },
         { icon: 'fas fa-clock', text: 'Mon-Fri: 9AM - 5PM' },
         { icon: 'fab fa-whatsapp', text: '+255 759 913 433', link: 'https://wa.me/255759913433' }
       ]
