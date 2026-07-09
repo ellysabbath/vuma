@@ -150,7 +150,7 @@ const Contact = () => {
             </div>
             <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <i className="fas fa-envelope" style={{ color: '#F9C74F', fontSize: '1.2rem' }}></i>
-              <span>vumainfo5@gmail.com</span>
+              <span>info@vumatanzania.or.tz</span>
             </div>
             <div style={{ marginTop: '2rem' }}>
               <h3 style={{ color: '#0B3B2F', marginBottom: '1rem' }}>Follow Us</h3>
