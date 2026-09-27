@@ -8,6 +8,7 @@ import eventc from '../assets/new/eventc.jpg';
 import eventd from '../assets/new/eventd.jpg';
 import evente from '../assets/new/evente.jpg';
 import eventf from '../assets/new/eventf.jpg';
+import eventt from '../assets/new/tesla.jpg';
 
 // Updated leadership data with new biographies and achievements
 const leadershipData = [
@@ -110,7 +111,21 @@ const leadershipData = [
       "Led the organization and delivery of forums, workshops, and VUMA expos that strengthened knowledge sharing and innovation.",
       "Enhanced stakeholder collaboration and event management systems, improving the reach and impact of VUMA's initiatives."
     ]
-  }
+  },
+{
+  id: 7,
+  name: "Elisha Sabbath",
+  role: "Member (IT Technician)",
+  image: eventt,
+  isFounder: false,
+  bio: "Providing technical support, managing digital systems, and ensuring reliable IT infrastructure for all VUMA Tanzania operations and events.",
+  fullBio: "Elisha Sabbath serves as the IT Technician at VUMA Tanzania, where he is responsible for maintaining and supporting the organization's digital infrastructure, troubleshooting hardware and software issues, and ensuring that all technological systems run smoothly. He provides technical assistance during boot camps, hackathons, forums, and community outreach programs, helping participants and staff make effective use of digital tools. Through his technical expertise and problem-solving skills, he ensures that VUMA's operations remain efficient, secure, and technology-driven, enabling the organization to deliver impactful programs without technical disruptions.",
+  achievements: [
+    "Maintained and optimized VUMA's IT infrastructure, ensuring minimal downtime and reliable system performance across all operations.",
+    "Provided on-site technical support during boot camps, hackathons, and expos, enabling smooth execution of digital activities and participant engagement.",
+    "Improved digital security and data management practices, safeguarding organizational information and enhancing overall operational efficiency."
+  ]
+}
 ];
 
 const Leadership = () => {
