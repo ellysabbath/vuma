@@ -3,6 +3,119 @@ import { useNavigate, useParams } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
+// ==================== PROJECTS TABLE SKELETON ====================
+const ProjectsTableSkeleton = ({ count = 5 }) => {
+  const rows = Array.from({ length: count });
+
+  return (
+    <div style={{ background: 'white', borderRadius: '20px', padding: '1.5rem', boxShadow: '0 5px 15px rgba(0,0,0,0.05)' }}>
+      {/* Add button placeholder */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+        <div className="skeleton-block skeleton-circle" style={{ width: '32px', height: '32px' }} />
+      </div>
+
+      {/* Table header placeholder */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '2fr 1fr 1fr 1.5fr 1fr',
+        gap: '1rem',
+        padding: '0.8rem 0',
+        borderBottom: '2px solid #f0f0f0',
+        marginBottom: '0.5rem'
+      }}>
+        {['Title', 'Category', 'Status', 'Progress', 'Actions'].map((label, i) => (
+          <div
+            key={i}
+            className="skeleton-block"
+            style={{ height: '12px', width: '70%', borderRadius: '5px' }}
+          />
+        ))}
+      </div>
+
+      {/* Rows */}
+      {rows.map((_, idx) => (
+        <div
+          key={idx}
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '2fr 1fr 1fr 1.5fr 1fr',
+            gap: '1rem',
+            padding: '0.8rem 0',
+            borderBottom: '1px solid #f0f0f0',
+            alignItems: 'center',
+            animation: `skeletonFadeIn 0.5s ease ${idx * 0.08}s both`
+          }}
+        >
+          {/* Title */}
+          <div
+            className="skeleton-block"
+            style={{ height: '14px', width: '70%', borderRadius: '6px' }}
+          />
+
+          {/* Category badge */}
+          <div
+            className="skeleton-block skeleton-pill"
+            style={{ height: '18px', width: '80%', maxWidth: '90px' }}
+          />
+
+          {/* Status badge */}
+          <div
+            className="skeleton-block skeleton-pill"
+            style={{ height: '18px', width: '80%', maxWidth: '80px' }}
+          />
+
+          {/* Progress bar */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div
+              className="skeleton-block"
+              style={{ flex: 1, height: '6px', borderRadius: '10px' }}
+            />
+            <div
+              className="skeleton-block"
+              style={{ height: '12px', width: '30px', borderRadius: '4px' }}
+            />
+          </div>
+
+          {/* Action icons */}
+          <div style={{ display: 'flex', gap: '0.8rem' }}>
+            <div className="skeleton-block skeleton-circle" style={{ width: '14px', height: '14px' }} />
+            <div className="skeleton-block skeleton-circle" style={{ width: '14px', height: '14px' }} />
+            <div className="skeleton-block skeleton-circle" style={{ width: '14px', height: '14px' }} />
+          </div>
+        </div>
+      ))}
+
+      <style>{`
+        @keyframes skeletonFadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes skeletonShimmer {
+          0% { background-position: -500px 0; }
+          100% { background-position: 500px 0; }
+        }
+        .skeleton-block {
+          background: linear-gradient(
+            90deg,
+            #eef2f0 0%,
+            #e2e9e5 20%,
+            #f5f8f6 40%,
+            #eef2f0 60%,
+            #eef2f0 100%
+          );
+          background-size: 1000px 100%;
+          animation: skeletonShimmer 1.6s infinite linear;
+          display: block;
+        }
+        .skeleton-circle { border-radius: 50%; }
+        .skeleton-pill { border-radius: 60px; }
+      `}</style>
+    </div>
+  );
+};
+// ==================== END PROJECTS TABLE SKELETON ====================
+
+
 const AdminProjects = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -97,9 +210,9 @@ const AdminProjects = () => {
       alert('Please fill in project title');
       return;
     }
-    
+
     const token = localStorage.getItem('access_token');
-    
+
     try {
       const response = await fetch(`https://vuma.pythonanywhere.com/api/projects/${editingProject.id}/`, {
         method: 'PUT',
@@ -109,7 +222,7 @@ const AdminProjects = () => {
         },
         body: JSON.stringify(editingProject),
       });
-      
+
       const data = await response.json();
       if (data.success) {
         await fetchProjects();
@@ -151,9 +264,9 @@ const AdminProjects = () => {
       alert('Please fill in project title');
       return;
     }
-    
+
     const token = localStorage.getItem('access_token');
-    
+
     try {
       const response = await fetch('https://vuma.pythonanywhere.com/api/projects/', {
         method: 'POST',
@@ -163,7 +276,7 @@ const AdminProjects = () => {
         },
         body: JSON.stringify(newProject),
       });
-      
+
       const data = await response.json();
       if (data.success) {
         await fetchProjects();
@@ -182,7 +295,7 @@ const AdminProjects = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this project?')) {
       const token = localStorage.getItem('access_token');
-      
+
       try {
         const response = await fetch(`https://vuma.pythonanywhere.com/api/projects/${id}/`, {
           method: 'DELETE',
@@ -190,7 +303,7 @@ const AdminProjects = () => {
             'Authorization': `Bearer ${token}`
           }
         });
-        
+
         const data = await response.json();
         if (data.success) {
           await fetchProjects();
@@ -233,16 +346,80 @@ const AdminProjects = () => {
     return colors[category] || '#757575';
   };
 
+  // ==================== LOADING STATE (SKELETON) ====================
   if (loading) {
     return (
-      <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f9fbf7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center' }}>
-          <i className="fas fa-spinner fa-spin" style={{ fontSize: '3rem', color: '#0B3B2F' }}></i>
-          <p style={{ marginTop: '1rem', color: '#666' }}>Loading projects...</p>
+      <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f9fbf7' }}>
+        {/* Header skeleton */}
+        <div style={{ background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)', color: 'white', padding: '2rem 2rem' }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
+              <div
+                className="skeleton-block skeleton-block--dark"
+                style={{ width: '24px', height: '24px', borderRadius: '4px' }}
+              />
+              <div
+                className="skeleton-block skeleton-block--dark"
+                style={{ height: '28px', width: '220px', borderRadius: '8px' }}
+              />
+            </div>
+            <div
+              className="skeleton-block skeleton-block--dark"
+              style={{ height: '14px', width: '380px', borderRadius: '6px', marginTop: '0.4rem' }}
+            />
+          </div>
         </div>
+
+        {/* Table skeleton */}
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
+          <ProjectsTableSkeleton count={5} />
+        </div>
+
+        <style>{`
+          @keyframes skeletonFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes skeletonShimmer {
+            0% { background-position: -500px 0; }
+            100% { background-position: 500px 0; }
+          }
+          @keyframes skeletonShimmerDark {
+            0% { background-position: -500px 0; }
+            100% { background-position: 500px 0; }
+          }
+          .skeleton-block {
+            background: linear-gradient(
+              90deg,
+              #eef2f0 0%,
+              #e2e9e5 20%,
+              #f5f8f6 40%,
+              #eef2f0 60%,
+              #eef2f0 100%
+            );
+            background-size: 1000px 100%;
+            animation: skeletonShimmer 1.6s infinite linear;
+            display: block;
+          }
+          .skeleton-block--dark {
+            background: linear-gradient(
+              90deg,
+              rgba(255,255,255,0.08) 0%,
+              rgba(255,255,255,0.18) 20%,
+              rgba(255,255,255,0.28) 40%,
+              rgba(255,255,255,0.18) 60%,
+              rgba(255,255,255,0.08) 100%
+            );
+            background-size: 1000px 100%;
+            animation: skeletonShimmerDark 1.6s infinite linear;
+          }
+          .skeleton-circle { border-radius: 50%; }
+          .skeleton-pill { border-radius: 60px; }
+        `}</style>
       </div>
     );
   }
+  // ==================== END LOADING STATE ====================
 
   if (error) {
     return (
@@ -306,15 +483,15 @@ const AdminProjects = () => {
           <p>Track and manage all ongoing and completed projects</p>
         </div>
       </div>
-      
+
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
         <div style={{ background: 'white', borderRadius: '20px', padding: '1.5rem', boxShadow: '0 5px 15px rgba(0,0,0,0.05)' }}>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
-            <i 
-              className="fas fa-plus-circle" 
-              style={{ 
-                fontSize: '2rem', 
-                color: '#0B3B2F', 
+            <i
+              className="fas fa-plus-circle"
+              style={{
+                fontSize: '2rem',
+                color: '#0B3B2F',
                 cursor: 'pointer',
                 transition: 'transform 0.2s'
               }}
@@ -388,7 +565,7 @@ const AdminProjects = () => {
           zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', animation: 'fadeIn 0.3s ease'
         }}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{
-            background: 'white', borderRadius: '28px', maxWidth: '500px', width: '100%', 
+            background: 'white', borderRadius: '28px', maxWidth: '500px', width: '100%',
             maxHeight: '90vh', display: 'flex', flexDirection: 'column',
             position: 'relative', animation: 'slideInUp 0.3s ease'
           }}>
@@ -397,11 +574,11 @@ const AdminProjects = () => {
               width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', color: 'white', fontSize: '1.2rem',
               display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10
             }}><i className="fas fa-times"></i></button>
-            
-            <div style={{ 
-              background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)', 
-              padding: '1.5rem', 
-              textAlign: 'center', 
+
+            <div style={{
+              background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)',
+              padding: '1.5rem',
+              textAlign: 'center',
               borderRadius: '28px 28px 0 0',
               flexShrink: 0
             }}>
@@ -413,10 +590,10 @@ const AdminProjects = () => {
               </h2>
               {!isEditMode && <p style={{ color: '#F9C74F', fontSize: '0.9rem' }}>View complete project information</p>}
             </div>
-            
-            <div style={{ 
-              padding: '1.2rem', 
-              overflowY: 'auto', 
+
+            <div style={{
+              padding: '1.2rem',
+              overflowY: 'auto',
               flex: 1,
               maxHeight: 'calc(90vh - 140px)'
             }}>
@@ -433,7 +610,7 @@ const AdminProjects = () => {
                       placeholder="Enter project title"
                     />
                   </div>
-                  
+
                   <div style={{ marginBottom: '0.8rem' }}>
                     <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600, fontSize: '0.9rem' }}>Category</label>
                     <select
@@ -448,7 +625,7 @@ const AdminProjects = () => {
                       <option value="Education">Education</option>
                     </select>
                   </div>
-                  
+
                   <div style={{ marginBottom: '0.8rem' }}>
                     <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600, fontSize: '0.9rem' }}>Status</label>
                     <select
@@ -463,7 +640,7 @@ const AdminProjects = () => {
                       <option value="On Hold">On Hold</option>
                     </select>
                   </div>
-                  
+
                   <div style={{ marginBottom: '0.8rem' }}>
                     <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600, fontSize: '0.9rem' }}>Progress (%)</label>
                     <input
@@ -476,7 +653,7 @@ const AdminProjects = () => {
                       style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid #ddd', fontSize: '0.9rem' }}
                     />
                   </div>
-                  
+
                   <div style={{ marginBottom: '0.8rem' }}>
                     <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600, fontSize: '0.9rem' }}>Description</label>
                     <textarea
@@ -487,7 +664,7 @@ const AdminProjects = () => {
                       placeholder="Project description"
                     />
                   </div>
-                  
+
                   <div style={{ marginBottom: '0.8rem' }}>
                     <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600, fontSize: '0.9rem' }}>Start Date</label>
                     <input
@@ -498,7 +675,7 @@ const AdminProjects = () => {
                       style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid #ddd', fontSize: '0.9rem' }}
                     />
                   </div>
-                  
+
                   <div style={{ marginBottom: '0.8rem' }}>
                     <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600, fontSize: '0.9rem' }}>End Date</label>
                     <input
@@ -509,7 +686,7 @@ const AdminProjects = () => {
                       style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid #ddd', fontSize: '0.9rem' }}
                     />
                   </div>
-                  
+
                   <div style={{ marginBottom: '0.8rem' }}>
                     <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600, fontSize: '0.9rem' }}>Budget</label>
                     <input
@@ -521,7 +698,7 @@ const AdminProjects = () => {
                       placeholder="Project budget"
                     />
                   </div>
-                  
+
                   <div style={{ marginBottom: '0.8rem' }}>
                     <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600, fontSize: '0.9rem' }}>Location</label>
                     <input
@@ -533,7 +710,7 @@ const AdminProjects = () => {
                       placeholder="Project location"
                     />
                   </div>
-                  
+
                   <div style={{ display: 'flex', gap: '0.8rem', marginTop: '1rem' }}>
                     <button onClick={closeModal} style={{ flex: 1, background: '#f0f0f0', border: 'none', padding: '0.7rem', borderRadius: '50px', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}>Cancel</button>
                     <button onClick={handleUpdateProject} style={{ flex: 1, background: '#0B3B2F', color: 'white', border: 'none', padding: '0.7rem', borderRadius: '50px', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}>Update Project</button>
@@ -547,7 +724,7 @@ const AdminProjects = () => {
                       {selectedProject?.title}
                     </div>
                   </div>
-                  
+
                   <div style={{ marginBottom: '0.8rem' }}>
                     <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600, fontSize: '0.9rem', color: '#0B3B2F' }}>Category</label>
                     <div style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid #e0e0e0', fontSize: '0.9rem', background: '#f9f9f9', color: '#333' }}>
@@ -561,7 +738,7 @@ const AdminProjects = () => {
                       }}>{selectedProject?.category}</span>
                     </div>
                   </div>
-                  
+
                   <div style={{ marginBottom: '0.8rem' }}>
                     <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600, fontSize: '0.9rem', color: '#0B3B2F' }}>Status</label>
                     <div style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid #e0e0e0', fontSize: '0.9rem', background: '#f9f9f9', color: '#333' }}>
@@ -575,7 +752,7 @@ const AdminProjects = () => {
                       }}>{selectedProject?.status}</span>
                     </div>
                   </div>
-                  
+
                   <div style={{ marginBottom: '0.8rem' }}>
                     <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600, fontSize: '0.9rem', color: '#0B3B2F' }}>Progress</label>
                     <div style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid #e0e0e0', fontSize: '0.9rem', background: '#f9f9f9', color: '#333' }}>
@@ -587,7 +764,7 @@ const AdminProjects = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   {selectedProject?.description && (
                     <div style={{ marginBottom: '0.8rem' }}>
                       <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600, fontSize: '0.9rem', color: '#0B3B2F' }}>Description</label>
@@ -596,7 +773,7 @@ const AdminProjects = () => {
                       </div>
                     </div>
                   )}
-                  
+
                   {selectedProject?.start_date && (
                     <div style={{ marginBottom: '0.8rem' }}>
                       <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600, fontSize: '0.9rem', color: '#0B3B2F' }}>Start Date</label>
@@ -605,7 +782,7 @@ const AdminProjects = () => {
                       </div>
                     </div>
                   )}
-                  
+
                   {selectedProject?.end_date && (
                     <div style={{ marginBottom: '0.8rem' }}>
                       <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600, fontSize: '0.9rem', color: '#0B3B2F' }}>End Date</label>
@@ -614,7 +791,7 @@ const AdminProjects = () => {
                       </div>
                     </div>
                   )}
-                  
+
                   {selectedProject?.budget && (
                     <div style={{ marginBottom: '0.8rem' }}>
                       <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600, fontSize: '0.9rem', color: '#0B3B2F' }}>Budget</label>
@@ -623,7 +800,7 @@ const AdminProjects = () => {
                       </div>
                     </div>
                   )}
-                  
+
                   {selectedProject?.location && (
                     <div style={{ marginBottom: '0.8rem' }}>
                       <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600, fontSize: '0.9rem', color: '#0B3B2F' }}>Location</label>
@@ -632,7 +809,7 @@ const AdminProjects = () => {
                       </div>
                     </div>
                   )}
-                  
+
                   <div style={{ display: 'flex', gap: '0.8rem', marginTop: '1rem' }}>
                     <button onClick={closeModal} style={{ flex: 1, background: '#f0f0f0', border: 'none', padding: '0.7rem', borderRadius: '50px', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}>Close</button>
                     <button onClick={() => openEditModal(selectedProject)} style={{ flex: 1, background: '#0B3B2F', color: 'white', border: 'none', padding: '0.7rem', borderRadius: '50px', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}>Edit Project</button>
@@ -660,11 +837,11 @@ const AdminProjects = () => {
               width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', color: 'white', fontSize: '1.2rem',
               display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10
             }}><i className="fas fa-times"></i></button>
-            
-            <div style={{ 
-              background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)', 
-              padding: '1.5rem', 
-              textAlign: 'center', 
+
+            <div style={{
+              background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)',
+              padding: '1.5rem',
+              textAlign: 'center',
               borderRadius: '28px 28px 0 0',
               flexShrink: 0
             }}>
@@ -673,10 +850,10 @@ const AdminProjects = () => {
               </div>
               <h2 style={{ color: 'white', marginTop: '0.8rem', fontSize: '1.3rem' }}>Add New Project</h2>
             </div>
-            
-            <div style={{ 
-              padding: '1.2rem', 
-              overflowY: 'auto', 
+
+            <div style={{
+              padding: '1.2rem',
+              overflowY: 'auto',
               flex: 1,
               maxHeight: 'calc(90vh - 140px)'
             }}>
@@ -691,7 +868,7 @@ const AdminProjects = () => {
                   placeholder="Enter project title"
                 />
               </div>
-              
+
               <div style={{ marginBottom: '0.8rem' }}>
                 <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600, fontSize: '0.9rem' }}>Category</label>
                 <select
@@ -706,7 +883,7 @@ const AdminProjects = () => {
                   <option value="Education">Education</option>
                 </select>
               </div>
-              
+
               <div style={{ marginBottom: '0.8rem' }}>
                 <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600, fontSize: '0.9rem' }}>Status</label>
                 <select
@@ -721,7 +898,7 @@ const AdminProjects = () => {
                   <option value="On Hold">On Hold</option>
                 </select>
               </div>
-              
+
               <div style={{ marginBottom: '0.8rem' }}>
                 <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600, fontSize: '0.9rem' }}>Progress (%)</label>
                 <input
@@ -734,7 +911,7 @@ const AdminProjects = () => {
                   style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid #ddd', fontSize: '0.9rem' }}
                 />
               </div>
-              
+
               <div style={{ marginBottom: '0.8rem' }}>
                 <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600, fontSize: '0.9rem' }}>Description</label>
                 <textarea
@@ -745,7 +922,7 @@ const AdminProjects = () => {
                   placeholder="Project description"
                 />
               </div>
-              
+
               <div style={{ marginBottom: '0.8rem' }}>
                 <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600, fontSize: '0.9rem' }}>Start Date</label>
                 <input
@@ -756,7 +933,7 @@ const AdminProjects = () => {
                   style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid #ddd', fontSize: '0.9rem' }}
                 />
               </div>
-              
+
               <div style={{ marginBottom: '0.8rem' }}>
                 <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600, fontSize: '0.9rem' }}>End Date</label>
                 <input
@@ -767,7 +944,7 @@ const AdminProjects = () => {
                   style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid #ddd', fontSize: '0.9rem' }}
                 />
               </div>
-              
+
               <div style={{ marginBottom: '0.8rem' }}>
                 <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600, fontSize: '0.9rem' }}>Budget</label>
                 <input
@@ -779,7 +956,7 @@ const AdminProjects = () => {
                   placeholder="Project budget"
                 />
               </div>
-              
+
               <div style={{ marginBottom: '0.8rem' }}>
                 <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600, fontSize: '0.9rem' }}>Location</label>
                 <input
@@ -791,7 +968,7 @@ const AdminProjects = () => {
                   placeholder="Project location"
                 />
               </div>
-              
+
               <div style={{ display: 'flex', gap: '0.8rem', marginTop: '1rem' }}>
                 <button onClick={closeAddModal} style={{ flex: 1, background: '#f0f0f0', border: 'none', padding: '0.7rem', borderRadius: '50px', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}>Cancel</button>
                 <button onClick={handleAddProject} style={{ flex: 1, background: '#0B3B2F', color: 'white', border: 'none', padding: '0.7rem', borderRadius: '50px', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}>Add Project</button>
@@ -822,16 +999,16 @@ const AdminProjects = () => {
             transform: scale(1);
           }
         }
-        
+
         .modal-content div::-webkit-scrollbar {
           width: 4px;
         }
-        
+
         .modal-content div::-webkit-scrollbar-track {
           background: #f1f1f1;
           border-radius: 10px;
         }
-        
+
         .modal-content div::-webkit-scrollbar-thumb {
           background: #0B3B2F;
           border-radius: 10px;
