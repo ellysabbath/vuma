@@ -3,6 +3,90 @@ import { Link } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
+// ==================== SKELETON COMPONENTS ====================
+
+const ImpactStatsSkeleton = () => {
+  const items = [0, 1, 2, 3];
+  return (
+    <>
+      {items.map((i) => (
+        <div
+          key={i}
+          style={{
+            background: 'white',
+            borderRadius: '20px',
+            padding: '1.5rem',
+            textAlign: 'center',
+            boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
+            minHeight: '120px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            animation: `skeletonFadeIn 0.5s ease ${i * 0.08}s both`
+          }}
+        >
+          <div
+            className="skeleton-block skeleton-circle"
+            style={{ width: '40px', height: '40px', marginBottom: '0.6rem' }}
+          />
+          <div
+            className="skeleton-block"
+            style={{ width: '70%', height: '22px', borderRadius: '6px', marginBottom: '0.4rem' }}
+          />
+          <div
+            className="skeleton-block"
+            style={{ width: '55%', height: '12px', borderRadius: '5px' }}
+          />
+        </div>
+      ))}
+    </>
+  );
+};
+
+const TestimonialsSkeleton = () => {
+  const items = [0, 1, 2];
+  return (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+      gap: '2rem'
+    }}>
+      {items.map((i) => (
+        <div
+          key={i}
+          style={{
+            background: 'white',
+            borderRadius: '20px',
+            padding: '1.5rem',
+            textAlign: 'center',
+            boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
+            animation: `skeletonFadeIn 0.5s ease ${i * 0.1}s both`
+          }}
+        >
+          <div
+            className="skeleton-block"
+            style={{ width: '32px', height: '32px', borderRadius: '6px', margin: '0 auto 1rem' }}
+          />
+          <div className="skeleton-block" style={{ height: '10px', width: '100%', borderRadius: '5px', marginBottom: '6px' }} />
+          <div className="skeleton-block" style={{ height: '10px', width: '92%', borderRadius: '5px', marginBottom: '6px' }} />
+          <div className="skeleton-block" style={{ height: '10px', width: '75%', borderRadius: '5px', margin: '0 auto 1rem' }} />
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginBottom: '0.6rem' }}>
+            {[0, 1, 2, 3, 4].map((s) => (
+              <div key={s} className="skeleton-block" style={{ width: '14px', height: '14px', borderRadius: '3px' }} />
+            ))}
+          </div>
+          <div className="skeleton-block" style={{ height: '14px', width: '50%', borderRadius: '6px', margin: '0 auto 6px' }} />
+          <div className="skeleton-block" style={{ height: '10px', width: '35%', borderRadius: '5px', margin: '0 auto' }} />
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// ==================== END SKELETON COMPONENTS ====================
+
+
 const Donate = () => {
   // Form state
   const [selectedAmount, setSelectedAmount] = useState(null);
@@ -13,7 +97,7 @@ const Donate = () => {
   const [mobileNumber, setMobileNumber] = useState('');
   const [location, setLocation] = useState('');
   const [message, setMessage] = useState('');
-  
+
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
@@ -28,8 +112,9 @@ const Donate = () => {
   const [selectedPendingDonation, setSelectedPendingDonation] = useState(null);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [successAlertMessage, setSuccessAlertMessage] = useState('');
-  
-  // Donation data state - populated from backend response
+  const [alertType, setAlertType] = useState('info');
+
+  // Donation data state
   const [currentDonation, setCurrentDonation] = useState(null);
   const [transactionCode, setTransactionCode] = useState('');
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
@@ -38,19 +123,12 @@ const Donate = () => {
   const [testimonials, setTestimonials] = useState([]);
   const [loadingTestimonials, setLoadingTestimonials] = useState(true);
 
-  // Impact stats state - static values from API
-  const [impactStats, setImpactStats] = useState([
-    { value: '0', label: 'Youth Reached', icon: 'fas fa-users' },
-    { value: '0', label: 'Trees Planted', icon: 'fas fa-tree' },
-    { value: '0', label: 'Projects Completed', icon: 'fas fa-project-diagram' },
-    { value: '0', label: 'Active Volunteers', icon: 'fas fa-users' }
-  ]);
+  // Impact stats state
+  const [impactStats, setImpactStats] = useState([]);
   const [loadingStats, setLoadingStats] = useState(true);
 
-  // API Base URL
   const API_BASE_URL = 'https://vuma.pythonanywhere.com/api';
 
-  // M-PESA Number for donations
   const mpesaNumber = "+255 759 913 433";
   const bankDetails = {
     bankName: "CRDB Bank",
@@ -60,10 +138,16 @@ const Donate = () => {
     swiftCode: "CORUTZTZ"
   };
 
+  const DEFAULT_STATS = [
+    { value: '30,000', label: 'Youth Reached', icon: 'fas fa-users' },
+    { value: '50,000', label: 'Trees Planted', icon: 'fas fa-tree' },
+    { value: '742', label: 'Projects Completed', icon: 'fas fa-project-diagram' },
+    { value: '435', label: 'Active Volunteers', icon: 'fas fa-users' }
+  ];
+
   useEffect(() => {
     AOS.init({ duration: 800, once: false });
-    
-    // Load user data from localStorage (from Profile page)
+
     const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
     if (storedUser) {
       if (storedUser.email) setEmail(storedUser.email);
@@ -74,100 +158,84 @@ const Donate = () => {
       if (storedUser.city) setLocation(storedUser.city);
     }
 
-    // Fetch testimonials
     fetchTestimonials();
-    // Fetch impact stats
     fetchImpactStats();
   }, []);
 
-  // Fetch impact stats from API - static values, no counting
+  // Refresh AOS when new elements are inserted after loading
+  useEffect(() => {
+    if (!loadingStats && !loadingTestimonials) {
+      setTimeout(() => AOS.refresh(), 100);
+    }
+  }, [loadingStats, loadingTestimonials]);
+
   const fetchImpactStats = async () => {
     setLoadingStats(true);
     try {
       const response = await fetch(`${API_BASE_URL}/impacts/`);
-      if (response.ok) {
-        const data = await response.json();
-        let impactData = null;
-        
-        if (Array.isArray(data) && data.length > 0) {
-          impactData = data[0];
-        } else if (data.results && data.results.length > 0) {
-          impactData = data.results[0];
-        } else if (data.data && data.data.length > 0) {
-          impactData = data.data[0];
-        }
-        
-        if (impactData) {
-          const stats = [
-            { 
-              value: impactData.youth_reached_target?.toLocaleString() || '0', 
-              label: 'Youth Reached', 
-              icon: 'fas fa-users',
-              active: impactData.youth_reached_active
-            },
-            { 
-              value: impactData.trees_planted_target?.toLocaleString() || '0', 
-              label: 'Trees Planted', 
-              icon: 'fas fa-tree',
-              active: impactData.trees_planted_active
-            },
-            { 
-              value: impactData.ideas_generated_target?.toLocaleString() || '0', 
-              label: 'Projects Completed', 
-              icon: 'fas fa-project-diagram',
-              active: impactData.ideas_generated_active
-            },
-            { 
-              value: impactData.volunteers_target?.toLocaleString() || '0', 
-              label: 'Active Volunteers', 
-              icon: 'fas fa-users',
-              active: impactData.volunteers_active
-            }
-          ];
-          
-          // Only show active stats
-          const activeStats = stats.filter(s => s.active !== false);
-          setImpactStats(activeStats.length > 0 ? activeStats : stats);
-        }
-      } else {
-        console.error('Error fetching impact stats:', response.status);
-        // Use default stats if API fails
-        setImpactStats([
-          { value: '30,000', label: 'Youth Reached', icon: 'fas fa-users' },
-          { value: '50,000', label: 'Trees Planted', icon: 'fas fa-tree' },
-          { value: '742', label: 'Projects Completed', icon: 'fas fa-project-diagram' },
-          { value: '435', label: 'Active Volunteers', icon: 'fas fa-users' }
-        ]);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const data = await response.json();
+      let impactData = null;
+
+      if (Array.isArray(data) && data.length > 0) impactData = data[0];
+      else if (data.results && data.results.length > 0) impactData = data.results[0];
+      else if (data.data && data.data.length > 0) impactData = data.data[0];
+
+      if (!impactData) {
+        setImpactStats(DEFAULT_STATS);
+        return;
       }
+
+      const stats = [
+        {
+          value: impactData.youth_reached_target?.toLocaleString() || '0',
+          label: 'Youth Reached',
+          icon: 'fas fa-users',
+          active: impactData.youth_reached_active
+        },
+        {
+          value: impactData.trees_planted_target?.toLocaleString() || '0',
+          label: 'Trees Planted',
+          icon: 'fas fa-tree',
+          active: impactData.trees_planted_active
+        },
+        {
+          value: impactData.ideas_generated_target?.toLocaleString() || '0',
+          label: 'Projects Completed',
+          icon: 'fas fa-project-diagram',
+          active: impactData.ideas_generated_active
+        },
+        {
+          value: impactData.volunteers_target?.toLocaleString() || '0',
+          label: 'Active Volunteers',
+          icon: 'fas fa-users',
+          active: impactData.volunteers_active
+        }
+      ];
+
+      const activeStats = stats.filter((s) => s.active !== false);
+      setImpactStats(activeStats.length > 0 ? activeStats : stats);
     } catch (error) {
       console.error('Error fetching impact stats:', error);
-      // Use default stats if API fails
-      setImpactStats([
-        { value: '30,000', label: 'Youth Reached', icon: 'fas fa-users' },
-        { value: '50,000', label: 'Trees Planted', icon: 'fas fa-tree' },
-        { value: '742', label: 'Projects Completed', icon: 'fas fa-project-diagram' },
-        { value: '435', label: 'Active Volunteers', icon: 'fas fa-users' }
-      ]);
+      setImpactStats(DEFAULT_STATS);
     } finally {
       setLoadingStats(false);
     }
   };
 
-  // Fetch testimonials from backend
   const fetchTestimonials = async () => {
     setLoadingTestimonials(true);
     try {
       const response = await fetch(`${API_BASE_URL}/estimonials/active/`);
       if (response.ok) {
         const data = await response.json();
-        if (data.success) {
+        if (data.success && Array.isArray(data.data)) {
           setTestimonials(data.data);
         } else {
-          console.error('Failed to fetch testimonials:', data);
           setTestimonials([]);
         }
       } else {
-        console.error('Error fetching testimonials:', response.status);
         setTestimonials([]);
       }
     } catch (error) {
@@ -178,7 +246,6 @@ const Donate = () => {
     }
   };
 
-  // Preset amounts in TZS
   const presetAmounts = [5000, 10000, 25000, 50000, 100000, 250000];
 
   const formatCurrency = (amount) => {
@@ -206,48 +273,51 @@ const Donate = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Fetch pending (unconfirmed) donations for the logged-in user
+  const showTemporaryAlert = (message, type = 'info') => {
+    setAlertType(type);
+    setSuccessAlertMessage(message);
+    setShowSuccessAlert(true);
+    setTimeout(() => {
+      setShowSuccessAlert(false);
+      setSuccessAlertMessage('');
+    }, 5000);
+  };
+
   const fetchPendingDonations = async () => {
     const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
     const userEmail = storedUser.email || email;
     const userMobile = storedUser.phone || mobileNumber;
-    
+
     if (!userEmail && !userMobile) {
       showTemporaryAlert('Please login or enter your email/mobile number to fetch your pending donations', 'error');
       return;
     }
-    
+
     setLoadingPending(true);
     setConfirmError('');
-    
+
     try {
       const response = await fetch(`${API_BASE_URL}/donations/`);
-      
-      if (response.ok) {
-        const data = await response.json();
-        let allDonations = [];
-        if (data.results && Array.isArray(data.results)) {
-          allDonations = data.results;
-        } else if (Array.isArray(data)) {
-          allDonations = data;
-        }
-        
-        const userPendingDonations = allDonations.filter(donation => {
-          const matchesEmail = donation.email && donation.email.toLowerCase() === (userEmail || '').toLowerCase();
-          const matchesMobile = donation.mobile_number && donation.mobile_number === userMobile;
-          const isPending = donation.status === 'pending';
-          return (matchesEmail || matchesMobile) && isPending;
-        });
-        
-        setPendingDonations(userPendingDonations);
-        
-        if (userPendingDonations.length === 0) {
-          showTemporaryAlert('No pending donations found for your account. Please make a donation first.', 'info');
-        } else {
-          setShowPendingModal(true);
-        }
+      if (!response.ok) throw new Error('Failed to fetch donations');
+
+      const data = await response.json();
+      let allDonations = [];
+      if (data.results && Array.isArray(data.results)) allDonations = data.results;
+      else if (Array.isArray(data)) allDonations = data;
+
+      const userPendingDonations = allDonations.filter((donation) => {
+        const matchesEmail = donation.email && donation.email.toLowerCase() === (userEmail || '').toLowerCase();
+        const matchesMobile = donation.mobile_number && donation.mobile_number === userMobile;
+        const isPending = donation.status === 'pending';
+        return (matchesEmail || matchesMobile) && isPending;
+      });
+
+      setPendingDonations(userPendingDonations);
+
+      if (userPendingDonations.length === 0) {
+        showTemporaryAlert('No pending donations found for your account. Please make a donation first.', 'info');
       } else {
-        throw new Error('Failed to fetch donations');
+        setShowPendingModal(true);
       }
     } catch (error) {
       console.error('Error fetching pending donations:', error);
@@ -257,15 +327,14 @@ const Donate = () => {
     }
   };
 
-  // Select a pending donation to confirm
   const selectPendingDonation = (donation) => {
     setSelectedPendingDonation(donation);
     setCurrentDonation(donation);
     setShowPendingModal(false);
     setShowInstructions(true);
-    
-    showTemporaryAlert(`✅ Donation ID ${donation.id} loaded! Enter your transaction code to confirm.`, 'info');
-    
+
+    showTemporaryAlert(`Donation ID ${donation.id} loaded! Enter your transaction code to confirm.`, 'info');
+
     setTimeout(() => {
       const instructionsSection = document.getElementById('donation-instructions');
       if (instructionsSection) {
@@ -279,20 +348,9 @@ const Donate = () => {
     setPendingDonations([]);
   };
 
-  const showTemporaryAlert = (message, type = 'success') => {
-    setSuccessAlertMessage(message);
-    setShowSuccessAlert(true);
-    
-    setTimeout(() => {
-      setShowSuccessAlert(false);
-      setSuccessAlertMessage('');
-    }, 5000);
-  };
-
-  // Generate Receipt
   const generateReceipt = () => {
     if (!currentDonation) return;
-    
+
     const receiptContent = `VUMA ORGANIZATION DONATION RECEIPT
 =================================
 
@@ -314,7 +372,7 @@ DONATION DETAILS
 =================================
 Amount: ${currentDonation.formatted_amount || formatCurrency(parseFloat(currentDonation.amount))}
 Donation Type: ${currentDonation.donation_type === 'one-time' ? 'One-Time' : 'Monthly'}
-Status: ${currentDonation.status === 'completed' ? 'Completed ✓' : currentDonation.status}
+Status: ${currentDonation.status === 'completed' ? 'Completed' : currentDonation.status}
 Reference Number: ${currentDonation.reference_number}
 
 =================================
@@ -346,149 +404,92 @@ VUMA Organization - www.vuma.org
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
-    showTemporaryAlert('📄 Receipt downloaded successfully!', 'info');
+
+    showTemporaryAlert('Receipt downloaded successfully!', 'info');
   };
 
-  // Save donation to backend API
   const saveDonationToBackend = async (donationData) => {
-    try {
-      const requestBody = {
-        donation_type: donationData.donationType,
-        amount: donationData.amount,
-        full_name: donationData.fullName,
-        email: donationData.email,
-        mobile_number: donationData.mobileNumber,
-        location: donationData.location,
-        message: donationData.message || '',
-      };
-      
-      console.log('Sending donation request:', requestBody);
-      
-      const response = await fetch(`${API_BASE_URL}/donations/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-      });
+    const requestBody = {
+      donation_type: donationData.donationType,
+      amount: donationData.amount,
+      full_name: donationData.fullName,
+      email: donationData.email,
+      mobile_number: donationData.mobileNumber,
+      location: donationData.location,
+      message: donationData.message || '',
+    };
 
-      console.log('Response status:', response.status);
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('API Error Response:', errorData);
-        throw new Error(errorData.message || errorData.error || 'Failed to save donation');
-      }
+    const response = await fetch(`${API_BASE_URL}/donations/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody),
+    });
 
-      const data = await response.json();
-      console.log('Donation save response:', JSON.stringify(data, null, 2));
-      
-      let donationObject = null;
-      
-      if (data.id) {
-        donationObject = data;
-      } else if (data.data && data.data.id) {
-        donationObject = data.data;
-      } else if (data.results && Array.isArray(data.results) && data.results.length > 0) {
-        donationObject = data.results[0];
-      } else if (Array.isArray(data) && data.length > 0) {
-        donationObject = data[0];
-      } else if (data.donation && data.donation.id) {
-        donationObject = data.donation;
-      } else if (data.donation_id) {
-        const donationResponse = await fetch(`${API_BASE_URL}/donations/${data.donation_id}/`);
-        if (donationResponse.ok) {
-          const donationData = await donationResponse.json();
-          donationObject = donationData;
-        }
-      }
-      
-      if (!donationObject || !donationObject) {
-        console.error('Could not extract donation with ID from response:', data);
-        throw new Error('Donation created but could not retrieve ID. Please contact support.');
-      }
-      
-      console.log('Final donation object with ID:', donationObject);
-      return donationObject;
-    } catch (error) {
-      console.error('API Error:', error);
-      throw error;
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || errorData.error || 'Failed to save donation');
     }
+
+    const data = await response.json();
+
+    let donationObject = null;
+    if (data.id) donationObject = data;
+    else if (data.data && data.data.id) donationObject = data.data;
+    else if (data.results && Array.isArray(data.results) && data.results.length > 0) donationObject = data.results[0];
+    else if (Array.isArray(data) && data.length > 0) donationObject = data[0];
+    else if (data.donation && data.donation.id) donationObject = data.donation;
+    else if (data.donation_id) {
+      const donationResponse = await fetch(`${API_BASE_URL}/donations/${data.donation_id}/`);
+      if (donationResponse.ok) donationObject = await donationResponse.json();
+    }
+
+    if (!donationObject) {
+      throw new Error('Donation created but could not retrieve ID. Please contact support.');
+    }
+
+    return donationObject;
   };
 
-  // Fetch single donation by ID
   const fetchDonationById = async (donationId) => {
     try {
       const response = await fetch(`${API_BASE_URL}/donations/${donationId}/`);
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Fetched donation by ID:', data);
-        return data;
-      }
+      if (response.ok) return await response.json();
     } catch (error) {
       console.error('Error fetching donation:', error);
     }
     return null;
   };
 
-  // Confirm payment using the API
   const confirmPaymentAPI = async (donationId, paymentMethod, transactionCode) => {
-    try {
-      const url = `${API_BASE_URL}/donations/${donationId}/confirm_payment/`;
-      const payload = {
-        payment_method: paymentMethod,
-        transaction_code: transactionCode
-      };
-      
-      console.log('Confirming payment with:', {
-        donationId,
-        paymentMethod,
-        transactionCode,
-        url,
-        payload
-      });
-      
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
+    const url = `${API_BASE_URL}/donations/${donationId}/confirm_payment/`;
+    const payload = {
+      payment_method: paymentMethod,
+      transaction_code: transactionCode
+    };
 
-      console.log('Response status:', response.status);
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Payment confirmation error response:', errorData);
-        
-        let errorMessage = 'Failed to confirm payment';
-        if (errorData.error) {
-          errorMessage = errorData.error;
-        } else if (errorData.message) {
-          errorMessage = errorData.message;
-        } else if (errorData.detail) {
-          errorMessage = errorData.detail;
-        }
-        
-        throw new Error(errorMessage);
-      }
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
 
-      const data = await response.json();
-      console.log('Payment confirmation response:', data);
-      return data;
-    } catch (error) {
-      console.error('Payment confirmation error:', error);
-      throw error;
+    if (!response.ok) {
+      const errorData = await response.json();
+      let errorMessage = 'Failed to confirm payment';
+      if (errorData.error) errorMessage = errorData.error;
+      else if (errorData.message) errorMessage = errorData.message;
+      else if (errorData.detail) errorMessage = errorData.detail;
+      throw new Error(errorMessage);
     }
+
+    return await response.json();
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const amount = selectedAmount || customAmount;
-    
+
     if (!amount) {
       showTemporaryAlert('Please select or enter a donation amount', 'error');
       return;
@@ -501,44 +502,43 @@ VUMA Organization - www.vuma.org
       showTemporaryAlert('Please fill in all required fields (Name, Email, Mobile Number, Location)', 'error');
       return;
     }
-    
+
     setIsSubmitting(true);
     setApiError('');
-    
+
     const donationData = {
-      donationType: donationType,
+      donationType,
       amount: parseFloat(amount),
-      fullName: fullName,
-      email: email,
-      mobileNumber: mobileNumber,
-      location: location,
+      fullName,
+      email,
+      mobileNumber,
+      location,
       message: message || '',
     };
-    
+
     try {
       const savedDonation = await saveDonationToBackend(donationData);
-      
-      if (savedDonation && savedDonation.id) {
-        console.log('Donation saved with ID:', savedDonation.id);
-        setCurrentDonation(savedDonation);
-      } else {
+
+      if (!savedDonation || !savedDonation.id) {
         throw new Error('Could not retrieve donation information. Please contact support.');
       }
-      
+
+      setCurrentDonation(savedDonation);
       setShowInstructions(true);
-      
-      // SUCCESS MESSAGE SHOWS IMMEDIATELY AFTER DONATION
-      showTemporaryAlert(`✅ Donation created successfully! Reference: ${savedDonation.reference_number}. Please complete payment using the instructions below.`, 'success');
-      
+
+      showTemporaryAlert(
+        `Donation created successfully! Reference: ${savedDonation.reference_number}. Please complete payment using the instructions below.`,
+        'success'
+      );
+
       setTimeout(() => {
         const instructionsSection = document.getElementById('donation-instructions');
         if (instructionsSection) {
           instructionsSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
       }, 100);
-      
     } catch (error) {
-      showTemporaryAlert(`❌ ${error.message || 'Failed to process donation'}`, 'error');
+      showTemporaryAlert(error.message || 'Failed to process donation', 'error');
       setApiError(error.message || 'Failed to process donation. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -548,68 +548,59 @@ VUMA Organization - www.vuma.org
   const handlePaymentConfirmation = async () => {
     setConfirmError('');
     setConfirmSuccess('');
-    
+
     if (!selectedPaymentMethod) {
-      showTemporaryAlert('⚠️ Please select a payment method (M-PESA or Bank Transfer)', 'error');
+      showTemporaryAlert('Please select a payment method (M-PESA or Bank Transfer)', 'error');
       return;
     }
     if (!transactionCode) {
-      showTemporaryAlert('⚠️ Please enter your transaction code', 'error');
+      showTemporaryAlert('Please enter your transaction code', 'error');
       return;
     }
     if (!currentDonation || !currentDonation.id) {
-      showTemporaryAlert('❌ Donation ID is missing. Please try again.', 'error');
+      showTemporaryAlert('Donation ID is missing. Please try again.', 'error');
       return;
     }
-    
     if (transactionCode.trim().length < 4) {
-      showTemporaryAlert('⚠️ Transaction code should be at least 4 characters long', 'error');
+      showTemporaryAlert('Transaction code should be at least 4 characters long', 'error');
       return;
     }
-    
+
     setPaymentConfirmed(true);
-    
-    showTemporaryAlert('⏳ Confirming your payment... Please wait.', 'info');
-    
+    showTemporaryAlert('Confirming your payment... Please wait.', 'info');
+
     try {
-      const result = await confirmPaymentAPI(currentDonation.id, selectedPaymentMethod, transactionCode.trim());
-      
+      await confirmPaymentAPI(currentDonation.id, selectedPaymentMethod, transactionCode.trim());
+
       const updatedDonation = await fetchDonationById(currentDonation.id);
-      if (updatedDonation) {
-        setCurrentDonation(updatedDonation);
-      }
-      
-      const successMsg = `✅ Payment confirmed successfully! Amount: ${currentDonation.formatted_amount || formatCurrency(parseFloat(currentDonation.amount))} via ${selectedPaymentMethod === 'mpesa' ? 'M-PESA' : 'CRDB Bank'}`;
-      
+      if (updatedDonation) setCurrentDonation(updatedDonation);
+
+      const successMsg = `Payment confirmed successfully! Amount: ${currentDonation.formatted_amount || formatCurrency(parseFloat(currentDonation.amount))} via ${selectedPaymentMethod === 'mpesa' ? 'M-PESA' : 'CRDB Bank'}`;
+
       setConfirmSuccess(successMsg);
       showTemporaryAlert(successMsg, 'success');
-      
+
       setTransactionCode('');
       setSelectedPaymentMethod('');
-      
-      setTimeout(() => {
-        setConfirmSuccess('');
-      }, 5000);
-      
+
+      setTimeout(() => setConfirmSuccess(''), 5000);
     } catch (error) {
       console.error('Payment confirmation failed:', error);
-      
+
       let userFriendlyMessage = error.message || 'Failed to confirm payment';
-      
+
       if (error.message.includes('already confirmed')) {
-        userFriendlyMessage = '✅ This payment has already been confirmed. No further action needed.';
+        userFriendlyMessage = 'This payment has already been confirmed. No further action needed.';
         const updatedDonation = await fetchDonationById(currentDonation.id);
-        if (updatedDonation) {
-          setCurrentDonation(updatedDonation);
-        }
+        if (updatedDonation) setCurrentDonation(updatedDonation);
         showTemporaryAlert(userFriendlyMessage, 'success');
       } else if (error.message.includes('invalid') || error.message.includes('Invalid')) {
-        userFriendlyMessage = '❌ Invalid transaction code or payment method. Please check and try again.';
+        userFriendlyMessage = 'Invalid transaction code or payment method. Please check and try again.';
         showTemporaryAlert(userFriendlyMessage, 'error');
       } else {
-        showTemporaryAlert(`❌ ${userFriendlyMessage}`, 'error');
+        showTemporaryAlert(userFriendlyMessage, 'error');
       }
-      
+
       setConfirmError(userFriendlyMessage);
     } finally {
       setPaymentConfirmed(false);
@@ -624,77 +615,21 @@ VUMA Organization - www.vuma.org
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     try {
-      const date = new Date(dateString);
-      return date.toLocaleString();
-    } catch (e) {
+      return new Date(dateString).toLocaleString();
+    } catch {
       return 'N/A';
     }
   };
 
-  // Display loading state for testimonials
-  const renderTestimonials = () => {
-    if (loadingTestimonials) {
-      return (
-        <div style={{ textAlign: 'center', padding: '2rem' }}>
-          <div style={{
-            width: '40px',
-            height: '40px',
-            border: '3px solid #F9C74F',
-            borderTopColor: '#0B3B2F',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-            margin: '0 auto'
-          }} />
-          <p style={{ marginTop: '0.5rem', color: '#666', fontSize: '0.85rem' }}>Loading testimonials...</p>
-        </div>
-      );
-    }
-
-    if (testimonials.length === 0) {
-      return (
-        <div style={{ textAlign: 'center', padding: '2rem', color: '#999' }}>
-          <i className="fas fa-quote-left" style={{ fontSize: '2rem', opacity: 0.3 }}></i>
-          <p style={{ marginTop: '0.5rem' }}>No testimonials yet. Be the first to share your experience!</p>
-        </div>
-      );
-    }
-
-    return (
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
-        {testimonials.map((testimonial, idx) => (
-          <div key={testimonial.id} data-aos="fade-up" data-aos-delay={idx * 100} style={{
-            background: 'white',
-            borderRadius: '20px',
-            padding: '1.5rem',
-            textAlign: 'center',
-            boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
-            transition: 'transform 0.3s ease'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
-          onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
-            <i className="fas fa-quote-left" style={{ fontSize: '2rem', color: '#F9C74F', opacity: 0.5, marginBottom: '1rem' }}></i>
-            <p style={{ color: '#666', fontStyle: 'italic', marginBottom: '1rem', lineHeight: '1.6' }}>"{testimonial.text}"</p>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.2rem', marginBottom: '0.3rem' }}>
-              {[...Array(5)].map((_, i) => (
-                <i 
-                  key={i} 
-                  className="fas fa-star" 
-                  style={{ 
-                    color: i < testimonial.rating ? '#F9C74F' : '#ddd',
-                    fontSize: '0.9rem'
-                  }}
-                ></i>
-              ))}
-            </div>
-            <h4 style={{ color: '#0B3B2F', marginBottom: '0.2rem' }}>{testimonial.name}</h4>
-            {testimonial.location && (
-              <p style={{ fontSize: '0.8rem', color: '#888' }}>{testimonial.location}</p>
-            )}
-          </div>
-        ))}
-      </div>
-    );
+  // Helper to get alert icon and colors
+  const getAlertStyle = () => {
+    if (alertType === 'success') return { bg: '#e8f5e9', color: '#2e7d32', border: '#4caf50', icon: 'fas fa-check-circle' };
+    if (alertType === 'error') return { bg: '#ffebee', color: '#c62828', border: '#d32f2f', icon: 'fas fa-exclamation-circle' };
+    if (alertType === 'warning') return { bg: '#fff3e0', color: '#e65100', border: '#ff9800', icon: 'fas fa-exclamation-triangle' };
+    return { bg: '#e3f2fd', color: '#1565c0', border: '#2196f3', icon: 'fas fa-info-circle' };
   };
+
+  const alertStyle = getAlertStyle();
 
   return (
     <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f9fbf7' }}>
@@ -707,15 +642,13 @@ VUMA Organization - www.vuma.org
           from { opacity: 0; transform: scale(0.8); }
           to { opacity: 1; transform: scale(1); }
         }
-        @keyframes bounceIn {
-          0% { opacity: 0; transform: scale(0.3); }
-          50% { opacity: 1; transform: scale(1.05); }
-          70% { transform: scale(0.9); }
-          100% { transform: scale(1); }
+        @keyframes skeletonFadeIn {
+          from { opacity: 0; transform: translateY(15px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+        @keyframes skeletonShimmer {
+          0% { background-position: -500px 0; }
+          100% { background-position: 500px 0; }
         }
         @keyframes modalFadeIn {
           from { opacity: 0; }
@@ -726,24 +659,29 @@ VUMA Organization - www.vuma.org
           to { opacity: 1; transform: translateY(0); }
         }
         @keyframes slideInRight {
-          from {
-            opacity: 0;
-            transform: translateX(100%);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
+          from { opacity: 0; transform: translateX(100%); }
+          to { opacity: 1; transform: translateX(0); }
         }
-        @keyframes fadeOut {
-          from {
-            opacity: 1;
-          }
-          to {
-            opacity: 0;
-            visibility: hidden;
-          }
+        @keyframes statFadeIn {
+          from { opacity: 0; transform: scale(0.9) translateY(10px); }
+          to { opacity: 1; transform: scale(1) translateY(0); }
         }
+
+        .skeleton-block {
+          background: linear-gradient(
+            90deg,
+            #eef2f0 0%,
+            #e2e9e5 20%,
+            #f5f8f6 40%,
+            #eef2f0 60%,
+            #eef2f0 100%
+          );
+          background-size: 1000px 100%;
+          animation: skeletonShimmer 1.6s infinite linear;
+          display: block;
+        }
+        .skeleton-circle { border-radius: 50%; }
+
         .instruction-card { animation: fadeInUp 0.5s ease forwards; }
         .copy-btn { transition: all 0.3s ease; }
         .copy-btn:hover { background: #F9C74F !important; color: #0B3B2F !important; }
@@ -766,33 +704,27 @@ VUMA Organization - www.vuma.org
           max-width: 400px;
           width: calc(100% - 40px);
         }
-        .success-alert.fade-out {
-          animation: fadeOut 0.5s ease forwards;
-        }
       `}</style>
 
-      {/* Success Alert Toast Notification */}
+      {/* Success Alert Toast */}
       {showSuccessAlert && (
-        <div className={`success-alert ${!showSuccessAlert ? 'fade-out' : ''}`} style={{
-          background: successAlertMessage.includes('✅') ? '#e8f5e9' : 
-                     (successAlertMessage.includes('❌') ? '#ffebee' : 
-                     (successAlertMessage.includes('⚠️') ? '#fff3e0' : '#e3f2fd')),
-          color: successAlertMessage.includes('✅') ? '#2e7d32' : 
-                 (successAlertMessage.includes('❌') ? '#c62828' : 
-                 (successAlertMessage.includes('⚠️') ? '#e65100' : '#1565c0')),
-          padding: '1rem',
-          borderRadius: '12px',
-          boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
-          borderLeft: `4px solid ${successAlertMessage.includes('✅') ? '#4caf50' : 
-                                   (successAlertMessage.includes('❌') ? '#d32f2f' : 
-                                   (successAlertMessage.includes('⚠️') ? '#ff9800' : '#2196f3'))}`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '1rem'
-        }}>
+        <div
+          className="success-alert"
+          style={{
+            background: alertStyle.bg,
+            color: alertStyle.color,
+            padding: '1rem',
+            borderRadius: '12px',
+            boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
+            borderLeft: `4px solid ${alertStyle.border}`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '1rem'
+          }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-            <i className="fas fa-bell" style={{ fontSize: '1.2rem' }}></i>
+            <i className={alertStyle.icon} style={{ fontSize: '1.2rem' }}></i>
             <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>{successAlertMessage}</span>
           </div>
           <button
@@ -837,7 +769,7 @@ VUMA Organization - www.vuma.org
           background: 'radial-gradient(circle, rgba(249,199,79,0.08) 0%, transparent 70%)',
           borderRadius: '50%'
         }} />
-        
+
         <div style={{ maxWidth: '800px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <h1 data-aos="fade-up" style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', marginBottom: '1rem' }}>
             Support Our Mission
@@ -848,7 +780,7 @@ VUMA Organization - www.vuma.org
         </div>
       </div>
 
-      {/* Impact Stats - Fetched from API (Static Values - No Counting) */}
+      {/* Impact Stats */}
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '3rem 2rem' }}>
         <div style={{
           display: 'grid',
@@ -857,58 +789,22 @@ VUMA Organization - www.vuma.org
           marginBottom: '3rem'
         }}>
           {loadingStats ? (
-            // Loading skeleton for stats
-            Array(4).fill(0).map((_, idx) => (
-              <div key={idx} style={{
-                background: 'white',
-                borderRadius: '20px',
-                padding: '1.5rem',
-                textAlign: 'center',
-                boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
-                minHeight: '120px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <div style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  background: 'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
-                  backgroundSize: '200% 100%',
-                  animation: 'shimmer 1.5s infinite',
-                  marginBottom: '0.5rem'
-                }} />
-                <div style={{
-                  width: '80%',
-                  height: '20px',
-                  background: 'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
-                  backgroundSize: '200% 100%',
-                  animation: 'shimmer 1.5s infinite',
-                  borderRadius: '4px',
-                  marginBottom: '0.3rem'
-                }} />
-                <div style={{
-                  width: '60%',
-                  height: '14px',
-                  background: 'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
-                  backgroundSize: '200% 100%',
-                  animation: 'shimmer 1.5s infinite',
-                  borderRadius: '4px'
-                }} />
-              </div>
-            ))
+            <ImpactStatsSkeleton />
           ) : (
             impactStats.map((stat, idx) => (
-              <div key={idx} data-aos="zoom-in" data-aos-delay={idx * 100} className="stat-card" style={{
-                background: 'white',
-                borderRadius: '20px',
-                padding: '1.5rem',
-                textAlign: 'center',
-                boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
-                cursor: 'pointer'
-              }}>
+              <div
+                key={idx}
+                className="stat-card"
+                style={{
+                  background: 'white',
+                  borderRadius: '20px',
+                  padding: '1.5rem',
+                  textAlign: 'center',
+                  boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
+                  cursor: 'pointer',
+                  animation: `statFadeIn 0.5s ease ${idx * 0.1}s both`
+                }}
+              >
                 <i className={stat.icon} style={{ fontSize: '2rem', color: '#F9C74F', marginBottom: '0.5rem' }}></i>
                 <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0B3B2F' }}>{stat.value}</div>
                 <div style={{ color: '#666', fontSize: '0.85rem' }}>{stat.label}</div>
@@ -948,21 +844,12 @@ VUMA Organization - www.vuma.org
               e.currentTarget.style.transform = 'scale(1)';
             }}
           >
-            {loadingPending ? (
-              <>
-                <i className="fas fa-spinner fa-spin"></i>
-                <span>Loading...</span>
-              </>
-            ) : (
-              <>
-                <i className="fas fa-clock"></i>
-                <span>View My Pending Donations</span>
-              </>
-            )}
+            <i className="fas fa-clock"></i>
+            <span>{loadingPending ? 'Loading pending donations...' : 'View My Pending Donations'}</span>
           </button>
         </div>
 
-        {/* Donation Form */}
+        {/* Donation Form + Why Donate */}
         <div data-aos="fade-up" style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
@@ -979,7 +866,6 @@ VUMA Organization - www.vuma.org
             <h2 style={{ color: '#0B3B2F', marginBottom: '0.5rem' }}>Make a Donation</h2>
             <p style={{ color: '#666', marginBottom: '1.5rem' }}>Fill out the form to receive a reference number and payment instructions</p>
 
-            {/* Error message styled like success alert */}
             {apiError && (
               <div style={{
                 background: '#ffebee',
@@ -1223,17 +1109,8 @@ VUMA Organization - www.vuma.org
                   e.currentTarget.style.boxShadow = 'none';
                 }}
               >
-                {isSubmitting ? (
-                  <>
-                    <i className="fas fa-spinner fa-spin" style={{ marginRight: '0.5rem' }}></i>
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <i className="fas fa-heart" style={{ marginRight: '0.5rem' }}></i>
-                    Submit Donation
-                  </>
-                )}
+                <i className="fas fa-heart" style={{ marginRight: '0.5rem' }}></i>
+                {isSubmitting ? 'Processing...' : 'Submit Donation'}
               </button>
             </form>
           </div>
@@ -1282,7 +1159,7 @@ VUMA Organization - www.vuma.org
                 textDecoration: 'none',
                 fontWeight: 600
               }}>
-                Contact Us →
+                Contact Us <i className="fas fa-arrow-right" style={{ marginLeft: '0.3rem' }}></i>
               </Link>
             </div>
           </div>
@@ -1374,7 +1251,8 @@ VUMA Organization - www.vuma.org
                     fontSize: '0.8rem',
                     fontWeight: 'bold'
                   }}>
-                    {currentDonation.status === 'completed' ? '✓ COMPLETED' : '⏳ PENDING'}
+                    <i className={`fas ${currentDonation.status === 'completed' ? 'fa-check-circle' : 'fa-clock'}`} style={{ marginRight: '0.3rem' }}></i>
+                    {currentDonation.status === 'completed' ? 'COMPLETED' : 'PENDING'}
                   </span>
                 </div>
               </div>
@@ -1387,7 +1265,10 @@ VUMA Organization - www.vuma.org
               padding: '1rem',
               marginBottom: '1.5rem'
             }}>
-              <h4 style={{ color: '#0B3B2F', marginBottom: '0.8rem' }}>📋 Donor Information</h4>
+              <h4 style={{ color: '#0B3B2F', marginBottom: '0.8rem' }}>
+                <i className="fas fa-clipboard-list" style={{ color: '#F9C74F', marginRight: '0.5rem' }}></i>
+                Donor Information
+              </h4>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.8rem' }}>
                 <div><strong>Full Name:</strong> {currentDonation.full_name}</div>
                 <div><strong>Email:</strong> {currentDonation.email}</div>
@@ -1398,7 +1279,8 @@ VUMA Organization - www.vuma.org
               </div>
               {currentDonation.message && (
                 <div style={{ marginTop: '0.8rem', padding: '0.5rem', background: 'rgba(249,199,79,0.1)', borderRadius: '8px' }}>
-                  <strong>💬 Message:</strong> "{currentDonation.message}"
+                  <i className="fas fa-comment" style={{ color: '#F9C74F', marginRight: '0.5rem' }}></i>
+                  <strong>Message:</strong> "{currentDonation.message}"
                 </div>
               )}
             </div>
@@ -1413,7 +1295,8 @@ VUMA Organization - www.vuma.org
                 border: '1px solid #e0e0e0'
               }}>
                 <h4 style={{ color: '#0B3B2F', marginBottom: '0.8rem' }}>
-                  <i className="fas fa-history"></i> Payment Activity Log
+                  <i className="fas fa-history" style={{ marginRight: '0.5rem', color: '#F9C74F' }}></i>
+                  Payment Activity Log
                 </h4>
                 <div style={{ maxHeight: '150px', overflowY: 'auto' }}>
                   {currentDonation.logs.map((log, idx) => (
@@ -1422,7 +1305,9 @@ VUMA Organization - www.vuma.org
                       borderBottom: idx < currentDonation.logs.length - 1 ? '1px solid #e0e0e0' : 'none',
                       fontSize: '0.75rem'
                     }}>
-                      <span style={{ color: '#F9C74F', fontWeight: 'bold' }}>●</span>
+                      <span style={{ color: '#F9C74F', fontWeight: 'bold' }}>
+                        <i className="fas fa-circle" style={{ fontSize: '0.4rem', verticalAlign: 'middle' }}></i>
+                      </span>
                       <span style={{ marginLeft: '0.5rem', color: '#666' }}>{formatDate(log.created_at)}</span>
                       <span style={{ marginLeft: '0.5rem', color: '#0B3B2F' }}>{log.description}</span>
                     </div>
@@ -1452,8 +1337,8 @@ VUMA Organization - www.vuma.org
                   <i className="fas fa-mobile-alt" style={{ fontSize: '1.5rem', color: '#F9C74F' }}></i>
                 </div>
                 <div>
-                  <h3 style={{ color: '#0B3B2F', margin: 0 }}>M-PESA / Mobile Money   "you will see LABAN ABAS MAPABHA"</h3>
-                  <p style={{ color: '#666', margin: 0, fontSize: '0.8rem' }}>Send money directly to our official number</p>
+                  <h3 style={{ color: '#0B3B2F', margin: 0 }}>M-PESA / Mobile Money</h3>
+                  <p style={{ color: '#666', margin: 0, fontSize: '0.8rem' }}>You will see LABAN ABAS MAPABHA as the recipient</p>
                 </div>
               </div>
               <div style={{
@@ -1483,7 +1368,8 @@ VUMA Organization - www.vuma.org
                     fontWeight: 600
                   }}
                 >
-                  <i className="fas fa-copy"></i> Copy Number
+                  <i className="fas fa-copy" style={{ marginRight: '0.4rem' }}></i>
+                  Copy Number
                 </button>
               </div>
               <div style={{ marginTop: '1rem' }}>
@@ -1524,8 +1410,8 @@ VUMA Organization - www.vuma.org
                   <i className="fas fa-university" style={{ fontSize: '1.5rem', color: '#F9C74F' }}></i>
                 </div>
                 <div>
-                  <h3 style={{ color: '#0B3B2F', margin: 0 }}>CRDB Bank Transfer    "you will see LABAN ABAS MAPABHA"</h3>
-                  <p style={{ color: '#666', margin: 0, fontSize: '0.8rem' }}>Direct deposit to our bank account</p>
+                  <h3 style={{ color: '#0B3B2F', margin: 0 }}>CRDB Bank Transfer</h3>
+                  <p style={{ color: '#666', margin: 0, fontSize: '0.8rem' }}>You will see LABAN ABAS MAPABHA as the account holder</p>
                 </div>
               </div>
               <div style={{
@@ -1565,7 +1451,8 @@ VUMA Organization - www.vuma.org
                   width: '100%'
                 }}
               >
-                <i className="fas fa-copy"></i> Copy Account Number
+                <i className="fas fa-copy" style={{ marginRight: '0.4rem' }}></i>
+                Copy Account Number
               </button>
             </div>
 
@@ -1582,8 +1469,7 @@ VUMA Organization - www.vuma.org
                   <i className="fas fa-check-circle" style={{ marginRight: '0.5rem', color: '#4caf50' }}></i>
                   Confirm Your Payment
                 </h3>
-                
-                {/* Error message styled like success alert */}
+
                 {confirmError && (
                   <div style={{
                     background: '#ffebee',
@@ -1600,7 +1486,7 @@ VUMA Organization - www.vuma.org
                     <span>{confirmError}</span>
                   </div>
                 )}
-                
+
                 {confirmSuccess && (
                   <div style={{
                     background: '#e8f5e9',
@@ -1617,7 +1503,7 @@ VUMA Organization - www.vuma.org
                     <span>{confirmSuccess}</span>
                   </div>
                 )}
-                
+
                 <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                   <select
                     value={selectedPaymentMethod}
@@ -1658,15 +1544,8 @@ VUMA Organization - www.vuma.org
                       cursor: paymentConfirmed ? 'not-allowed' : 'pointer'
                     }}
                   >
-                    {paymentConfirmed ? (
-                      <>
-                        <i className="fas fa-spinner fa-spin"></i> Confirming...
-                      </>
-                    ) : (
-                      <>
-                        <i className="fas fa-check"></i> Confirm Payment
-                      </>
-                    )}
+                    <i className="fas fa-check" style={{ marginRight: '0.4rem' }}></i>
+                    {paymentConfirmed ? 'Confirming...' : 'Confirm Payment'}
                   </button>
                 </div>
               </div>
@@ -1686,7 +1565,8 @@ VUMA Organization - www.vuma.org
                   fontWeight: 600
                 }}
               >
-                <i className="fas fa-download"></i> Download Receipt
+                <i className="fas fa-download" style={{ marginRight: '0.4rem' }}></i>
+                Download Receipt
               </button>
               <button
                 onClick={() => {
@@ -1702,7 +1582,8 @@ VUMA Organization - www.vuma.org
                   fontWeight: 600
                 }}
               >
-                <i className="fas fa-envelope"></i> Confirm via Email
+                <i className="fas fa-envelope" style={{ marginRight: '0.4rem' }}></i>
+                Confirm via Email
               </button>
             </div>
           </div>
@@ -1713,10 +1594,7 @@ VUMA Organization - www.vuma.org
       {showPendingModal && (
         <div className="modal-overlay" onClick={closePendingModal} style={{
           position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
+          top: 0, left: 0, right: 0, bottom: 0,
           background: 'rgba(0,0,0,0.85)',
           backdropFilter: 'blur(8px)',
           zIndex: 2000,
@@ -1781,11 +1659,7 @@ VUMA Organization - www.vuma.org
               </p>
             </div>
 
-            <div style={{
-              flex: 1,
-              overflowY: 'auto',
-              padding: '1rem'
-            }}>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '1rem' }}>
               {pendingDonations.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '2rem' }}>
                   <i className="fas fa-inbox" style={{ fontSize: '3rem', color: '#ccc' }}></i>
@@ -1862,24 +1736,58 @@ VUMA Organization - www.vuma.org
         </div>
       )}
 
-      {/* Testimonials - Dynamically Fetched from Backend */}
+      {/* Testimonials */}
       <div style={{ background: '#f0f5ee', padding: '3rem 2rem' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
           <h2 data-aos="fade-up" style={{ color: '#0B3B2F', marginBottom: '2rem' }}>
             <i className="fas fa-star" style={{ color: '#F9C74F', marginRight: '0.5rem' }}></i>
             What Donors Say
           </h2>
-          {renderTestimonials()}
+
+          {loadingTestimonials ? (
+            <TestimonialsSkeleton />
+          ) : testimonials.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '2rem', color: '#999' }}>
+              <i className="fas fa-quote-left" style={{ fontSize: '2rem', opacity: 0.3 }}></i>
+              <p style={{ marginTop: '0.5rem' }}>No testimonials yet. Be the first to share your experience!</p>
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+              {testimonials.map((testimonial, idx) => (
+                <div key={testimonial.id} data-aos="fade-up" data-aos-delay={idx * 100} style={{
+                  background: 'white',
+                  borderRadius: '20px',
+                  padding: '1.5rem',
+                  textAlign: 'center',
+                  boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
+                  transition: 'transform 0.3s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
+                  <i className="fas fa-quote-left" style={{ fontSize: '2rem', color: '#F9C74F', opacity: 0.5, marginBottom: '1rem' }}></i>
+                  <p style={{ color: '#666', fontStyle: 'italic', marginBottom: '1rem', lineHeight: '1.6' }}>"{testimonial.text}"</p>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.2rem', marginBottom: '0.3rem' }}>
+                    {[...Array(5)].map((_, i) => (
+                      <i
+                        key={i}
+                        className="fas fa-star"
+                        style={{
+                          color: i < testimonial.rating ? '#F9C74F' : '#ddd',
+                          fontSize: '0.9rem'
+                        }}
+                      ></i>
+                    ))}
+                  </div>
+                  <h4 style={{ color: '#0B3B2F', marginBottom: '0.2rem' }}>{testimonial.name}</h4>
+                  {testimonial.location && (
+                    <p style={{ fontSize: '0.8rem', color: '#888' }}>{testimonial.location}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
-
-      {/* Shimmer animation for loading skeletons */}
-      <style>{`
-        @keyframes shimmer {
-          0% { background-position: -200% 0; }
-          100% { background-position: 200% 0; }
-        }
-      `}</style>
     </div>
   );
 };

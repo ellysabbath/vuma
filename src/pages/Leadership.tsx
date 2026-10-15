@@ -8,6 +8,7 @@ import eventc from '../assets/new/eventc.jpg';
 import eventd from '../assets/new/eventd.jpg';
 import evente from '../assets/new/evente.jpg';
 import eventf from '../assets/new/eventf.jpg';
+import tesla from '../assets/new/tesla.jpg';
 
 // Updated leadership data with new biographies and achievements
 const leadershipData = [
@@ -55,6 +56,20 @@ const leadershipData = [
       "Prepared clear financial summaries and reports for all disbursed funds."
     ]
   },
+{
+  id: 3,
+  name: "Elisha Sabbath Mwananjela",
+  role: "IT Technician",
+  image: tesla,
+  isFounder: false,
+  bio: "Certified software engineer managing digital systems and ensuring reliable IT infrastructure for all VUMA operations and events.",
+  fullBio: "Elisha Sabbath Mwananjela serves as the IT Technician at VUMA Tanzania, where he is responsible for maintaining and supporting the organization's digital infrastructure, troubleshooting hardware and software issues, and ensuring that all technological systems run smoothly. As a certified software engineer, he provides technical assistance during boot camps, hackathons, forums, and community outreach programs, helping participants and staff make effective use of digital tools. Through his technical expertise and problem-solving skills, he ensures that VUMA's operations remain efficient, secure, and technology-driven, enabling the organization to deliver impactful programs without technical disruptions.",
+  achievements: [
+    "Maintained and optimized VUMA's IT infrastructure, ensuring minimal downtime and reliable system performance across all operations.",
+    "Provided on-site technical support during boot camps, hackathons, and expos, enabling smooth execution of digital activities and participant engagement.",
+    "Improved digital security and data management practices, safeguarding organizational information and enhancing overall operational efficiency."
+  ]
+},
   {
     id: 4,
     name: "Edom Fanuel Mataro",
@@ -123,7 +138,7 @@ const Leadership = () => {
   const sectionRef = useRef(null);
   const statsRef = useRef(null);
   const carouselRef = useRef(null);
-  
+
   const [counters, setCounters] = useState({
     experience: 0,
     projects: 0,
@@ -166,7 +181,7 @@ const Leadership = () => {
 
     let animationId;
     let startTime;
-    const duration = 25000; // 25 seconds for full scroll
+    const duration = 25000;
     const scrollDistance = carousel.scrollWidth - carousel.clientWidth;
 
     const scroll = (timestamp) => {
@@ -216,18 +231,18 @@ const Leadership = () => {
   const startCounters = () => {
     const duration = 2000;
     const stepTime = 20;
-    
+
     const statsData = [
       { id: 'experience', target: 15 },
       { id: 'projects', target: 4 },
       { id: 'youth', target: 50000 },
       { id: 'partners', target: 25 }
     ];
-    
+
     statsData.forEach((stat) => {
       let currentValue = 0;
       const increment = stat.target / (duration / stepTime);
-      
+
       const interval = setInterval(() => {
         currentValue += increment;
         if (currentValue >= stat.target) {
@@ -256,7 +271,6 @@ const Leadership = () => {
     setImageLoaded(prev => ({ ...prev, [id]: true }));
   };
 
-  // Pause auto-scroll on hover
   const handleCarouselMouseEnter = () => {
     if (carouselRef.current && carouselRef.current._animationId) {
       cancelAnimationFrame(carouselRef.current._animationId);
@@ -347,10 +361,6 @@ const Leadership = () => {
             70% { transform: scale(0.9); }
             100% { transform: scale(1); }
           }
-          @keyframes shimmer {
-            0% { background-position: -1000px 0; }
-            100% { background-position: 1000px 0; }
-          }
           @keyframes slideInUp {
             from { opacity: 0; transform: translateY(50px); }
             to { opacity: 1; transform: translateY(0); }
@@ -363,82 +373,82 @@ const Leadership = () => {
             0% { transform: translateX(0); }
             100% { transform: translateX(-50%); }
           }
-          
+
           .leader-card {
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             width: ${cardWidth}px;
             min-width: ${cardWidth}px;
           }
-          
+
           .leader-card:hover {
             transform: translateY(-10px) scale(1.02) !important;
             box-shadow: 0 25px 50px rgba(0,0,0,0.15) !important;
           }
-          
+
           .leader-card:hover .profile-image {
             transform: scale(1.05);
           }
-          
+
           .leader-card:hover .shine-effect {
             left: 100%;
           }
-          
+
           .profile-image {
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
           }
-          
+
           .shine-effect {
             transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1);
           }
-          
+
           .stat-card {
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
           }
-          
+
           .stat-card:hover {
             transform: translateY(-5px) scale(1.02);
             background: rgba(11,59,47,0.03);
           }
-          
+
           .modal-content {
             animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
           }
-          
+
           .modal-overlay {
             animation: fadeIn 0.3s ease;
           }
-          
+
           .carousel-track {
             display: flex;
             gap: 1.5rem;
             animation: scrollLeftToRight 30s linear infinite;
             width: fit-content;
           }
-          
+
           .carousel-container:hover .carousel-track {
             animation-play-state: paused;
           }
-          
+
           @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
           }
-          
+
           .modal-content::-webkit-scrollbar {
             width: 6px;
           }
-          
+
           .modal-content::-webkit-scrollbar-track {
             background: #f1f1f1;
             border-radius: 3px;
           }
-          
+
           .modal-content::-webkit-scrollbar-thumb {
             background: #F9C74F;
             border-radius: 3px;
           }
-          
+
           @media (max-width: 768px) {
             .modal-content { max-height: 90vh; }
             .leader-card {
@@ -591,20 +601,22 @@ const Leadership = () => {
                   background: '#f0f0f0'
                 }}
                 className="profile-image">
+                  {/* SKELETON: avatar shimmer while image loads */}
                   {!imageLoaded[founder.id] && (
-                    <div style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      background: 'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
-                      backgroundSize: '200% 100%',
-                      animation: 'shimmer 1.5s infinite'
-                    }} />
+                    <div
+                      className="skeleton-block skeleton-circle"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        borderRadius: '50%'
+                      }}
+                    />
                   )}
-                  <img 
-                    src={founder.image} 
+                  <img
+                    src={founder.image}
                     alt={founder.name}
                     style={{
                       width: '100%',
@@ -674,8 +686,8 @@ const Leadership = () => {
             <i className="fas fa-users" style={{ color: '#F9C74F', marginRight: '0.5rem' }}></i>
             Our Expert Team
           </h3>
-          
-          <div 
+
+          <div
             className="carousel-container"
             style={{
               width: '100%',
@@ -686,7 +698,7 @@ const Leadership = () => {
             onMouseEnter={handleCarouselMouseEnter}
             onMouseLeave={handleCarouselMouseLeave}
           >
-            <div 
+            <div
               ref={carouselRef}
               className="carousel-track"
               style={{
@@ -696,7 +708,6 @@ const Leadership = () => {
                 animation: 'scrollLeftToRight 30s linear infinite'
               }}
             >
-              {/* Double the team members for seamless infinite scroll */}
               {[...teamMembers, ...teamMembers].map((member, idx) => (
                 <div
                   key={`${member.id}-${idx}`}
@@ -755,20 +766,22 @@ const Leadership = () => {
                       background: '#f0f0f0'
                     }}
                     className="profile-image">
+                      {/* SKELETON: avatar shimmer while image loads */}
                       {!imageLoaded[member.id] && (
-                        <div style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          background: 'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
-                          backgroundSize: '200% 100%',
-                          animation: 'shimmer 1.5s infinite'
-                        }} />
+                        <div
+                          className="skeleton-block skeleton-circle"
+                          style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            borderRadius: '50%'
+                          }}
+                        />
                       )}
-                      <img 
-                        src={member.image} 
+                      <img
+                        src={member.image}
                         alt={member.name}
                         style={{
                           width: '100%',
@@ -823,8 +836,7 @@ const Leadership = () => {
               ))}
             </div>
           </div>
-          
-          {/* Scroll Indicator */}
+
           <div style={{
             textAlign: 'center',
             marginTop: '1rem',
@@ -862,11 +874,11 @@ const Leadership = () => {
           { id: 'youth', icon: 'fas fa-users', label: 'Youth Empowered', value: counters.youth.toLocaleString(), suffix: '+' },
           { id: 'partners', icon: 'fas fa-handshake', label: 'Community Partners', value: counters.partners, suffix: '+' }
         ].map((stat, idx) => (
-          <div 
+          <div
             key={stat.id}
             className="stat-card"
-            style={{ 
-              flex: 1, 
+            style={{
+              flex: 1,
               minWidth: '150px',
               padding: '1.5rem',
               borderRadius: '24px',
@@ -888,9 +900,9 @@ const Leadership = () => {
             }}>
               <i className={stat.icon} style={{ fontSize: '1.3rem', color: '#F9C74F' }}></i>
             </div>
-            <div style={{ 
-              fontSize: 'clamp(1.8rem, 5vw, 2.5rem)', 
-              fontWeight: 800, 
+            <div style={{
+              fontSize: 'clamp(1.8rem, 5vw, 2.5rem)',
+              fontWeight: 800,
               color: '#0B3B2F',
               fontFamily: 'monospace'
             }}>
@@ -967,8 +979,8 @@ const Leadership = () => {
                 overflow: 'hidden',
                 border: '4px solid #F9C74F'
               }}>
-                <img 
-                  src={selectedLeader.image} 
+                <img
+                  src={selectedLeader.image}
                   alt={selectedLeader.name}
                   style={{
                     width: '100%',

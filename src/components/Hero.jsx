@@ -2,12 +2,195 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import eventdImg from '../assets/eventd.jpg';
 
+// ==================== HERO SKELETON ====================
+const HeroSkeleton = () => {
+  const titleLines = [1];
+  const paragraphLines = [1, 2, 3];
+  const listItems = [1, 2, 3, 4, 5, 6];
+  const buttons = [1, 2, 3];
+
+  return (
+    <div
+      className="hero-content"
+      style={{
+        maxWidth: '90%',
+        width: '100%',
+        padding: '1rem',
+        zIndex: 2,
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center'
+      }}
+    >
+      {/* Title */}
+      {titleLines.map((i) => (
+        <div
+          key={`title-${i}`}
+          className="skeleton-block"
+          style={{
+            height: 'clamp(1.5rem, 6vw, 3.2rem)',
+            width: 'min(90%, 720px)',
+            borderRadius: '12px',
+            marginBottom: '0.8rem',
+            animation: 'skeletonFadeIn 0.5s ease both'
+          }}
+        />
+      ))}
+
+      {/* Subtitle */}
+      <div
+        className="skeleton-block"
+        style={{
+          height: 'clamp(0.9rem, 4vw, 1.2rem)',
+          width: 'min(80%, 560px)',
+          borderRadius: '8px',
+          marginBottom: '1.5rem',
+          animation: 'skeletonFadeIn 0.5s ease 0.05s both'
+        }}
+      />
+
+      {/* Paragraph */}
+      <div style={{ width: 'min(85%, 640px)', marginBottom: '2rem' }}>
+        {paragraphLines.map((i) => (
+          <div
+            key={`p-${i}`}
+            className="skeleton-block"
+            style={{
+              height: 'clamp(0.7rem, 3vw, 0.9rem)',
+              width: i === paragraphLines.length ? '60%' : '100%',
+              borderRadius: '6px',
+              marginBottom: '0.5rem',
+              animation: `skeletonFadeIn 0.5s ease ${0.1 + i * 0.05}s both`
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Heading 1 */}
+      <div
+        className="skeleton-block"
+        style={{
+          height: 'clamp(1.2rem, 5vw, 2rem)',
+          width: 'min(50%, 320px)',
+          borderRadius: '10px',
+          marginBottom: '1rem',
+          animation: 'skeletonFadeIn 0.5s ease 0.3s both'
+        }}
+      />
+
+      {/* Paragraph */}
+      <div style={{ width: 'min(85%, 640px)', marginBottom: '2rem' }}>
+        {paragraphLines.map((i) => (
+          <div
+            key={`p2-${i}`}
+            className="skeleton-block"
+            style={{
+              height: 'clamp(0.7rem, 3vw, 0.9rem)',
+              width: i === paragraphLines.length ? '50%' : '100%',
+              borderRadius: '6px',
+              marginBottom: '0.5rem',
+              animation: `skeletonFadeIn 0.5s ease ${0.35 + i * 0.05}s both`
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Heading 2 */}
+      <div
+        className="skeleton-block"
+        style={{
+          height: 'clamp(1.2rem, 5vw, 2rem)',
+          width: 'min(50%, 320px)',
+          borderRadius: '10px',
+          marginBottom: '1.2rem',
+          animation: 'skeletonFadeIn 0.5s ease 0.5s both'
+        }}
+      />
+
+      {/* List items */}
+      <div
+        style={{
+          width: 'min(90%, 600px)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.75rem',
+          marginBottom: '2rem'
+        }}
+      >
+        {listItems.map((i) => (
+          <div
+            key={`li-${i}`}
+            className="skeleton-block"
+            style={{
+              height: 'clamp(2rem, 6vw, 2.5rem)',
+              width: '100%',
+              borderRadius: '12px',
+              animation: `skeletonFadeIn 0.5s ease ${0.55 + i * 0.05}s both`
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Buttons */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'center',
+          gap: '0.8rem',
+          flexWrap: 'wrap',
+          padding: '0 0.5rem'
+        }}
+      >
+        {buttons.map((i) => (
+          <div
+            key={`btn-${i}`}
+            className="skeleton-block"
+            style={{
+              height: 'clamp(2.2rem, 6vw, 2.8rem)',
+              width: 'clamp(120px, 30vw, 160px)',
+              borderRadius: '60px',
+              animation: `skeletonFadeIn 0.5s ease ${0.85 + i * 0.08}s both`
+            }}
+          />
+        ))}
+      </div>
+
+      <style>{`
+        @keyframes skeletonFadeIn {
+          from { opacity: 0; transform: translateY(15px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes skeletonShimmer {
+          0% { background-position: -500px 0; }
+          100% { background-position: 500px 0; }
+        }
+        .skeleton-block {
+          background: linear-gradient(
+            90deg,
+            rgba(255,255,255,0.06) 0%,
+            rgba(255,255,255,0.14) 20%,
+            rgba(255,255,255,0.22) 40%,
+            rgba(255,255,255,0.14) 60%,
+            rgba(255,255,255,0.06) 100%
+          );
+          background-size: 1000px 100%;
+          animation: skeletonShimmer 1.6s infinite linear;
+          backdrop-filter: blur(2px);
+        }
+      `}</style>
+    </div>
+  );
+};
+// ==================== END HERO SKELETON ====================
+
+
 const Hero = ({ onLoginClick }) => {
   const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = useState(false);
 
   useEffect(() => {
-    // Preload image
     const img = new Image();
     img.src = eventdImg;
     img.onload = () => setImageLoaded(true);
@@ -45,48 +228,33 @@ const Hero = ({ onLoginClick }) => {
       {/* Animated Overlay */}
       <div style={{
         position: 'absolute',
-        top: 0, 
-        left: 0, 
-        width: '100%', 
+        top: 0,
+        left: 0,
+        width: '100%',
         height: '100%',
         background: 'radial-gradient(circle at 20% 40%, rgba(0,0,0,0.4), rgba(0,20,10,0.6))',
         animation: 'pulse 4s ease-in-out infinite'
       }}></div>
-      
-      {/* Loading Skeleton */}
-      {!imageLoaded && (
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
+
+      {/* ==================== SKELETON LOADING ==================== */}
+      {!imageLoaded && <HeroSkeleton />}
+      {/* ==================== END SKELETON ==================== */}
+
+      <div
+        className="hero-content"
+        data-aos="fade-up"
+        data-aos-duration="1000"
+        style={{
+          maxWidth: '90%',
           width: '100%',
-          height: '100%',
-          background: 'linear-gradient(135deg, #0a3b2e, #0c4d3a)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1
-        }}>
-          <div style={{
-            width: '40px',
-            height: '40px',
-            border: '3px solid rgba(249,199,79,0.3)',
-            borderTop: '3px solid #F9C74F',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite'
-          }} />
-        </div>
-      )}
-      
-      <div className="hero-content" data-aos="fade-up" data-aos-duration="1000" style={{ 
-        maxWidth: '90%',
-        width: '100%',
-        padding: '1rem', 
-        zIndex: 2,
-        opacity: imageLoaded ? 1 : 0,
-        transition: 'opacity 0.5s ease',
-        position: 'relative'
-      }}>
+          padding: '1rem',
+          zIndex: 2,
+          opacity: imageLoaded ? 1 : 0,
+          transition: 'opacity 0.5s ease',
+          position: 'relative',
+          pointerEvents: imageLoaded ? 'auto' : 'none'
+        }}
+      >
         <h1 style={{
           fontSize: 'clamp(1.5rem, 6vw, 3.2rem)',
           fontWeight: 800,
@@ -100,9 +268,9 @@ const Hero = ({ onLoginClick }) => {
         }}>
           Vijana. Uongozi. Ubunifu. Mazingira
         </h1>
-        
-        <p style={{ 
-          fontSize: 'clamp(0.9rem, 4vw, 1.2rem)', 
+
+        <p style={{
+          fontSize: 'clamp(0.9rem, 4vw, 1.2rem)',
           marginBottom: '1.5rem',
           animation: 'slideInUp 0.8s ease 0.2s',
           opacity: 0.95,
@@ -110,7 +278,7 @@ const Hero = ({ onLoginClick }) => {
         }}>
           Empowering Youth, Strengthening Communities, Creating Sustainable Impact
         </p>
-        
+
         <p style={{
           fontSize: 'clamp(0.8rem, 3.5vw, 1rem)',
           marginBottom: '2rem',
@@ -135,7 +303,7 @@ const Hero = ({ onLoginClick }) => {
         }}>
           Why We Exist?
         </h2>
-        
+
         <p style={{
           fontSize: 'clamp(0.9rem, 4vw, 1.2rem)',
           marginBottom: '2rem',
@@ -158,7 +326,7 @@ const Hero = ({ onLoginClick }) => {
         }}>
           Who We Support?
         </h2>
-        
+
         <p style={{
           fontSize: 'clamp(0.9rem, 4vw, 1.2rem)',
           marginBottom: '1rem',
@@ -168,7 +336,7 @@ const Hero = ({ onLoginClick }) => {
         }}>
           We work with:
         </p>
-        
+
         {/* Styled List */}
         <div style={{
           textAlign: 'left',
@@ -221,7 +389,7 @@ const Hero = ({ onLoginClick }) => {
             ))}
           </ul>
         </div>
-        
+
         <div style={{
           animation: 'slideInUp 0.8s ease 0.6s',
           display: 'flex',
@@ -231,7 +399,7 @@ const Hero = ({ onLoginClick }) => {
           flexWrap: 'wrap',
           padding: '0 0.5rem'
         }}>
-          <button 
+          <button
             className="btn-cta"
             onClick={handleJoinMovement}
             style={{
@@ -260,8 +428,7 @@ const Hero = ({ onLoginClick }) => {
             Join Movement →
           </button>
 
-          {/* Share Your Story Button - Navigates to /say-about-us */}
-          <button 
+          <button
             className="btn-cta"
             onClick={handleShareStory}
             style={{
@@ -292,8 +459,7 @@ const Hero = ({ onLoginClick }) => {
             Share Your Story
           </button>
 
-          {/* Login Button - Navigates to /login */}
-          <button 
+          <button
             className="btn-cta btn-outline-light"
             onClick={handleLoginClick}
             style={{
@@ -330,7 +496,7 @@ const Hero = ({ onLoginClick }) => {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.8; }
         }
-        
+
         @keyframes slideInUp {
           from {
             opacity: 0;
@@ -341,52 +507,47 @@ const Hero = ({ onLoginClick }) => {
             transform: translateY(0);
           }
         }
-        
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-        
+
         @media (max-width: 768px) {
           .hero-content {
             max-width: 95% !important;
           }
-          
+
           .hero-content h1 {
             font-size: 1.6rem !important;
             margin-bottom: 0.6rem !important;
           }
-          
+
           .hero-content p {
             font-size: 0.85rem !important;
             margin-bottom: 1.2rem !important;
           }
-          
+
           .btn-cta, .btn-outline-light {
             padding: 0.6rem 1.2rem !important;
             font-size: 0.85rem !important;
             min-width: 130px !important;
           }
-          
+
           ul li {
             margin-bottom: 8px !important;
             padding: 6px 10px !important;
           }
-          
+
           ul li span {
             font-size: 0.75rem !important;
           }
         }
-        
+
         @media (max-width: 480px) {
           .hero-content h1 {
             font-size: 1.3rem !important;
           }
-          
+
           .hero-content p {
             font-size: 0.75rem !important;
           }
-          
+
           .btn-cta, .btn-outline-light {
             padding: 0.5rem 1rem !important;
             font-size: 0.8rem !important;

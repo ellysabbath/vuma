@@ -3,6 +3,99 @@ import { useNavigate } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
+// ==================== STATS SKELETON ====================
+const StatsSkeleton = () => {
+  const items = [0, 1, 2, 3];
+  return (
+    <div style={{
+      padding: '3rem 2rem',
+      background: 'linear-gradient(135deg, #FFFFFF, #f9fbf7)',
+      borderRadius: '40px',
+      maxWidth: '1100px',
+      width: '100%',
+      display: 'flex',
+      flexWrap: 'wrap',
+      justifyContent: 'space-around',
+      alignItems: 'center',
+      gap: '2rem',
+      textAlign: 'center',
+      boxShadow: '0 20px 60px rgba(0,0,0,0.08)',
+      border: '1px solid rgba(255,255,255,0.8)'
+    }}>
+      {items.map((i) => (
+        <div
+          key={i}
+          style={{
+            flex: '1 1 180px',
+            minWidth: '150px',
+            padding: '1.5rem',
+            borderRadius: '24px',
+            animation: `skeletonFadeIn 0.5s ease ${i * 0.1}s both`
+          }}
+        >
+          {/* Icon circle */}
+          <div
+            className="skeleton-block"
+            style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              margin: '0 auto 0.8rem'
+            }}
+          />
+
+          {/* Big number */}
+          <div
+            className="skeleton-block"
+            style={{
+              height: '44px',
+              width: '70%',
+              borderRadius: '10px',
+              margin: '0 auto 0.8rem'
+            }}
+          />
+
+          {/* Label */}
+          <div
+            className="skeleton-block"
+            style={{
+              height: '12px',
+              width: '55%',
+              borderRadius: '6px',
+              margin: '0 auto'
+            }}
+          />
+        </div>
+      ))}
+
+      <style>{`
+        @keyframes skeletonFadeIn {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes skeletonShimmer {
+          0% { background-position: -400px 0; }
+          100% { background-position: 400px 0; }
+        }
+        .skeleton-block {
+          background: linear-gradient(
+            90deg,
+            #eef2f0 0%,
+            #e2e9e5 20%,
+            #f5f8f6 40%,
+            #eef2f0 60%,
+            #eef2f0 100%
+          );
+          background-size: 800px 100%;
+          animation: skeletonShimmer 1.6s infinite linear;
+        }
+      `}</style>
+    </div>
+  );
+};
+// ==================== END STATS SKELETON ====================
+
+
 const AdminImpacts = () => {
   const navigate = useNavigate();
   const [impacts, setImpacts] = useState([]);
@@ -107,7 +200,7 @@ const AdminImpacts = () => {
       const response = await fetch(`${API_BASE_URL}/impacts/`);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
-      
+
       let impactData = [];
       if (Array.isArray(data)) {
         impactData = data;
@@ -132,55 +225,41 @@ const AdminImpacts = () => {
     return impacts.length > 0 ? impacts[0] : null;
   };
 
+  // ==================== LOADING STATE (SKELETON) ====================
   if (loading) {
     return (
-      <div style={{ 
-        paddingTop: '70px', 
-        minHeight: '100vh', 
+      <div style={{
+        paddingTop: '70px',
+        minHeight: '100vh',
         background: 'linear-gradient(135deg, #f5f7f3 0%, #e8ece6 100%)',
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center' 
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '2rem'
       }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{
-            width: '60px',
-            height: '60px',
-            margin: '0 auto',
-            borderRadius: '50%',
-            border: '4px solid #e8ece6',
-            borderTop: '4px solid #0B3B2F',
-            animation: 'spin 1s linear infinite'
-          }}></div>
-          <p style={{ marginTop: '0.75rem', color: '#4a5a4a', fontWeight: 400 }}>Loading impact data...</p>
-        </div>
-        <style>{`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}</style>
+        <StatsSkeleton />
       </div>
     );
   }
+  // ==================== END LOADING STATE ====================
 
   if (error) {
     return (
-      <div style={{ 
-        paddingTop: '70px', 
-        minHeight: '100vh', 
+      <div style={{
+        paddingTop: '70px',
+        minHeight: '100vh',
         background: 'linear-gradient(135deg, #f5f7f3 0%, #e8ece6 100%)',
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center' 
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
       }}>
-        <div style={{ 
-          textAlign: 'center', 
-          maxWidth: '400px', 
-          padding: '3rem 2rem', 
-          background: 'white', 
-          borderRadius: '28px', 
-          boxShadow: '0 20px 60px rgba(0,0,0,0.08)' 
+        <div style={{
+          textAlign: 'center',
+          maxWidth: '400px',
+          padding: '3rem 2rem',
+          background: 'white',
+          borderRadius: '28px',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.08)'
         }}>
           <div style={{
             width: '70px',
@@ -196,16 +275,16 @@ const AdminImpacts = () => {
           </div>
           <h3 style={{ marginTop: '1rem', color: '#0B3B2F' }}>Connection Error</h3>
           <p style={{ marginTop: '0.5rem', color: '#6a7a6a', fontSize: '0.95rem' }}>{error}</p>
-          <button 
-            onClick={fetchImpacts} 
+          <button
+            onClick={fetchImpacts}
             disabled={isRefreshing}
-            style={{ 
-              marginTop: '1.5rem', 
-              background: '#0B3B2F', 
-              border: 'none', 
-              padding: '0.6rem 2rem', 
-              borderRadius: '40px', 
-              cursor: isRefreshing ? 'not-allowed' : 'pointer', 
+            style={{
+              marginTop: '1.5rem',
+              background: '#0B3B2F',
+              border: 'none',
+              padding: '0.6rem 2rem',
+              borderRadius: '40px',
+              cursor: isRefreshing ? 'not-allowed' : 'pointer',
               fontSize: '0.85rem',
               fontWeight: 600,
               color: 'white',
@@ -224,8 +303,8 @@ const AdminImpacts = () => {
   const impact = getImpactRecord();
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
+    <div style={{
+      minHeight: '100vh',
       background: 'linear-gradient(135deg, #f5f7f3 0%, #e8ece6 100%)',
       display: 'flex',
       alignItems: 'center',
@@ -278,39 +357,39 @@ const AdminImpacts = () => {
         border: '1px solid rgba(255,255,255,0.8)'
       }}>
         {impact ? [
-          { 
-            id: 'youth_reached', 
-            icon: 'fas fa-users', 
-            label: impact.youth_reached_label || 'Youth Reached', 
-            value: counters.youth_reached, 
-            suffix: impact.youth_reached_suffix || '+' 
+          {
+            id: 'youth_reached',
+            icon: 'fas fa-users',
+            label: impact.youth_reached_label || 'Youth Reached',
+            value: counters.youth_reached,
+            suffix: impact.youth_reached_suffix || '+'
           },
-          { 
-            id: 'trees_planted', 
-            icon: 'fas fa-tree', 
-            label: impact.trees_planted_label || 'Trees Planted', 
-            value: counters.trees_planted, 
-            suffix: impact.trees_planted_suffix || '+' 
+          {
+            id: 'trees_planted',
+            icon: 'fas fa-tree',
+            label: impact.trees_planted_label || 'Trees Planted',
+            value: counters.trees_planted,
+            suffix: impact.trees_planted_suffix || '+'
           },
-          { 
-            id: 'ideas_generated', 
-            icon: 'fas fa-lightbulb', 
-            label: impact.ideas_generated_label || 'Ideas Generated', 
-            value: counters.ideas_generated, 
-            suffix: impact.ideas_generated_suffix || '+' 
+          {
+            id: 'ideas_generated',
+            icon: 'fas fa-lightbulb',
+            label: impact.ideas_generated_label || 'Ideas Generated',
+            value: counters.ideas_generated,
+            suffix: impact.ideas_generated_suffix || '+'
           },
-          { 
-            id: 'volunteers', 
-            icon: 'fas fa-handshake', 
-            label: impact.volunteers_label || 'Active Volunteers', 
-            value: counters.volunteers, 
-            suffix: impact.volunteers_suffix || '+' 
+          {
+            id: 'volunteers',
+            icon: 'fas fa-handshake',
+            label: impact.volunteers_label || 'Active Volunteers',
+            value: counters.volunteers,
+            suffix: impact.volunteers_suffix || '+'
           }
         ].map((stat, idx) => (
-          <div 
+          <div
             key={stat.id}
             className="stat-card"
-            style={{ 
+            style={{
               flex: '1 1 180px',
               minWidth: '150px',
               padding: '1.5rem',
@@ -332,18 +411,18 @@ const AdminImpacts = () => {
             }}>
               <i className={stat.icon} style={{ fontSize: '1.4rem', color: '#F9C74F' }}></i>
             </div>
-            <div className="count-number" style={{ 
-              fontSize: 'clamp(2rem, 5vw, 2.8rem)', 
-              fontWeight: 800, 
+            <div className="count-number" style={{
+              fontSize: 'clamp(2rem, 5vw, 2.8rem)',
+              fontWeight: 800,
               color: '#0B3B2F',
               fontFamily: 'monospace',
               letterSpacing: '-0.02em'
             }}>
               {stat.value.toLocaleString()}{stat.suffix}
             </div>
-            <div style={{ 
-              color: '#6a7a6a', 
-              fontSize: '0.85rem', 
+            <div style={{
+              color: '#6a7a6a',
+              fontSize: '0.85rem',
               fontWeight: 500,
               letterSpacing: '0.3px',
               textTransform: 'uppercase'
@@ -352,8 +431,8 @@ const AdminImpacts = () => {
             </div>
           </div>
         )) : (
-          <div style={{ 
-            textAlign: 'center', 
+          <div style={{
+            textAlign: 'center',
             padding: '2rem',
             width: '100%'
           }}>

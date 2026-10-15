@@ -3,6 +3,223 @@ import { useNavigate } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
+// ==================== PROGRAMS SKELETON ====================
+const ProgramsSkeleton = ({ count = 3 }) => {
+  const items = Array.from({ length: count });
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      {items.map((_, idx) => (
+        <div
+          key={idx}
+          className="program-skeleton-card"
+          style={{
+            background: 'white',
+            borderRadius: '24px',
+            overflow: 'hidden',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+            border: '1px solid rgba(0,0,0,0.05)',
+            animation: `skeletonFadeIn 0.5s ease ${idx * 0.1}s both`
+          }}
+        >
+          {/* Program header skeleton (dark green gradient) */}
+          <div style={{
+            background: 'linear-gradient(135deg, #0B3B2F 0%, #1a5c48 50%, #2b7a5c 100%)',
+            padding: '0.8rem 1.5rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap' }}>
+              {/* Number circle */}
+              <div
+                className="skeleton-block skeleton-block--dark skeleton-circle"
+                style={{ width: '36px', height: '36px', flexShrink: 0 }}
+              />
+
+              {/* Title + badges */}
+              <div style={{ flex: 1, minWidth: '150px' }}>
+                <div
+                  className="skeleton-block skeleton-block--dark"
+                  style={{
+                    height: '16px',
+                    width: '60%',
+                    borderRadius: '6px',
+                    marginBottom: '8px'
+                  }}
+                />
+                <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
+                  <div
+                    className="skeleton-block skeleton-block--dark"
+                    style={{ height: '12px', width: '100px', borderRadius: '15px' }}
+                  />
+                  <div
+                    className="skeleton-block skeleton-block--dark"
+                    style={{ height: '12px', width: '90px', borderRadius: '15px' }}
+                  />
+                </div>
+              </div>
+
+              {/* Chevron placeholder */}
+              <div
+                className="skeleton-block skeleton-block--dark"
+                style={{ height: '14px', width: '14px', borderRadius: '4px' }}
+              />
+            </div>
+
+            {/* Description line */}
+            <div
+              className="skeleton-block skeleton-block--dark"
+              style={{
+                height: '10px',
+                width: '65%',
+                borderRadius: '5px',
+                marginTop: '0.5rem',
+                marginLeft: '3rem'
+              }}
+            />
+          </div>
+
+          {/* Activities section */}
+          <div style={{ padding: '1.2rem 1.5rem 1.5rem' }}>
+            {/* "Activities" heading */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.8rem' }}>
+              <div className="skeleton-block" style={{ width: '3px', height: '16px', borderRadius: '2px' }} />
+              <div className="skeleton-block" style={{ height: '14px', width: '80px', borderRadius: '6px' }} />
+              <div className="skeleton-block" style={{ height: '14px', width: '30px', borderRadius: '10px' }} />
+            </div>
+
+            {/* Activity items */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              {[1, 2].map((n) => (
+                <div
+                  key={n}
+                  style={{
+                    padding: '0.6rem 1rem',
+                    borderRadius: '10px',
+                    background: '#f9fbf7',
+                    border: '1px solid rgba(0,0,0,0.05)'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                    {/* Activity icon circle */}
+                    <div
+                      className="skeleton-block skeleton-circle"
+                      style={{ width: '28px', height: '28px', flexShrink: 0 }}
+                    />
+                    <div style={{ flex: 1 }}>
+                      {/* Activity name */}
+                      <div
+                        className="skeleton-block"
+                        style={{ height: '12px', width: '55%', borderRadius: '5px', marginBottom: '6px' }}
+                      />
+                      {/* Activity description */}
+                      <div
+                        className="skeleton-block"
+                        style={{ height: '9px', width: '80%', borderRadius: '5px' }}
+                      />
+                    </div>
+                    {/* Chevron */}
+                    <div
+                      className="skeleton-block"
+                      style={{ height: '10px', width: '10px', borderRadius: '3px' }}
+                    />
+                  </div>
+
+                  {/* Explanation blocks (only on first item to vary) */}
+                  {n === 1 && (
+                    <div style={{
+                      marginTop: '0.5rem',
+                      paddingTop: '0.5rem',
+                      borderTop: '1px dashed rgba(0,0,0,0.06)',
+                      paddingLeft: '2.5rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.4rem'
+                    }}>
+                      {[1, 2].map((e) => (
+                        <div
+                          key={e}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            gap: '0.4rem',
+                            padding: '0.3rem 0.6rem',
+                            background: '#f9fbf7',
+                            borderRadius: '6px',
+                            borderLeft: '3px solid #e2e9e5'
+                          }}
+                        >
+                          <div
+                            className="skeleton-block"
+                            style={{ width: '10px', height: '10px', borderRadius: '3px', marginTop: '3px', flexShrink: 0 }}
+                          />
+                          <div style={{ flex: 1 }}>
+                            <div
+                              className="skeleton-block"
+                              style={{ height: '9px', width: '50%', borderRadius: '4px', marginBottom: '5px' }}
+                            />
+                            <div
+                              className="skeleton-block"
+                              style={{ height: '8px', width: '90%', borderRadius: '4px' }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      ))}
+
+      <style>{`
+        @keyframes skeletonFadeIn {
+          from { opacity: 0; transform: translateY(15px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes skeletonShimmer {
+          0% { background-position: -500px 0; }
+          100% { background-position: 500px 0; }
+        }
+        @keyframes skeletonShimmerDark {
+          0% { background-position: -500px 0; }
+          100% { background-position: 500px 0; }
+        }
+        .skeleton-block {
+          background: linear-gradient(
+            90deg,
+            #eef2f0 0%,
+            #e2e9e5 20%,
+            #f5f8f6 40%,
+            #eef2f0 60%,
+            #eef2f0 100%
+          );
+          background-size: 1000px 100%;
+          animation: skeletonShimmer 1.6s infinite linear;
+          display: block;
+        }
+        .skeleton-block--dark {
+          background: linear-gradient(
+            90deg,
+            rgba(255,255,255,0.08) 0%,
+            rgba(255,255,255,0.18) 20%,
+            rgba(255,255,255,0.28) 40%,
+            rgba(255,255,255,0.18) 60%,
+            rgba(255,255,255,0.08) 100%
+          );
+          background-size: 1000px 100%;
+          animation: skeletonShimmerDark 1.6s infinite linear;
+        }
+        .skeleton-circle {
+          border-radius: 50%;
+        }
+      `}</style>
+    </div>
+  );
+};
+// ==================== END PROGRAMS SKELETON ====================
+
+
 const Programs = () => {
   const navigate = useNavigate();
   const [programs, setPrograms] = useState([]);
@@ -25,7 +242,7 @@ const Programs = () => {
     setError('');
     try {
       const programsRes = await fetch(`${API_BASE_URL}/prog/`);
-      
+
       let programsData = [];
       if (programsRes.ok) {
         const data = await programsRes.json();
@@ -50,7 +267,6 @@ const Programs = () => {
             const activitiesRes = await fetch(`${API_BASE_URL}/activity/by_program/?program_id=${program.id}`);
             if (activitiesRes.ok) {
               const activitiesData = await activitiesRes.json();
-              // Fetch explanations for each activity
               const activitiesWithExplanations = await Promise.all(
                 (Array.isArray(activitiesData) ? activitiesData : []).map(async (activity) => {
                   try {
@@ -75,7 +291,7 @@ const Programs = () => {
       );
 
       setPrograms(programsWithActivities);
-      
+
     } catch (error) {
       console.error('Error fetching data:', error);
       setError('Network error. Please check again later.');
@@ -196,24 +412,137 @@ const Programs = () => {
     return activity.icon || 'fas fa-tasks';
   };
 
+  // ==================== LOADING STATE (SKELETON) ====================
   if (loading) {
     return (
-      <div style={{ paddingTop: '70px', minHeight: '100vh', background: 'linear-gradient(135deg, #f9fbf7 0%, #f0f5ee 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center' }}>
+      <div style={{
+        paddingTop: '70px',
+        minHeight: '100vh',
+        background: '#f9fbf7'
+      }}>
+        {/* Hero skeleton (dark green gradient) */}
+        <div style={{
+          background: 'linear-gradient(135deg, #0B3B2F 0%, #1a5c48 50%, #2b7a5c 100%)',
+          color: 'white',
+          padding: '1.5rem 2rem',
+          textAlign: 'center',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
           <div style={{
-            width: '60px',
-            height: '60px',
-            border: '3px solid #F9C74F',
-            borderTopColor: '#0B3B2F',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-            margin: '0 auto 1rem'
+            position: 'absolute',
+            top: '-50%',
+            right: '-20%',
+            width: '600px',
+            height: '600px',
+            background: 'radial-gradient(circle, rgba(249,199,79,0.08) 0%, transparent 70%)',
+            borderRadius: '50%'
           }} />
-          <p style={{ marginTop: '1rem', color: '#666' }}>Loading programs...</p>
+          <div style={{
+            position: 'absolute',
+            bottom: '-40%',
+            left: '-10%',
+            width: '400px',
+            height: '400px',
+            background: 'radial-gradient(circle, rgba(249,199,79,0.05) 0%, transparent 70%)',
+            borderRadius: '50%'
+          }} />
+
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            {/* Badge */}
+            <div
+              className="skeleton-block skeleton-block--dark skeleton-pill"
+              style={{
+                height: '22px',
+                width: '130px',
+                margin: '0 auto 0.6rem',
+                animation: 'skeletonFadeIn 0.5s ease both'
+              }}
+            />
+            {/* Title */}
+            <div
+              className="skeleton-block skeleton-block--dark"
+              style={{
+                height: 'clamp(1.8rem, 4vw, 2.5rem)',
+                width: 'min(70%, 500px)',
+                margin: '0 auto 0.5rem',
+                borderRadius: '12px',
+                animation: 'skeletonFadeIn 0.5s ease 0.1s both'
+              }}
+            />
+            {/* Subtitle */}
+            <div
+              className="skeleton-block skeleton-block--dark"
+              style={{
+                height: 'clamp(0.85rem, 2vw, 1rem)',
+                width: 'min(80%, 600px)',
+                margin: '0 auto',
+                borderRadius: '8px',
+                animation: 'skeletonFadeIn 0.5s ease 0.2s both'
+              }}
+            />
+          </div>
         </div>
+
+        {/* Programs list skeleton */}
+        <div className="programs-container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
+          <ProgramsSkeleton count={3} />
+        </div>
+
+        <style>{`
+          @keyframes skeletonFadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes skeletonShimmer {
+            0% { background-position: -500px 0; }
+            100% { background-position: 500px 0; }
+          }
+          @keyframes skeletonShimmerDark {
+            0% { background-position: -500px 0; }
+            100% { background-position: 500px 0; }
+          }
+          .skeleton-block {
+            background: linear-gradient(
+              90deg,
+              #eef2f0 0%,
+              #e2e9e5 20%,
+              #f5f8f6 40%,
+              #eef2f0 60%,
+              #eef2f0 100%
+            );
+            background-size: 1000px 100%;
+            animation: skeletonShimmer 1.6s infinite linear;
+            display: block;
+          }
+          .skeleton-block--dark {
+            background: linear-gradient(
+              90deg,
+              rgba(255,255,255,0.08) 0%,
+              rgba(255,255,255,0.18) 20%,
+              rgba(255,255,255,0.28) 40%,
+              rgba(255,255,255,0.18) 60%,
+              rgba(255,255,255,0.08) 100%
+            );
+            background-size: 1000px 100%;
+            animation: skeletonShimmerDark 1.6s infinite linear;
+          }
+          .skeleton-pill {
+            border-radius: 50px;
+          }
+          .skeleton-circle {
+            border-radius: 50%;
+          }
+          @media (max-width: 768px) {
+            .programs-container {
+              padding: 1rem !important;
+            }
+          }
+        `}</style>
       </div>
     );
   }
+  // ==================== END LOADING STATE ====================
 
   if (error) {
     return (
@@ -232,17 +561,13 @@ const Programs = () => {
   return (
     <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f9fbf7' }}>
       <style>{`
-        @keyframes spin { 
-          0% { transform: rotate(0deg); } 
-          100% { transform: rotate(360deg); } 
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
-        @keyframes fadeIn { 
-          from { opacity: 0; } 
-          to { opacity: 1; } 
-        }
-        @keyframes slideInUp { 
-          from { opacity: 0; transform: translateY(50px); } 
-          to { opacity: 1; transform: translateY(0); } 
+        @keyframes slideInUp {
+          from { opacity: 0; transform: translateY(50px); }
+          to { opacity: 1; transform: translateY(0); }
         }
         @keyframes pulseGlow {
           0%, 100% { box-shadow: 0 0 20px rgba(249,199,79,0.2); }
@@ -252,11 +577,11 @@ const Programs = () => {
           0%, 100% { transform: translateY(0px); }
           50% { transform: translateY(-10px); }
         }
-        
+
         .modal-content::-webkit-scrollbar { width: 6px; }
         .modal-content::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
         .modal-content::-webkit-scrollbar-thumb { background: #F9C74F; border-radius: 3px; }
-        
+
         .program-card {
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -264,7 +589,7 @@ const Programs = () => {
           transform: translateY(-8px);
           box-shadow: 0 30px 60px rgba(0,0,0,0.15) !important;
         }
-        
+
         .activity-item {
           transition: all 0.3s ease;
           cursor: pointer;
@@ -274,7 +599,7 @@ const Programs = () => {
           transform: translateX(8px);
           border-color: #F9C74F !important;
         }
-        
+
         .explanation-item {
           transition: all 0.3s ease;
         }
@@ -282,11 +607,11 @@ const Programs = () => {
           transform: translateX(4px);
           box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
-        
+
         .pulse-glow {
           animation: pulseGlow 2s ease-in-out infinite;
         }
-        
+
         @media (max-width: 768px) {
           .programs-container {
             padding: 1rem !important;
@@ -321,7 +646,7 @@ const Programs = () => {
           background: 'radial-gradient(circle, rgba(249,199,79,0.05) 0%, transparent 70%)',
           borderRadius: '50%'
         }} />
-        
+
         <div style={{ position: 'relative', zIndex: 1 }}>
           <div data-aos="fade-up" style={{ marginBottom: '0.3rem' }}>
             <span style={{
@@ -337,21 +662,21 @@ const Programs = () => {
               Our Programs
             </span>
           </div>
-          <h1 data-aos="fade-up" data-aos-delay="100" style={{ 
-            fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', 
+          <h1 data-aos="fade-up" data-aos-delay="100" style={{
+            fontSize: 'clamp(1.8rem, 4vw, 2.5rem)',
             marginBottom: '0.3rem',
             fontWeight: 700,
             letterSpacing: '-0.02em'
           }}>
             Empowering Communities
           </h1>
-          <p data-aos="fade-up" data-aos-delay="200" style={{ 
-            fontSize: 'clamp(0.85rem, 2vw, 1rem)', 
-            maxWidth: '700px', 
+          <p data-aos="fade-up" data-aos-delay="200" style={{
+            fontSize: 'clamp(0.85rem, 2vw, 1rem)',
+            maxWidth: '700px',
             margin: '0 auto',
             opacity: 0.9
           }}>
-            Discover our transformative programs developing youth leadership, 
+            Discover our transformative programs developing youth leadership,
             environmental resilience, and career opportunities across Tanzania
           </p>
         </div>
@@ -359,7 +684,7 @@ const Programs = () => {
 
       {/* Programs List Section */}
       <div className="programs-container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem 2rem' }}>
-        
+
         {programs.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '4rem' }}>
             <i className="fas fa-chalkboard-user" style={{ fontSize: '4rem', color: '#ddd' }}></i>
@@ -368,9 +693,9 @@ const Programs = () => {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             {programs.map((program, idx) => (
-              <div 
-                key={program.id} 
-                data-aos="fade-up" 
+              <div
+                key={program.id}
+                data-aos="fade-up"
                 data-aos-delay={idx * 100}
                 className="program-card"
                 style={{
@@ -382,7 +707,7 @@ const Programs = () => {
                 }}
               >
                 {/* Thin Program Header */}
-                <div 
+                <div
                   style={{
                     background: getCategoryGradient(program.category),
                     padding: '0.8rem 1.5rem',
@@ -412,7 +737,7 @@ const Programs = () => {
                     background: 'rgba(255,255,255,0.03)',
                     pointerEvents: 'none'
                   }} />
-                  
+
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap', position: 'relative', zIndex: 1 }}>
                     <div style={{
                       width: '36px',
@@ -463,12 +788,12 @@ const Programs = () => {
                       <i className="fas fa-chevron-right"></i>
                     </div>
                   </div>
-                  
+
                   {program.description && (
-                    <p style={{ 
-                      color: 'rgba(255,255,255,0.85)', 
-                      marginTop: '0.3rem', 
-                      marginBottom: 0, 
+                    <p style={{
+                      color: 'rgba(255,255,255,0.85)',
+                      marginTop: '0.3rem',
+                      marginBottom: 0,
                       fontSize: '0.8rem',
                       position: 'relative',
                       zIndex: 1,
@@ -481,9 +806,9 @@ const Programs = () => {
 
                 {/* Activities Section */}
                 <div style={{ padding: '1.2rem 1.5rem 1.5rem' }}>
-                  <h3 style={{ 
-                    color: '#0B3B2F', 
-                    marginBottom: '0.8rem', 
+                  <h3 style={{
+                    color: '#0B3B2F',
+                    marginBottom: '0.8rem',
                     fontSize: '0.95rem',
                     display: 'flex',
                     alignItems: 'center',
@@ -507,12 +832,12 @@ const Programs = () => {
                       {program.activities?.length || 0}
                     </span>
                   </h3>
-                  
+
                   {program.activities && program.activities.length > 0 ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                       {program.activities.map((activity, actIdx) => (
-                        <div 
-                          key={activity.id} 
+                        <div
+                          key={activity.id}
                           className="activity-item"
                           style={{
                             display: 'flex',
@@ -570,18 +895,17 @@ const Programs = () => {
                               <i className="fas fa-chevron-right"></i>
                             </div>
                           </div>
-                          
-                          {/* All Explanations Visible */}
+
                           {activity.explanations && activity.explanations.length > 0 && (
-                            <div style={{ 
-                              marginTop: '0.5rem', 
-                              paddingTop: '0.5rem', 
+                            <div style={{
+                              marginTop: '0.5rem',
+                              paddingTop: '0.5rem',
                               borderTop: '1px dashed rgba(0,0,0,0.06)',
                               paddingLeft: '2.5rem'
                             }}>
-                              <div style={{ 
-                                display: 'flex', 
-                                flexDirection: 'column', 
+                              <div style={{
+                                display: 'flex',
+                                flexDirection: 'column',
                                 gap: '0.4rem'
                               }}>
                                 {activity.explanations.map((exp, expIdx) => (
@@ -594,7 +918,7 @@ const Programs = () => {
                                     borderRadius: '6px',
                                     borderLeft: `3px solid ${getExplanationTypeColor(exp.explanation_type)}`
                                   }}>
-                                    <i className={getExplanationTypeIcon(exp.explanation_type)} style={{ 
+                                    <i className={getExplanationTypeIcon(exp.explanation_type)} style={{
                                       color: getExplanationTypeColor(exp.explanation_type),
                                       fontSize: '0.6rem',
                                       marginTop: '0.1rem'
@@ -614,9 +938,9 @@ const Programs = () => {
                                           {getExplanationTypeLabel(exp.explanation_type)}
                                         </span>
                                       </div>
-                                      <p style={{ 
-                                        fontSize: '0.7rem', 
-                                        color: '#555', 
+                                      <p style={{
+                                        fontSize: '0.7rem',
+                                        color: '#555',
                                         margin: '0.1rem 0 0 0',
                                         lineHeight: '1.4',
                                         whiteSpace: 'pre-wrap'
@@ -644,7 +968,7 @@ const Programs = () => {
         )}
       </div>
 
-      {/* Program Modal */}
+      {/* Program Modal — unchanged */}
       {showProgramModal && selectedProgram && (
         <div className="modal-overlay" onClick={closeProgramModal} style={{
           position: 'fixed',
@@ -671,7 +995,7 @@ const Programs = () => {
             position: 'relative',
             animation: 'slideInUp 0.3s ease'
           }}>
-            <div style={{ 
+            <div style={{
               background: getCategoryGradient(selectedProgram.category),
               padding: '1.5rem',
               textAlign: 'center',
@@ -699,7 +1023,7 @@ const Programs = () => {
               onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
                 <i className="fas fa-times"></i>
               </button>
-              
+
               <div style={{
                 width: '60px',
                 height: '60px',
@@ -716,11 +1040,11 @@ const Programs = () => {
               }}>
                 {getCategoryEmoji(selectedProgram.category)}
               </div>
-              
+
               <h2 style={{ color: 'white', marginTop: '0.5rem', marginBottom: '0.3rem', fontSize: 'clamp(1.2rem, 4vw, 1.5rem)' }}>
                 {selectedProgram.name}
               </h2>
-              
+
               <span style={{
                 display: 'inline-block',
                 background: 'rgba(255,255,255,0.2)',
@@ -732,7 +1056,7 @@ const Programs = () => {
                 {getCategoryName(selectedProgram.category)}
               </span>
             </div>
-            
+
             <div style={{ padding: 'clamp(1rem, 4vw, 1.5rem)' }}>
               <div style={{ marginBottom: '1rem' }}>
                 <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -743,17 +1067,17 @@ const Programs = () => {
                   {selectedProgram.description || 'No description available'}
                 </p>
               </div>
-              
+
               <div>
                 <h3 style={{ color: '#0B3B2F', marginBottom: '0.8rem', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <i className="fas fa-tasks" style={{ color: '#F9C74F' }}></i>
                   Activities ({selectedProgram.activities?.length || 0})
                 </h3>
-                
+
                 {selectedProgram.activities && selectedProgram.activities.length > 0 ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                     {selectedProgram.activities.map((activity, idx) => (
-                      <div 
+                      <div
                         key={activity.id}
                         style={{
                           border: `1px solid ${getCategoryColor(selectedProgram.category)}30`,
@@ -805,7 +1129,7 @@ const Programs = () => {
                             {activity.explanations?.length || 0} explanations
                           </span>
                         </div>
-                        
+
                         {activity.description && (
                           <div style={{ padding: '0.3rem 1rem', background: 'white' }}>
                             <p style={{ fontSize: '0.75rem', color: '#666', margin: '0.2rem 0' }}>
@@ -813,7 +1137,7 @@ const Programs = () => {
                             </p>
                           </div>
                         )}
-                        
+
                         {activity.explanations && activity.explanations.length > 0 && (
                           <div style={{ padding: '0.3rem 1rem', background: '#f9fbf7', borderTop: '1px solid #f0f0f0' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
@@ -827,7 +1151,7 @@ const Programs = () => {
                                   borderRadius: '6px',
                                   borderLeft: `3px solid ${getExplanationTypeColor(exp.explanation_type)}`
                                 }}>
-                                  <i className={getExplanationTypeIcon(exp.explanation_type)} style={{ 
+                                  <i className={getExplanationTypeIcon(exp.explanation_type)} style={{
                                     color: getExplanationTypeColor(exp.explanation_type),
                                     fontSize: '0.6rem',
                                     marginTop: '0.1rem'
@@ -865,17 +1189,17 @@ const Programs = () => {
                   </p>
                 )}
               </div>
-              
-              <button 
-                onClick={closeProgramModal} 
-                style={{ 
-                  width: '100%', 
+
+              <button
+                onClick={closeProgramModal}
+                style={{
+                  width: '100%',
                   background: 'linear-gradient(135deg, #F9C74F, #f6b83e)',
-                  border: 'none', 
-                  padding: '0.6rem', 
-                  borderRadius: '50px', 
-                  color: '#0B3B2F', 
-                  fontWeight: 600, 
+                  border: 'none',
+                  padding: '0.6rem',
+                  borderRadius: '50px',
+                  color: '#0B3B2F',
+                  fontWeight: 600,
                   cursor: 'pointer',
                   marginTop: '1rem',
                   transition: 'all 0.3s ease',
@@ -899,7 +1223,7 @@ const Programs = () => {
         </div>
       )}
 
-      {/* Activity Modal with Full Explanations */}
+      {/* Activity Modal — unchanged */}
       {showActivityModal && selectedActivity && (
         <div className="modal-overlay" onClick={closeActivityModal} style={{
           position: 'fixed',
@@ -948,8 +1272,8 @@ const Programs = () => {
             onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
               <i className="fas fa-times"></i>
             </button>
-            
-            <div style={{ 
+
+            <div style={{
               background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)',
               padding: '1.5rem',
               textAlign: 'center',
@@ -988,7 +1312,7 @@ const Programs = () => {
                 </p>
               )}
             </div>
-            
+
             <div style={{ padding: 'clamp(1rem, 4vw, 1.5rem)' }}>
               {selectedActivity.description && (
                 <div style={{ marginBottom: '1rem' }}>
@@ -999,10 +1323,10 @@ const Programs = () => {
                   <p style={{ color: '#666', lineHeight: '1.6', fontSize: '0.85rem' }}>{selectedActivity.description}</p>
                 </div>
               )}
-              
+
               {(selectedActivity.target_audience || selectedActivity.max_participants) && (
-                <div style={{ 
-                  display: 'grid', 
+                <div style={{
+                  display: 'grid',
                   gridTemplateColumns: selectedActivity.target_audience && selectedActivity.max_participants ? '1fr 1fr' : '1fr',
                   gap: '0.6rem',
                   marginBottom: '1rem'
@@ -1021,13 +1345,12 @@ const Programs = () => {
                   )}
                 </div>
               )}
-              
-              {/* Full Explanations */}
+
               {selectedActivity.explanations && selectedActivity.explanations.length > 0 ? (
                 <div>
-                  <h3 style={{ 
-                    color: '#0B3B2F', 
-                    marginBottom: '0.6rem', 
+                  <h3 style={{
+                    color: '#0B3B2F',
+                    marginBottom: '0.6rem',
                     fontSize: '0.95rem',
                     display: 'flex',
                     alignItems: 'center',
@@ -1045,10 +1368,10 @@ const Programs = () => {
                       {selectedActivity.explanations.length}
                     </span>
                   </h3>
-                  
+
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                     {selectedActivity.explanations.map((explanation, idx) => (
-                      <div 
+                      <div
                         key={explanation.id || idx}
                         className="explanation-item"
                         style={{
@@ -1083,7 +1406,7 @@ const Programs = () => {
                           }}>
                             {idx + 1}
                           </span>
-                          <i className={getExplanationTypeIcon(explanation.explanation_type)} style={{ 
+                          <i className={getExplanationTypeIcon(explanation.explanation_type)} style={{
                             color: getExplanationTypeColor(explanation.explanation_type),
                             fontSize: '0.8rem'
                           }}></i>
@@ -1101,13 +1424,13 @@ const Programs = () => {
                             {getExplanationTypeLabel(explanation.explanation_type)}
                           </span>
                         </div>
-                        
+
                         <div style={{ padding: '0.8rem 1rem' }}>
-                          <p style={{ 
-                            color: '#444', 
-                            lineHeight: '1.7', 
-                            margin: 0, 
-                            whiteSpace: 'pre-wrap', 
+                          <p style={{
+                            color: '#444',
+                            lineHeight: '1.7',
+                            margin: 0,
+                            whiteSpace: 'pre-wrap',
                             fontSize: '0.85rem'
                           }}>
                             {explanation.content}
@@ -1123,17 +1446,17 @@ const Programs = () => {
                   <p style={{ marginTop: '0.3rem', color: '#999', fontSize: '0.8rem' }}>No detailed explanations available yet.</p>
                 </div>
               )}
-              
-              <button 
-                onClick={closeActivityModal} 
-                style={{ 
-                  width: '100%', 
+
+              <button
+                onClick={closeActivityModal}
+                style={{
+                  width: '100%',
                   background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)',
-                  border: 'none', 
-                  padding: '0.6rem', 
-                  borderRadius: '50px', 
-                  color: 'white', 
-                  fontWeight: 600, 
+                  border: 'none',
+                  padding: '0.6rem',
+                  borderRadius: '50px',
+                  color: 'white',
+                  fontWeight: 600,
                   cursor: 'pointer',
                   marginTop: '1rem',
                   transition: 'all 0.3s ease',

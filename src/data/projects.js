@@ -11,24 +11,36 @@ import eventi from '../assets/imageg.jpg';
 import eventj from '../assets/eventj.jpg';
 import eventk from '../assets/eventk.jpg';
 import eventl from '../assets/eventl.jpg';
+import kaka from '../assets/kaka.jpeg';
+import keke from '../assets/keke.jpeg';
+import keko from '../assets/keko.jpeg';
+import kako from '../assets/kako.jpeg';
+import kaki from '../assets/kaki.jpeg';
+import kaku from '../assets/kaku.jpeg';
 
 export const projects = [
   { 
-    title: "Solar-Powered Water Pump", 
+    title: "VUMA team with environmental analysts", 
     cat: "environment", 
-    img: eventa,
-    description: "Sustainable water solution for rural communities"
+    img: kaki,
+    description: "Sustainable environment for future generation"
   },
   { 
-    title: "Youth Leadership Academy", 
+    title: "VUMA Leader describing about an Organization", 
     cat: "leadership", 
-    img: eventb,
+    img: kaku,
     description: "Empowering next generation of African leaders"
+  },
+    { 
+    title: "Mazingira day event", 
+    cat: "green", 
+    img: keke,
+    description: "Here    we  ensure that  our  environments   becomes safe  for  all livings"
   },
   { 
     title: "Plastic Upcycling Hub", 
     cat: "environment", 
-    img: eventc,
+    img: kaka,
     description: "Turning waste into valuable products"
   },
   { 
@@ -44,16 +56,16 @@ export const projects = [
     description: "Innovative food production in city spaces"
   },
   { 
-    title: "Climate Tech Bootcamp", 
+    title: "VUMA Team with Climate Tech Bootcamp and projects", 
     cat: "leadership", 
-    img: eventf,
+    img: keko,
     description: "Tech skills for climate solutions"
   },
  
   { 
-    title: "Zero Waste Initiative", 
+    title: "VUMA team for ensuring Zero Waste Initiative", 
     cat: "environment", 
-    img: eventh,
+    img: kako,
     description: "Promoting waste reduction and recycling"
   },
   // { 

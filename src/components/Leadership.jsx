@@ -112,21 +112,82 @@ const leadershipData = [
       "Enhanced stakeholder collaboration and event management systems, improving the reach and impact of VUMA's initiatives."
     ]
   },
-{
-  id: 7,
-  name: "Elisha Sabbath",
-  role: "Member (IT Technician)",
-  image: eventt,
-  isFounder: false,
-  bio: "Providing technical support, managing digital systems, and ensuring reliable IT infrastructure for all VUMA Tanzania operations and events.",
-  fullBio: "Elisha Sabbath serves as the IT Technician at VUMA Tanzania, where he is responsible for maintaining and supporting the organization's digital infrastructure, troubleshooting hardware and software issues, and ensuring that all technological systems run smoothly. He provides technical assistance during boot camps, hackathons, forums, and community outreach programs, helping participants and staff make effective use of digital tools. Through his technical expertise and problem-solving skills, he ensures that VUMA's operations remain efficient, secure, and technology-driven, enabling the organization to deliver impactful programs without technical disruptions.",
-  achievements: [
-    "Maintained and optimized VUMA's IT infrastructure, ensuring minimal downtime and reliable system performance across all operations.",
-    "Provided on-site technical support during boot camps, hackathons, and expos, enabling smooth execution of digital activities and participant engagement.",
-    "Improved digital security and data management practices, safeguarding organizational information and enhancing overall operational efficiency."
-  ]
-}
+  {
+    id: 7,
+    name: "Elisha Sabbath",
+    role: "Member (IT Technician)",
+    image: eventt,
+    isFounder: false,
+    bio: "Providing technical support, managing digital systems, and ensuring reliable IT infrastructure for all VUMA Tanzania operations and events.",
+    fullBio: "Elisha Sabbath serves as the IT Technician at VUMA Tanzania, where he is responsible for maintaining and supporting the organization's digital infrastructure, troubleshooting hardware and software issues, and ensuring that all technological systems run smoothly. He provides technical assistance during boot camps, hackathons, forums, and community outreach programs, helping participants and staff make effective use of digital tools. Through his technical expertise and problem-solving skills, he ensures that VUMA's operations remain efficient, secure, and technology-driven, enabling the organization to deliver impactful programs without technical disruptions.",
+    achievements: [
+      "Maintained and optimized VUMA's IT infrastructure, ensuring minimal downtime and reliable system performance across all operations.",
+      "Provided on-site technical support during boot camps, hackathons, and expos, enabling smooth execution of digital activities and participant engagement.",
+      "Improved digital security and data management practices, safeguarding organizational information and enhancing overall operational efficiency."
+    ]
+  }
 ];
+
+// ==================== STATS SKELETON ====================
+const StatsSkeleton = () => {
+  const items = [0, 1, 2, 3];
+  return (
+    <div style={{
+      display: 'flex',
+      flexWrap: 'wrap',
+      justifyContent: 'space-around',
+      gap: '2rem',
+      textAlign: 'center'
+    }}>
+      {items.map((i) => (
+        <div
+          key={i}
+          style={{
+            flex: 1,
+            minWidth: '150px',
+            padding: '1.5rem',
+            borderRadius: '24px',
+            animation: `skeletonFadeIn 0.5s ease ${i * 0.1}s both`
+          }}
+        >
+          {/* Icon circle */}
+          <div
+            className="skeleton-block skeleton-circle"
+            style={{
+              width: '50px',
+              height: '50px',
+              margin: '0 auto 0.8rem'
+            }}
+          />
+
+          {/* Big number */}
+          <div
+            className="skeleton-block"
+            style={{
+              height: '40px',
+              width: '65%',
+              borderRadius: '10px',
+              margin: '0 auto 0.8rem'
+            }}
+          />
+
+          {/* Label */}
+          <div
+            className="skeleton-block"
+            style={{
+              height: '12px',
+              width: '75%',
+              borderRadius: '6px',
+              margin: '0 auto'
+            }}
+          />
+        </div>
+      ))}
+    </div>
+  );
+};
+// ==================== END STATS SKELETON ====================
+
 
 const Leadership = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -138,7 +199,7 @@ const Leadership = () => {
   const sectionRef = useRef(null);
   const statsRef = useRef(null);
   const carouselRef = useRef(null);
-  
+
   // Stats state - fetched from API
   const [statsData, setStatsData] = useState({
     years_experience: 0,
@@ -146,7 +207,7 @@ const Leadership = () => {
     youth_empowered: 0,
     community_partners: 0
   });
-  
+
   const [counters, setCounters] = useState({
     experience: 0,
     projects: 0,
@@ -171,13 +232,13 @@ const Leadership = () => {
     try {
       setStatsError(null);
       const response = await fetch(`${API_BASE_URL}/stats/`);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
-      
+
       if (data.success && data.data) {
         const newStatsData = {
           years_experience: data.data.years_experience || 0,
@@ -185,24 +246,21 @@ const Leadership = () => {
           youth_empowered: data.data.youth_empowered || 0,
           community_partners: data.data.community_partners || 0
         };
-        
+
         setStatsData(newStatsData);
-        
-        // If stats are visible and not currently animating, restart counters with new values
+
         if (statsVisible && !isAnimatingRef.current) {
-          // Reset counters to 0 before starting new animation
           setCounters({
             experience: 0,
             projects: 0,
             youth: 0,
             partners: 0
           });
-          // Start counters with new values after a small delay
           setTimeout(() => {
             startCounters(newStatsData);
           }, 100);
         }
-        
+
         setIsStatsLoading(false);
       } else {
         throw new Error('Invalid data format from API');
@@ -210,7 +268,6 @@ const Leadership = () => {
     } catch (error) {
       console.error('Error fetching stats:', error);
       setStatsError(error.message);
-      // Fallback to default values if API fails
       const fallbackData = {
         years_experience: 15,
         projects_completed: 4,
@@ -225,13 +282,11 @@ const Leadership = () => {
   // Initial fetch and auto-fetch every 5 seconds
   useEffect(() => {
     fetchStats();
-    
-    // Set up interval for auto-fetch every 5 seconds
+
     fetchIntervalRef.current = setInterval(() => {
       fetchStats();
     }, 5000);
 
-    // Cleanup interval on unmount
     return () => {
       if (fetchIntervalRef.current) {
         clearInterval(fetchIntervalRef.current);
@@ -295,7 +350,7 @@ const Leadership = () => {
     };
   }, [teamMembers.length]);
 
-  // Stats counter observer - uses fetched stats data
+  // Stats counter observer
   React.useEffect(() => {
     const statsObserver = new IntersectionObserver(
       (entries) => {
@@ -304,7 +359,6 @@ const Leadership = () => {
             setStatsVisible(true);
             startCounters(statsData);
           } else if (entry.isIntersecting && !statsVisible && !isStatsLoading) {
-            // If stats are already visible but we need to restart
             setStatsVisible(true);
           }
         });
@@ -324,10 +378,9 @@ const Leadership = () => {
   }, [statsData, isStatsLoading]);
 
   const startCounters = (data) => {
-    // Don't start if already animating
     if (isAnimatingRef.current) return;
-    
-    const duration = 2500; // 2.5 seconds
+
+    const duration = 2500;
     const startTime = performance.now();
     const startValues = {
       experience: 0,
@@ -335,49 +388,43 @@ const Leadership = () => {
       youth: 0,
       partners: 0
     };
-    
+
     const targets = {
       experience: data.years_experience || 0,
       projects: data.projects_completed || 0,
       youth: data.youth_empowered || 0,
       partners: data.community_partners || 0
     };
-    
+
     isAnimatingRef.current = true;
-    
-    // Cancel any existing animation
+
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
     }
-    
+
     const animate = (currentTime) => {
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      
-      // Ease out cubic function for smooth deceleration
       const eased = 1 - Math.pow(1 - progress, 3);
-      
-      // Calculate current values
+
       const currentValues = {};
       Object.keys(targets).forEach(key => {
         const target = targets[key];
         const start = startValues[key] || 0;
         currentValues[key] = Math.round(start + (target - start) * eased);
       });
-      
+
       setCounters(currentValues);
-      
+
       if (progress < 1) {
-        // Continue animation
         animationFrameRef.current = requestAnimationFrame(animate);
       } else {
-        // Animation complete - set final values
         setCounters(targets);
         isAnimatingRef.current = false;
         animationFrameRef.current = null;
       }
     };
-    
+
     animationFrameRef.current = requestAnimationFrame(animate);
   };
 
@@ -397,7 +444,6 @@ const Leadership = () => {
     setImageLoaded(prev => ({ ...prev, [id]: true }));
   };
 
-  // Pause auto-scroll on hover
   const handleCarouselMouseEnter = () => {
     if (carouselRef.current && carouselRef.current._animationId) {
       cancelAnimationFrame(carouselRef.current._animationId);
@@ -444,7 +490,6 @@ const Leadership = () => {
     );
   }
 
-  // Fixed card size for ALL cards
   const cardWidth = 300;
   const cardImageSize = 120;
 
@@ -488,10 +533,6 @@ const Leadership = () => {
             70% { transform: scale(0.9); }
             100% { transform: scale(1); }
           }
-          @keyframes shimmer {
-            0% { background-position: -1000px 0; }
-            100% { background-position: 1000px 0; }
-          }
           @keyframes slideInUp {
             from { opacity: 0; transform: translateY(50px); }
             to { opacity: 1; transform: translateY(0); }
@@ -504,87 +545,81 @@ const Leadership = () => {
             0% { transform: translateX(0); }
             100% { transform: translateX(-50%); }
           }
-          
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+          @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
           }
-          
+
           .leader-card {
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             width: ${cardWidth}px;
             min-width: ${cardWidth}px;
           }
-          
+
           .leader-card:hover {
             transform: translateY(-10px) scale(1.02) !important;
             box-shadow: 0 25px 50px rgba(0,0,0,0.15) !important;
           }
-          
+
           .leader-card:hover .profile-image {
             transform: scale(1.05);
           }
-          
+
           .leader-card:hover .shine-effect {
             left: 100%;
           }
-          
+
           .profile-image {
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
           }
-          
+
           .shine-effect {
             transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1);
           }
-          
+
           .stat-card {
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
           }
-          
+
           .stat-card:hover {
             transform: translateY(-5px) scale(1.02);
             background: rgba(11,59,47,0.03);
           }
-          
+
           .modal-content {
             animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
           }
-          
+
           .modal-overlay {
             animation: fadeIn 0.3s ease;
           }
-          
+
           .carousel-track {
             display: flex;
             gap: 1.5rem;
             animation: scrollLeftToRight 30s linear infinite;
             width: fit-content;
           }
-          
+
           .carousel-container:hover .carousel-track {
             animation-play-state: paused;
           }
-          
-          @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-          }
-          
+
           .modal-content::-webkit-scrollbar {
             width: 6px;
           }
-          
+
           .modal-content::-webkit-scrollbar-track {
             background: #f1f1f1;
             border-radius: 3px;
           }
-          
+
           .modal-content::-webkit-scrollbar-thumb {
             background: #F9C74F;
             border-radius: 3px;
           }
-          
+
           @media (max-width: 768px) {
             .modal-content { max-height: 90vh; }
             .leader-card {
@@ -694,7 +729,6 @@ const Leadership = () => {
               }}
               className="shine-effect" />
 
-              {/* Founder Badge */}
               <div style={{
                 position: 'absolute',
                 top: '15px',
@@ -737,20 +771,21 @@ const Leadership = () => {
                   background: '#f0f0f0'
                 }}
                 className="profile-image">
+                  {/* SKELETON: avatar shimmer while image loads */}
                   {!imageLoaded[founder.id] && (
-                    <div style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      background: 'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
-                      backgroundSize: '200% 100%',
-                      animation: 'shimmer 1.5s infinite'
-                    }} />
+                    <div
+                      className="skeleton-block skeleton-circle"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0
+                      }}
+                    />
                   )}
-                  <img 
-                    src={founder.image} 
+                  <img
+                    src={founder.image}
                     alt={founder.name}
                     style={{
                       width: '100%',
@@ -806,10 +841,8 @@ const Leadership = () => {
           </div>
         )}
 
-        {/* Team Members - Moving Carousel Left to Right */}
-        <div style={{
-          marginTop: '2rem'
-        }}>
+        {/* Team Members - Moving Carousel */}
+        <div style={{ marginTop: '2rem' }}>
           <h3 style={{
             textAlign: 'center',
             fontSize: '1.5rem',
@@ -820,8 +853,8 @@ const Leadership = () => {
             <i className="fas fa-users" style={{ color: '#F9C74F', marginRight: '0.5rem' }}></i>
             Our Expert Team
           </h3>
-          
-          <div 
+
+          <div
             className="carousel-container"
             style={{
               width: '100%',
@@ -832,7 +865,7 @@ const Leadership = () => {
             onMouseEnter={handleCarouselMouseEnter}
             onMouseLeave={handleCarouselMouseLeave}
           >
-            <div 
+            <div
               ref={carouselRef}
               className="carousel-track"
               style={{
@@ -842,7 +875,6 @@ const Leadership = () => {
                 animation: 'scrollLeftToRight 30s linear infinite'
               }}
             >
-              {/* Double the team members for seamless infinite scroll */}
               {[...teamMembers, ...teamMembers].map((member, idx) => (
                 <div
                   key={`${member.id}-${idx}`}
@@ -901,20 +933,21 @@ const Leadership = () => {
                       background: '#f0f0f0'
                     }}
                     className="profile-image">
+                      {/* SKELETON: avatar shimmer while image loads */}
                       {!imageLoaded[member.id] && (
-                        <div style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          background: 'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
-                          backgroundSize: '200% 100%',
-                          animation: 'shimmer 1.5s infinite'
-                        }} />
+                        <div
+                          className="skeleton-block skeleton-circle"
+                          style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0
+                          }}
+                        />
                       )}
-                      <img 
-                        src={member.image} 
+                      <img
+                        src={member.image}
                         alt={member.name}
                         style={{
                           width: '100%',
@@ -969,8 +1002,7 @@ const Leadership = () => {
               ))}
             </div>
           </div>
-          
-          {/* Scroll Indicator */}
+
           <div style={{
             textAlign: 'center',
             marginTop: '1rem',
@@ -998,7 +1030,7 @@ const Leadership = () => {
         boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
         position: 'relative'
       }}>
-        {/* Auto-refresh indicator */}
+        {/* Auto-refresh indicator (uses fa-sync rotating icon — kept as status indicator, not a loader) */}
         <div style={{
           position: 'absolute',
           top: '1rem',
@@ -1010,34 +1042,12 @@ const Leadership = () => {
           gap: '0.4rem',
           opacity: 0.6
         }}>
-          <i className="fas fa-sync" style={{ fontSize: '0.5rem', animation: 'spin 2s linear infinite' }}></i>
+          <i className="fas fa-sync" style={{ fontSize: '0.5rem', animation: 'liveSpin 2s linear infinite' }}></i>
           <span>Live</span>
-          <style>{`
-            @keyframes spin {
-              0% { transform: rotate(0deg); }
-              100% { transform: rotate(360deg); }
-            }
-          `}</style>
         </div>
 
-        {/* Stats loading state */}
-        {isStatsLoading && (
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: '2rem'
-          }}>
-            <div style={{
-              width: '40px',
-              height: '40px',
-              border: '3px solid rgba(249,199,79,0.2)',
-              borderTop: '3px solid #F9C74F',
-              borderRadius: '50%',
-              animation: 'spin 0.8s linear infinite'
-            }} />
-          </div>
-        )}
+        {/* Stats loading state — SKELETON */}
+        {isStatsLoading && <StatsSkeleton />}
 
         {/* Stats error state */}
         {statsError && !isStatsLoading && (
@@ -1052,60 +1062,70 @@ const Leadership = () => {
         )}
 
         {/* Stats grid */}
-        <div style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          justifyContent: 'space-around',
-          gap: '2rem',
-          textAlign: 'center'
-        }}>
-          {[
-            { id: 'experience', icon: 'fas fa-calendar-alt', label: 'Years Combined Experience', value: counters.experience, suffix: '+' },
-            { id: 'projects', icon: 'fas fa-project-diagram', label: 'Projects Completed', value: counters.projects, suffix: '+' },
-            { id: 'youth', icon: 'fas fa-users', label: 'Youth Empowered', value: counters.youth.toLocaleString(), suffix: '+' },
-            { id: 'partners', icon: 'fas fa-handshake', label: 'Community Partners', value: counters.partners, suffix: '+' }
-          ].map((stat, idx) => (
-            <div 
-              key={stat.id}
-              className="stat-card"
-              style={{ 
-                flex: 1, 
-                minWidth: '150px',
-                padding: '1.5rem',
-                borderRadius: '24px',
-                cursor: 'pointer',
-                opacity: statsVisible ? 1 : 0,
-                transform: statsVisible ? 'translateY(0) scale(1)' : 'translateY(50px) scale(0.9)',
-                transition: `all 0.5s cubic-bezier(0.4, 0, 0.2, 1) ${idx * 0.1}s`
-              }}
-            >
-              <div style={{
-                width: '50px',
-                height: '50px',
-                background: 'rgba(249,199,79,0.15)',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 0.8rem'
-              }}>
-                <i className={stat.icon} style={{ fontSize: '1.3rem', color: '#F9C74F' }}></i>
+        {!isStatsLoading && (
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'space-around',
+            gap: '2rem',
+            textAlign: 'center'
+          }}>
+            {[
+              { id: 'experience', icon: 'fas fa-calendar-alt', label: 'Years Combined Experience', value: counters.experience, suffix: '+' },
+              { id: 'projects', icon: 'fas fa-project-diagram', label: 'Projects Completed', value: counters.projects, suffix: '+' },
+              { id: 'youth', icon: 'fas fa-users', label: 'Youth Empowered', value: counters.youth.toLocaleString(), suffix: '+' },
+              { id: 'partners', icon: 'fas fa-handshake', label: 'Community Partners', value: counters.partners, suffix: '+' }
+            ].map((stat, idx) => (
+              <div
+                key={stat.id}
+                className="stat-card"
+                style={{
+                  flex: 1,
+                  minWidth: '150px',
+                  padding: '1.5rem',
+                  borderRadius: '24px',
+                  cursor: 'pointer',
+                  opacity: statsVisible ? 1 : 0,
+                  transform: statsVisible ? 'translateY(0) scale(1)' : 'translateY(50px) scale(0.9)',
+                  transition: `all 0.5s cubic-bezier(0.4, 0, 0.2, 1) ${idx * 0.1}s`
+                }}
+              >
+                <div style={{
+                  width: '50px',
+                  height: '50px',
+                  background: 'rgba(249,199,79,0.15)',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 0.8rem'
+                }}>
+                  <i className={stat.icon} style={{ fontSize: '1.3rem', color: '#F9C74F' }}></i>
+                </div>
+                <div style={{
+                  fontSize: 'clamp(1.8rem, 5vw, 2.5rem)',
+                  fontWeight: 800,
+                  color: '#0B3B2F',
+                  fontFamily: 'monospace'
+                }}>
+                  {stat.value}{stat.suffix}
+                </div>
+                <div style={{ color: '#555', fontSize: '0.8rem', fontWeight: 500 }}>
+                  {stat.label}
+                </div>
               </div>
-              <div style={{ 
-                fontSize: 'clamp(1.8rem, 5vw, 2.5rem)', 
-                fontWeight: 800, 
-                color: '#0B3B2F',
-                fontFamily: 'monospace'
-              }}>
-                {stat.value}{stat.suffix}
-              </div>
-              <div style={{ color: '#555', fontSize: '0.8rem', fontWeight: 500 }}>
-                {stat.label}
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
+
+      {/* Global keyframes for this file (only ones still in use) */}
+      <style>{`
+        @keyframes liveSpin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
 
       {/* Leader Profile Modal */}
       {showModal && selectedLeader && (
@@ -1171,8 +1191,8 @@ const Leadership = () => {
                 overflow: 'hidden',
                 border: '4px solid #F9C74F'
               }}>
-                <img 
-                  src={selectedLeader.image} 
+                <img
+                  src={selectedLeader.image}
                   alt={selectedLeader.name}
                   style={{
                     width: '100%',

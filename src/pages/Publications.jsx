@@ -3,9 +3,126 @@ import { useNavigate } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
+// ==================== PUBLICATIONS SKELETON ====================
+const PublicationsSkeleton = ({ count = 5 }) => {
+  const items = Array.from({ length: count });
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      {items.map((_, idx) => (
+        <div
+          key={idx}
+          style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '12px',
+            border: '2px solid #e2e8f0',
+            padding: '18px 20px',
+            animation: `skeletonFadeIn 0.5s ease ${idx * 0.06}s both`
+          }}
+        >
+          {/* Title */}
+          <div
+            className="skeleton-block"
+            style={{
+              height: '18px',
+              width: '70%',
+              borderRadius: '6px',
+              marginBottom: '10px'
+            }}
+          />
+
+          {/* Author line */}
+          <div
+            className="skeleton-block"
+            style={{
+              height: '11px',
+              width: '35%',
+              borderRadius: '5px',
+              marginBottom: '10px'
+            }}
+          />
+
+          {/* Description lines */}
+          <div
+            className="skeleton-block"
+            style={{
+              height: '10px',
+              width: '100%',
+              borderRadius: '5px',
+              marginBottom: '6px'
+            }}
+          />
+          <div
+            className="skeleton-block"
+            style={{
+              height: '10px',
+              width: '85%',
+              borderRadius: '5px',
+              marginBottom: '12px'
+            }}
+          />
+
+          {/* Meta row: type badge + date + view link */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '8px'
+          }}>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <div
+                className="skeleton-block skeleton-pill"
+                style={{ height: '16px', width: '70px' }}
+              />
+              <div
+                className="skeleton-block"
+                style={{ height: '10px', width: '80px', borderRadius: '5px' }}
+              />
+            </div>
+            <div
+              className="skeleton-block"
+              style={{ height: '10px', width: '90px', borderRadius: '5px' }}
+            />
+          </div>
+        </div>
+      ))}
+
+      <style>{`
+        @keyframes skeletonFadeIn {
+          from { opacity: 0; transform: translateY(15px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes skeletonShimmer {
+          0% { background-position: -500px 0; }
+          100% { background-position: 500px 0; }
+        }
+        .skeleton-block {
+          background: linear-gradient(
+            90deg,
+            #eef2f0 0%,
+            #e2e9e5 20%,
+            #f5f8f6 40%,
+            #eef2f0 60%,
+            #eef2f0 100%
+          );
+          background-size: 1000px 100%;
+          animation: skeletonShimmer 1.6s infinite linear;
+          display: block;
+        }
+        .skeleton-pill {
+          border-radius: 60px;
+        }
+      `}</style>
+    </div>
+  );
+};
+// ==================== END PUBLICATIONS SKELETON ====================
+
+
 const Publications = () => {
   const navigate = useNavigate();
-  
+
   const [publications, setPublications] = useState([]);
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -23,7 +140,6 @@ const Publications = () => {
     setLoading(true);
     setError('');
     try {
-      // Fetch only published publications
       const response = await fetch(`${API_BASE_URL}/publications/by-status/?status=published`);
       const data = await response.json();
       if (data.success) {
@@ -85,36 +201,179 @@ const Publications = () => {
     return labels[type] || type;
   };
 
-  const getStatusColor = (status) => {
-    const colors = {
-      'published': '#10b981',
-      'pending': '#f59e0b',
-      'draft': '#6b7280',
-      'archived': '#ef4444'
-    };
-    return colors[status] || '#6b7280';
-  };
-
-  const getStatusLabel = (status) => {
-    const labels = {
-      'published': 'Published',
-      'pending': 'Pending Review',
-      'draft': 'Draft',
-      'archived': 'Archived'
-    };
-    return labels[status] || status;
-  };
-
+  // ==================== LOADING STATE (SKELETON) ====================
   if (loading) {
     return (
-      <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center' }}>
-          <i className="fas fa-spinner fa-spin" style={{ fontSize: '2rem', color: '#0B3B2F' }}></i>
-          <p style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: '#64748b' }}>Loading publications...</p>
+      <div style={styles.page}>
+        {/* Header skeleton */}
+        <header style={styles.header}>
+          <div style={styles.headerContent}>
+            <div style={{ position: 'relative' }}>
+              {/* Back arrow placeholder */}
+              <div
+                className="skeleton-block skeleton-block--dark"
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  width: '42px',
+                  height: '38px',
+                  borderRadius: '8px'
+                }}
+              />
+
+              {/* Title */}
+              <div
+                className="skeleton-block skeleton-block--dark"
+                style={{
+                  height: '2rem',
+                  width: 'min(60%, 340px)',
+                  margin: '0 auto 6px',
+                  borderRadius: '10px'
+                }}
+              />
+
+              {/* Underline */}
+              <div
+                className="skeleton-block skeleton-block--dark"
+                style={{
+                  height: '3px',
+                  width: '60px',
+                  margin: '4px auto 0',
+                  borderRadius: '2px'
+                }}
+              />
+            </div>
+
+            {/* Subtitle */}
+            <div
+              className="skeleton-block skeleton-block--dark"
+              style={{
+                height: '14px',
+                width: 'min(80%, 420px)',
+                margin: '10px auto 0',
+                borderRadius: '6px'
+              }}
+            />
+
+            {/* Stats badge */}
+            <div
+              className="skeleton-block skeleton-block--dark skeleton-pill"
+              style={{
+                height: '26px',
+                width: '180px',
+                margin: '12px auto 0'
+              }}
+            />
+          </div>
+
+          <style>{`
+            @keyframes skeletonShimmerDark {
+              0% { background-position: -500px 0; }
+              100% { background-position: 500px 0; }
+            }
+            .skeleton-block--dark {
+              background: linear-gradient(
+                90deg,
+                rgba(255,255,255,0.08) 0%,
+                rgba(255,255,255,0.18) 20%,
+                rgba(255,255,255,0.28) 40%,
+                rgba(255,255,255,0.18) 60%,
+                rgba(255,255,255,0.08) 100%
+              );
+              background-size: 1000px 100%;
+              animation: skeletonShimmerDark 1.6s infinite linear;
+              display: block;
+            }
+          `}</style>
+        </header>
+
+        <div style={styles.container}>
+          {/* Controls skeleton: search bar + filter pills */}
+          <div className="controls-row" style={styles.controls}>
+            <div className="search-wrapper" style={{ ...styles.searchWrapper, flex: '1 1 100%' }}>
+              <div
+                className="skeleton-block"
+                style={{
+                  height: '42px',
+                  width: '100%',
+                  borderRadius: '10px'
+                }}
+              />
+            </div>
+
+            <div className="filter-group" style={styles.filterGroup}>
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div
+                  key={i}
+                  className="skeleton-block skeleton-pill"
+                  style={{
+                    height: '32px',
+                    width: i === 1 ? '60px' : i === 2 ? '80px' : i === 3 ? '100px' : i === 4 ? '70px' : '70px'
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Results stats bar skeleton */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '8px 14px',
+            backgroundColor: '#f1f5f9',
+            borderRadius: '8px',
+            marginBottom: '16px'
+          }}>
+            <div className="skeleton-block" style={{ height: '16px', width: '24px', borderRadius: '4px' }} />
+            <div className="skeleton-block" style={{ height: '12px', width: '120px', borderRadius: '5px' }} />
+          </div>
+
+          {/* Publication cards skeleton */}
+          <PublicationsSkeleton count={5} />
+
+          {/* Footer skeleton */}
+          <div style={styles.footer}>
+            <div style={styles.footerContent}>
+              <div className="skeleton-block" style={{ height: '10px', width: '180px', borderRadius: '5px' }} />
+              <div className="skeleton-block" style={{ height: '10px', width: '6px', borderRadius: '50%' }} />
+              <div className="skeleton-block" style={{ height: '10px', width: '100px', borderRadius: '5px' }} />
+            </div>
+          </div>
         </div>
+
+        <style>{`
+          @keyframes skeletonFadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes skeletonShimmer {
+            0% { background-position: -500px 0; }
+            100% { background-position: 500px 0; }
+          }
+          .skeleton-block {
+            background: linear-gradient(
+              90deg,
+              #eef2f0 0%,
+              #e2e9e5 20%,
+              #f5f8f6 40%,
+              #eef2f0 60%,
+              #eef2f0 100%
+            );
+            background-size: 1000px 100%;
+            animation: skeletonShimmer 1.6s infinite linear;
+            display: block;
+          }
+          .skeleton-pill {
+            border-radius: 60px;
+          }
+        `}</style>
       </div>
     );
   }
+  // ==================== END LOADING STATE ====================
 
   if (error) {
     return (
@@ -239,8 +498,8 @@ const Publications = () => {
       <header style={styles.header}>
         <div style={styles.headerContent}>
           <div className="title-animate" style={styles.titleWrapper}>
-            <div 
-              className="back-arrow" 
+            <div
+              className="back-arrow"
               onClick={handleBack}
               style={styles.backArrow}
               onMouseEnter={(e) => e.currentTarget.style.transform = 'translateX(-4px)'}
@@ -248,7 +507,7 @@ const Publications = () => {
             >
               <i className="fas fa-arrow-left"></i>
             </div>
-            
+
             <h1 style={styles.title}>
               <span style={styles.titleIcon}>📚</span>
               <span className="title-glow" style={styles.titleText}>
@@ -260,7 +519,7 @@ const Publications = () => {
 
           <p style={styles.subtitle}>
             <span style={styles.subtitleIcon}>✦</span>
-            Advancing youth about  Leadership,environment  and Innovation
+            Advancing youth about Leadership, environment and Innovation
             <span style={styles.subtitleIcon}>✦</span>
           </p>
 
@@ -382,8 +641,8 @@ const Publications = () => {
                     )}
                     {pub.short_description && (
                       <p style={styles.pubDescription}>
-                        {pub.short_description.length > 150 
-                          ? pub.short_description.substring(0, 150) + '...' 
+                        {pub.short_description.length > 150
+                          ? pub.short_description.substring(0, 150) + '...'
                           : pub.short_description}
                       </p>
                     )}
@@ -400,10 +659,10 @@ const Publications = () => {
                       }}>{getTypeLabel(pub.type)}</span>
                       {pub.published_date && (
                         <span style={{ fontSize: '0.7rem', color: '#64748b' }}>
-                          {new Date(pub.published_date).toLocaleDateString('en-US', { 
-                            year: 'numeric', 
-                            month: 'short', 
-                            day: 'numeric' 
+                          {new Date(pub.published_date).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
                           })}
                         </span>
                       )}

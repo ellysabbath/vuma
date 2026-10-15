@@ -2,6 +2,107 @@ import React, { useEffect, useState } from 'react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
+// ==================== NEWS SKELETON ====================
+const NewsSkeleton = ({ count = 6 }) => {
+  const items = Array.from({ length: count });
+
+  return (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+      gap: '2rem'
+    }}>
+      {items.map((_, idx) => (
+        <div
+          key={idx}
+          className="news-skeleton-card"
+          style={{
+            background: 'white',
+            borderRadius: '16px',
+            overflow: 'hidden',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+            border: '1px solid #e2e8f0',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            animation: `skeletonFadeIn 0.5s ease ${idx * 0.08}s both`
+          }}
+        >
+          {/* Image placeholder */}
+          <div
+            className="skeleton-block"
+            style={{
+              height: '240px',
+              width: '100%',
+              borderRadius: 0
+            }}
+          />
+
+          {/* Content */}
+          <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
+            {/* Meta row */}
+            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>
+              <div className="skeleton-block" style={{ height: '10px', width: '80px', borderRadius: '5px' }} />
+              <div className="skeleton-block" style={{ height: '10px', width: '60px', borderRadius: '5px' }} />
+            </div>
+
+            {/* Title (2 lines) */}
+            <div className="skeleton-block" style={{ height: '16px', width: '100%', borderRadius: '6px', marginBottom: '8px' }} />
+            <div className="skeleton-block" style={{ height: '16px', width: '75%', borderRadius: '6px', marginBottom: '14px' }} />
+
+            {/* Excerpt (3 lines) */}
+            <div className="skeleton-block" style={{ height: '10px', width: '100%', borderRadius: '5px', marginBottom: '6px' }} />
+            <div className="skeleton-block" style={{ height: '10px', width: '95%', borderRadius: '5px', marginBottom: '6px' }} />
+            <div className="skeleton-block" style={{ height: '10px', width: '60%', borderRadius: '5px', marginBottom: '16px' }} />
+
+            {/* Footer */}
+            <div style={{
+              marginTop: 'auto',
+              paddingTop: '0.75rem',
+              borderTop: '1px solid #e2e8f0',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <div className="skeleton-block" style={{ height: '10px', width: '40px', borderRadius: '5px' }} />
+                <div className="skeleton-block" style={{ height: '10px', width: '40px', borderRadius: '5px' }} />
+              </div>
+              <div className="skeleton-block" style={{ height: '10px', width: '80px', borderRadius: '5px' }} />
+            </div>
+          </div>
+        </div>
+      ))}
+
+      <style>{`
+        @keyframes skeletonFadeIn {
+          from { opacity: 0; transform: translateY(15px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes skeletonShimmer {
+          0% { background-position: -500px 0; }
+          100% { background-position: 500px 0; }
+        }
+        .skeleton-block {
+          background: linear-gradient(
+            90deg,
+            #eef2f0 0%,
+            #e2e9e5 20%,
+            #f5f8f6 40%,
+            #eef2f0 60%,
+            #eef2f0 100%
+          );
+          background-size: 1000px 100%;
+          animation: skeletonShimmer 1.6s infinite linear;
+          display: block;
+        }
+      `}</style>
+    </div>
+  );
+};
+// ==================== END NEWS SKELETON ====================
+
+
 const News = () => {
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,10 +126,10 @@ const News = () => {
     setError('');
     try {
       const response = await fetch(`${API_BASE_URL}/news/`);
-      
+
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
-      
+
       if (data.success && Array.isArray(data.data)) {
         setNews(data.data);
       } else if (Array.isArray(data)) {
@@ -53,7 +154,7 @@ const News = () => {
       }
       return `data:image/jpeg;base64,${post.image_base64}`;
     }
-    
+
     if (post.image) {
       if (post.image.startsWith('http')) {
         return post.image;
@@ -63,14 +164,14 @@ const News = () => {
       }
       return `${MEDIA_BASE_URL}/media/${post.image}`;
     }
-    
+
     if (post.image_url) {
       if (post.image_url.startsWith('http')) {
         return post.image_url;
       }
       return `${MEDIA_BASE_URL}${post.image_url}`;
     }
-    
+
     return null;
   };
 
@@ -97,10 +198,10 @@ const News = () => {
         return dateString;
       }
       const date = new Date(dateString);
-      return date.toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
       });
     } catch {
       return dateString;
@@ -119,8 +220,8 @@ const News = () => {
       });
       const data = await response.json();
       if (data.success) {
-        setNews(prevNews => 
-          prevNews.map(item => 
+        setNews(prevNews =>
+          prevNews.map(item =>
             item.id === id ? { ...item, likes: data.likes } : item
           )
         );
@@ -139,14 +240,14 @@ const News = () => {
     setSelectedPost(post);
     setShowModal(true);
     document.body.style.overflow = 'hidden';
-    
+
     try {
       const response = await fetch(`${API_BASE_URL}/news/${post.id}/`);
       const data = await response.json();
       if (data.success) {
         setSelectedPost(data.data);
-        setNews(prevNews => 
-          prevNews.map(item => 
+        setNews(prevNews =>
+          prevNews.map(item =>
             item.id === post.id ? { ...item, views: data.data.views } : item
           )
         );
@@ -191,16 +292,42 @@ const News = () => {
     window.open(shareUrl, '_blank', 'width=600,height=400');
   };
 
+  // ==================== LOADING STATE (SKELETON) ====================
   if (loading) {
     return (
-      <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ width: '60px', height: '60px', margin: '0 auto', border: '3px solid rgba(11,59,47,0.1)', borderTopColor: '#0B3B2F', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-          <p style={{ marginTop: '1rem', fontSize: '0.875rem', color: '#64748b' }}>Loading news...</p>
+      <div style={{ paddingTop: '70px', background: '#f8fafc', minHeight: '100vh' }}>
+        {/* Thin Header skeleton */}
+        <div style={{
+          background: 'white',
+          borderBottom: '1px solid #e2e8f0',
+          padding: '1rem 2rem',
+          position: 'sticky',
+          top: '70px',
+          zIndex: 100,
+          boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+        }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <div className="skeleton-block" style={{ height: '18px', width: '180px', borderRadius: '8px', marginBottom: '6px' }} />
+                <div className="skeleton-block" style={{ height: '10px', width: '120px', borderRadius: '5px' }} />
+              </div>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <div className="skeleton-block" style={{ height: '12px', width: '60px', borderRadius: '5px' }} />
+                <div className="skeleton-block" style={{ height: '12px', width: '60px', borderRadius: '5px' }} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Skeleton grid */}
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
+          <NewsSkeleton count={6} />
         </div>
       </div>
     );
   }
+  // ==================== END LOADING STATE ====================
 
   if (error) {
     return (
@@ -253,7 +380,7 @@ const News = () => {
         </div>
       </div>
 
-      {/* Blog Cards Grid - FULL IMAGES VISIBLE (no cropping) */}
+      {/* Blog Cards Grid */}
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
         {news.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '4rem', background: 'white', borderRadius: '20px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
@@ -262,9 +389,9 @@ const News = () => {
           </div>
         ) : (
           <>
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', 
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
               gap: '2rem'
             }}>
               {displayedPosts.map((post, idx) => {
@@ -272,7 +399,7 @@ const News = () => {
                 const showFallback = imageErrors[post.id] || !imageUrl;
                 const initials = getInitials(post.title);
                 const bgColor = getRandomColor(post.id);
-                
+
                 return (
                   <div key={post.id} data-aos="fade-up" data-aos-delay={idx * 100} style={{
                     background: 'white',
@@ -297,13 +424,12 @@ const News = () => {
                     e.currentTarget.style.borderColor = '#e2e8f0';
                   }}
                   onClick={() => openModal(post)}>
-                    
-                    {/* FULL IMAGE - No cropping, object-fit contain shows entire image */}
+
                     <div style={{ height: '240px', overflow: 'hidden', background: '#f1f5f9', position: 'relative' }}>
                       {!showFallback && imageUrl ? (
-                        <img 
-                          src={imageUrl} 
-                          alt={post.title} 
+                        <img
+                          src={imageUrl}
+                          alt={post.title}
                           style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#f1f5f9' }}
                           onError={() => handleImageError(post.id)}
                         />
@@ -322,8 +448,7 @@ const News = () => {
                         </div>
                       )}
                     </div>
-                    
-                    {/* Content */}
+
                     <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
                         <span style={{ fontSize: '0.7rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
@@ -337,11 +462,11 @@ const News = () => {
                           </span>
                         )}
                       </div>
-                      
-                      <h3 style={{ 
-                        color: '#0B3B2F', 
-                        margin: '0 0 0.5rem 0', 
-                        fontSize: '1rem', 
+
+                      <h3 style={{
+                        color: '#0B3B2F',
+                        margin: '0 0 0.5rem 0',
+                        fontSize: '1rem',
                         fontWeight: 700,
                         lineHeight: '1.4',
                         display: '-webkit-box',
@@ -351,11 +476,11 @@ const News = () => {
                       }}>
                         {post.title}
                       </h3>
-                      
-                      <p style={{ 
-                        color: '#475569', 
-                        marginBottom: '1rem', 
-                        fontSize: '0.8rem', 
+
+                      <p style={{
+                        color: '#475569',
+                        marginBottom: '1rem',
+                        fontSize: '0.8rem',
                         lineHeight: '1.5',
                         flex: 1,
                         display: '-webkit-box',
@@ -365,10 +490,10 @@ const News = () => {
                       }}>
                         {post.excerpt || (post.content ? post.content.substring(0, 120) + '...' : 'No description available')}
                       </p>
-                      
-                      <div style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
+
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
                         justifyContent: 'space-between',
                         marginTop: '0.5rem',
                         paddingTop: '0.75rem',
@@ -396,7 +521,6 @@ const News = () => {
               })}
             </div>
 
-            {/* Load More Button */}
             {hasMore && (
               <div style={{ textAlign: 'center', marginTop: '3rem' }}>
                 <button onClick={loadMore} style={{
@@ -427,7 +551,7 @@ const News = () => {
         )}
       </div>
 
-      {/* Blog Post Modal - FULL IMAGE VISIBLE */}
+      {/* Modal — unchanged, but the like spinner inside is fine (button-level) */}
       {showModal && selectedPost && (
         <div className="modal-overlay" onClick={closeModal} style={{
           position: 'fixed',
@@ -454,12 +578,11 @@ const News = () => {
             position: 'relative',
             animation: 'slideInUp 0.3s ease'
           }}>
-            {/* Modal Header with FULL IMAGE - object-fit contain */}
             <div style={{ position: 'relative', height: '280px', overflow: 'hidden', background: '#f1f5f9' }}>
               {getImageUrl(selectedPost) && !imageErrors[selectedPost.id] ? (
-                <img 
-                  src={getImageUrl(selectedPost)} 
-                  alt={selectedPost.title} 
+                <img
+                  src={getImageUrl(selectedPost)}
+                  alt={selectedPost.title}
                   style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#f1f5f9' }}
                   onError={() => handleImageError(selectedPost.id)}
                 />
@@ -478,7 +601,7 @@ const News = () => {
                 </div>
               )}
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.5))' }} />
-              
+
               <button
                 onClick={closeModal}
                 style={{
@@ -505,7 +628,7 @@ const News = () => {
               >
                 <i className="fas fa-times"></i>
               </button>
-              
+
               <div style={{ position: 'absolute', bottom: '20px', left: '20px', right: '20px', zIndex: 10 }}>
                 <span style={{
                   display: 'inline-block',
@@ -525,9 +648,7 @@ const News = () => {
               </div>
             </div>
 
-            {/* Modal Body */}
             <div style={{ padding: '1.25rem' }}>
-              {/* Meta Information */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -551,11 +672,11 @@ const News = () => {
                   <i className="far fa-eye" style={{ marginRight: '0.3rem', color: '#F9C74F' }}></i>
                   {selectedPost.views || 0} views
                 </span>
-                <span 
+                <span
                   onClick={(e) => handleLike(selectedPost.id, e)}
-                  style={{ 
-                    fontSize: '0.75rem', 
-                    color: '#64748b', 
+                  style={{
+                    fontSize: '0.75rem',
+                    color: '#64748b',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -567,7 +688,6 @@ const News = () => {
                 </span>
               </div>
 
-              {/* Full Content */}
               <div style={{ marginBottom: '1.25rem' }}>
                 <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <i className="fas fa-info-circle" style={{ color: '#F9C74F' }}></i>
@@ -578,7 +698,6 @@ const News = () => {
                 </p>
               </div>
 
-              {/* Key Highlights */}
               {selectedPost.key_highlights && selectedPost.key_highlights.length > 0 && (
                 <div style={{ marginBottom: '1.25rem', background: '#f8fafc', padding: '0.75rem', borderRadius: '12px' }}>
                   <h4 style={{ color: '#0B3B2F', marginBottom: '0.5rem', fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -596,65 +715,28 @@ const News = () => {
                 </div>
               )}
 
-              {/* Share Section */}
               <div style={{ marginBottom: '1rem' }}>
                 <h4 style={{ color: '#0B3B2F', marginBottom: '0.5rem', fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <i className="fas fa-share-alt" style={{ color: '#F9C74F' }}></i>
                   Share this article
                 </h4>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <button onClick={() => shareOnSocial('facebook', selectedPost.title)} style={{
-                    background: '#1877f2',
-                    border: 'none',
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '50%',
-                    color: 'white',
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s ease'
-                  }}
+                  <button onClick={() => shareOnSocial('facebook', selectedPost.title)} style={{ background: '#1877f2', border: 'none', width: '32px', height: '32px', borderRadius: '50%', color: 'white', cursor: 'pointer', transition: 'transform 0.2s ease' }}
                   onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
                   onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
                     <i className="fab fa-facebook-f"></i>
                   </button>
-                  <button onClick={() => shareOnSocial('twitter', selectedPost.title)} style={{
-                    background: '#1da1f2',
-                    border: 'none',
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '50%',
-                    color: 'white',
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s ease'
-                  }}
+                  <button onClick={() => shareOnSocial('twitter', selectedPost.title)} style={{ background: '#1da1f2', border: 'none', width: '32px', height: '32px', borderRadius: '50%', color: 'white', cursor: 'pointer', transition: 'transform 0.2s ease' }}
                   onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
                   onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
                     <i className="fab fa-twitter"></i>
                   </button>
-                  <button onClick={() => shareOnSocial('linkedin', selectedPost.title)} style={{
-                    background: '#0077b5',
-                    border: 'none',
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '50%',
-                    color: 'white',
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s ease'
-                  }}
+                  <button onClick={() => shareOnSocial('linkedin', selectedPost.title)} style={{ background: '#0077b5', border: 'none', width: '32px', height: '32px', borderRadius: '50%', color: 'white', cursor: 'pointer', transition: 'transform 0.2s ease' }}
                   onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
                   onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
                     <i className="fab fa-linkedin-in"></i>
                   </button>
-                  <button onClick={() => shareOnSocial('whatsapp', selectedPost.title)} style={{
-                    background: '#25D366',
-                    border: 'none',
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '50%',
-                    color: 'white',
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s ease'
-                  }}
+                  <button onClick={() => shareOnSocial('whatsapp', selectedPost.title)} style={{ background: '#25D366', border: 'none', width: '32px', height: '32px', borderRadius: '50%', color: 'white', cursor: 'pointer', transition: 'transform 0.2s ease' }}
                   onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
                   onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
                     <i className="fab fa-whatsapp"></i>
@@ -662,7 +744,6 @@ const News = () => {
                 </div>
               </div>
 
-              {/* Action Buttons */}
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.75rem' }}>
                 <button
                   onClick={closeModal}
@@ -721,10 +802,6 @@ const News = () => {
       )}
 
       <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
         @keyframes fadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
@@ -739,7 +816,7 @@ const News = () => {
             transform: translateY(0);
           }
         }
-        
+
         .modal-content::-webkit-scrollbar {
           width: 5px;
         }
@@ -751,7 +828,7 @@ const News = () => {
           background: #F9C74F;
           border-radius: 3px;
         }
-        
+
         @media (max-width: 768px) {
           .modal-content {
             max-height: 90vh;

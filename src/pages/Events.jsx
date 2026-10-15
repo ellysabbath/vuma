@@ -3,6 +3,123 @@ import { useNavigate } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
+// ==================== EVENTS SKELETON ====================
+const EventsSkeleton = ({ count = 5 }) => {
+  const items = Array.from({ length: count });
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      {items.map((_, idx) => (
+        <div
+          key={idx}
+          className="event-skeleton-row"
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            background: 'white',
+            borderRadius: '16px',
+            overflow: 'hidden',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+            border: '1px solid #e2e8f0',
+            animation: `skeletonFadeIn 0.5s ease ${idx * 0.06}s both`
+          }}
+        >
+          {/* Thumbnail */}
+          <div
+            className="skeleton-block"
+            style={{
+              flex: '0 0 100px',
+              minWidth: '100px',
+              minHeight: '100px',
+              borderRadius: 0
+            }}
+          />
+
+          {/* Details */}
+          <div style={{ flex: 1, padding: '1rem', minWidth: '200px' }}>
+            {/* Top row: badges + count */}
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              gap: '0.5rem',
+              marginBottom: '0.6rem'
+            }}>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <div className="skeleton-block skeleton-pill" style={{ height: '14px', width: '60px' }} />
+                <div className="skeleton-block skeleton-pill" style={{ height: '14px', width: '80px' }} />
+              </div>
+              <div className="skeleton-block" style={{ height: '12px', width: '50px', borderRadius: '6px' }} />
+            </div>
+
+            {/* Title */}
+            <div
+              className="skeleton-block"
+              style={{
+                height: '16px',
+                width: '65%',
+                borderRadius: '6px',
+                marginBottom: '0.6rem'
+              }}
+            />
+
+            {/* Meta row: date / time / location */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.5rem' }}>
+              <div className="skeleton-block" style={{ height: '10px', width: '90px', borderRadius: '5px' }} />
+              <div className="skeleton-block" style={{ height: '10px', width: '70px', borderRadius: '5px' }} />
+              <div className="skeleton-block" style={{ height: '10px', width: '100px', borderRadius: '5px' }} />
+            </div>
+
+            {/* Description line */}
+            <div
+              className="skeleton-block"
+              style={{
+                height: '10px',
+                width: '85%',
+                borderRadius: '5px',
+                marginBottom: '0.6rem'
+              }}
+            />
+
+            {/* "Click for details" */}
+            <div className="skeleton-block" style={{ height: '10px', width: '110px', borderRadius: '5px' }} />
+          </div>
+        </div>
+      ))}
+
+      <style>{`
+        @keyframes skeletonFadeIn {
+          from { opacity: 0; transform: translateY(15px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes skeletonShimmer {
+          0% { background-position: -500px 0; }
+          100% { background-position: 500px 0; }
+        }
+        .skeleton-block {
+          background: linear-gradient(
+            90deg,
+            #eef2f0 0%,
+            #e2e9e5 20%,
+            #f5f8f6 40%,
+            #eef2f0 60%,
+            #eef2f0 100%
+          );
+          background-size: 1000px 100%;
+          animation: skeletonShimmer 1.6s infinite linear;
+          display: block;
+        }
+        .skeleton-pill {
+          border-radius: 60px;
+        }
+      `}</style>
+    </div>
+  );
+};
+// ==================== END EVENTS SKELETON ====================
+
+
 const Events = () => {
   const navigate = useNavigate();
   const [events, setEvents] = useState([]);
@@ -26,10 +143,10 @@ const Events = () => {
     setError('');
     try {
       const response = await fetch(`${API_BASE_URL}/events/`);
-      
+
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
-      
+
       if (data.results && Array.isArray(data.results)) {
         setEvents(data.results);
       } else if (Array.isArray(data)) {
@@ -68,15 +185,13 @@ const Events = () => {
     }, 3000);
   };
 
-  // MODIFIED: Navigate to registration page WITHOUT ID
   const handleRegisterClick = () => {
     if (selectedEvent.registered >= selectedEvent.capacity) {
       showCircledAlert('This event is fully booked!', 'error');
       return;
     }
-    
+
     closeModal();
-    // Navigate to registration page - no ID in URL
     navigate('/events/register');
   };
 
@@ -105,10 +220,10 @@ const Events = () => {
   const formatDate = (dateString) => {
     if (!dateString) return 'Date TBA';
     try {
-      return new Date(dateString).toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'short', 
-        day: 'numeric' 
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
       });
     } catch {
       return dateString;
@@ -121,16 +236,70 @@ const Events = () => {
     return { color: '#10b981', text: 'Available' };
   };
 
+  // ==================== LOADING STATE (SKELETON) ====================
   if (loading) {
     return (
-      <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ width: '60px', height: '60px', margin: '0 auto', border: '3px solid rgba(11,59,47,0.1)', borderTopColor: '#0B3B2F', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-          <p style={{ marginTop: '1rem', fontSize: '0.875rem', color: '#64748b' }}>Loading events...</p>
+      <div style={{ paddingTop: '70px', background: '#f8fafc', minHeight: '100vh' }}>
+        {/* Thin header skeleton */}
+        <div style={{
+          background: 'white',
+          borderBottom: '1px solid #e2e8f0',
+          padding: '1rem 2rem',
+          position: 'sticky',
+          top: '70px',
+          zIndex: 100,
+          boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+        }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <div className="skeleton-block" style={{ height: '18px', width: '140px', borderRadius: '8px', marginBottom: '6px' }} />
+                <div className="skeleton-block" style={{ height: '10px', width: '110px', borderRadius: '5px' }} />
+              </div>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <div className="skeleton-block" style={{ height: '12px', width: '70px', borderRadius: '5px' }} />
+                <div className="skeleton-block" style={{ height: '12px', width: '80px', borderRadius: '5px' }} />
+                <div className="skeleton-block" style={{ height: '12px', width: '50px', borderRadius: '5px' }} />
+              </div>
+            </div>
+          </div>
         </div>
+
+        {/* Events list skeleton */}
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
+          <EventsSkeleton count={5} />
+        </div>
+
+        <style>{`
+          @keyframes skeletonFadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes skeletonShimmer {
+            0% { background-position: -500px 0; }
+            100% { background-position: 500px 0; }
+          }
+          .skeleton-block {
+            background: linear-gradient(
+              90deg,
+              #eef2f0 0%,
+              #e2e9e5 20%,
+              #f5f8f6 40%,
+              #eef2f0 60%,
+              #eef2f0 100%
+            );
+            background-size: 1000px 100%;
+            animation: skeletonShimmer 1.6s infinite linear;
+            display: block;
+          }
+          .skeleton-pill {
+            border-radius: 60px;
+          }
+        `}</style>
       </div>
     );
   }
+  // ==================== END LOADING STATE ====================
 
   if (error) {
     return (
@@ -238,10 +407,10 @@ const Events = () => {
             {events.map((event, idx) => {
               const status = getStatusColor(event.registered || 0, event.capacity || 100);
               return (
-                <div 
-                  key={event.id} 
-                  data-aos="fade-up" 
-                  data-aos-delay={idx * 50} 
+                <div
+                  key={event.id}
+                  data-aos="fade-up"
+                  data-aos-delay={idx * 50}
                   style={{
                     display: 'flex',
                     flexWrap: 'wrap',
@@ -265,10 +434,9 @@ const Events = () => {
                   }}
                   onClick={() => openModal(event)}
                 >
-                  {/* Event Image - Small thumbnail */}
                   <div style={{ flex: '0 0 100px', minWidth: '100px', background: '#f1f5f9' }}>
-                    <img 
-                      src={getEventImage(event)} 
+                    <img
+                      src={getEventImage(event)}
                       alt={event.title}
                       style={{ width: '100%', height: '100%', objectFit: 'cover', minHeight: '100px' }}
                       onError={(e) => {
@@ -277,8 +445,7 @@ const Events = () => {
                       }}
                     />
                   </div>
-                  
-                  {/* Event Details - Compact */}
+
                   <div style={{ flex: 1, padding: '1rem' }}>
                     <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.5rem' }}>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
@@ -310,11 +477,11 @@ const Events = () => {
                         {event.registered || 0}/{event.capacity || 100}
                       </div>
                     </div>
-                    
+
                     <h3 style={{ color: '#0B3B2F', marginBottom: '0.25rem', fontSize: '0.95rem', fontWeight: 700 }}>
                       {event.title}
                     </h3>
-                    
+
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.5rem' }}>
                       <p style={{ color: '#64748b', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                         <i className="fas fa-calendar-alt" style={{ color: '#F9C74F', fontSize: '0.6rem' }}></i>
@@ -331,11 +498,11 @@ const Events = () => {
                         {event.location || 'TBA'}
                       </p>
                     </div>
-                    
+
                     <p style={{ color: '#475569', fontSize: '0.7rem', lineHeight: '1.4', marginBottom: '0.5rem', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                       {event.description ? event.description.substring(0, 80) + (event.description.length > 80 ? '...' : '') : 'No description available'}
                     </p>
-                    
+
                     <div style={{ fontSize: '0.65rem', color: '#F9C74F', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                       <i className="fas fa-eye"></i>
                       Click for details
@@ -349,7 +516,7 @@ const Events = () => {
         )}
       </div>
 
-      {/* Event Details Modal */}
+      {/* Event Details Modal — unchanged */}
       {showModal && selectedEvent && (
         <div className="modal-overlay" onClick={closeModal} style={{
           position: 'fixed',
@@ -376,7 +543,6 @@ const Events = () => {
             position: 'relative',
             animation: 'slideInUp 0.3s ease'
           }}>
-            {/* Close Button */}
             <button
               onClick={closeModal}
               style={{
@@ -404,11 +570,10 @@ const Events = () => {
               <i className="fas fa-times"></i>
             </button>
 
-            {/* Modal Image */}
             <div style={{ position: 'relative', height: '200px', overflow: 'hidden' }}>
-              <img 
-                src={getEventImage(selectedEvent)} 
-                alt={selectedEvent.title} 
+              <img
+                src={getEventImage(selectedEvent)}
+                alt={selectedEvent.title}
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 onError={(e) => {
                   e.target.onerror = null;
@@ -416,7 +581,7 @@ const Events = () => {
                 }}
               />
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.7))' }} />
-              
+
               <div style={{ position: 'absolute', bottom: '20px', left: '20px', right: '20px', zIndex: 10 }}>
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
                   <span style={{
@@ -448,9 +613,7 @@ const Events = () => {
               </div>
             </div>
 
-            {/* Modal Body */}
             <div style={{ padding: '1.25rem' }}>
-              {/* Event Info Grid */}
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(2, 1fr)',
@@ -494,7 +657,6 @@ const Events = () => {
                 </div>
               </div>
 
-              {/* Description */}
               <div style={{ marginBottom: '1.25rem' }}>
                 <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <i className="fas fa-info-circle" style={{ color: '#F9C74F', fontSize: '0.75rem' }}></i>
@@ -505,7 +667,6 @@ const Events = () => {
                 </p>
               </div>
 
-              {/* Speakers */}
               {selectedEvent.speakers && selectedEvent.speakers.length > 0 && (
                 <div style={{ marginBottom: '1.25rem' }}>
                   <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -530,7 +691,6 @@ const Events = () => {
                 </div>
               )}
 
-              {/* Action Buttons */}
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
                 <button
                   onClick={closeModal}
@@ -591,10 +751,6 @@ const Events = () => {
       )}
 
       <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
         @keyframes fadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
@@ -627,7 +783,7 @@ const Events = () => {
             transform: translateY(0);
           }
         }
-        
+
         .modal-content::-webkit-scrollbar {
           width: 5px;
         }
@@ -639,7 +795,7 @@ const Events = () => {
           background: #F9C74F;
           border-radius: 3px;
         }
-        
+
         @media (max-width: 768px) {
           .modal-content {
             max-height: 90vh;

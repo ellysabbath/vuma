@@ -2,6 +2,113 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { projects } from '../data/projects';
 
+// ==================== SKELETON CARD ====================
+const SkeletonCard = ({ index = 0 }) => {
+  return (
+    <div
+      className="project-card skeleton-card"
+      style={{
+        width: '280px',
+        background: 'white',
+        borderRadius: '28px',
+        overflow: 'hidden',
+        boxShadow: '0 12px 25px rgba(0,0,0,0.05)',
+        position: 'relative',
+        animation: `skeletonFadeIn 0.4s ease ${index * 0.08}s both`
+      }}
+    >
+      {/* Image skeleton */}
+      <div
+        className="skeleton-block"
+        style={{
+          height: '200px',
+          width: '100%',
+          borderRadius: 0
+        }}
+      />
+
+      {/* Content skeleton */}
+      <div className="project-content" style={{ padding: '1rem' }}>
+        {/* Category tag */}
+        <div
+          className="skeleton-block"
+          style={{ height: '12px', width: '55%', borderRadius: '6px' }}
+        />
+
+        {/* Title */}
+        <div
+          className="skeleton-block"
+          style={{
+            height: '18px',
+            width: '85%',
+            borderRadius: '6px',
+            marginTop: '12px'
+          }}
+        />
+
+        {/* Description lines */}
+        <div
+          className="skeleton-block"
+          style={{
+            height: '10px',
+            width: '100%',
+            borderRadius: '5px',
+            marginTop: '12px'
+          }}
+        />
+        <div
+          className="skeleton-block"
+          style={{
+            height: '10px',
+            width: '92%',
+            borderRadius: '5px',
+            marginTop: '8px'
+          }}
+        />
+        <div
+          className="skeleton-block"
+          style={{
+            height: '10px',
+            width: '70%',
+            borderRadius: '5px',
+            marginTop: '8px'
+          }}
+        />
+
+        {/* View Details */}
+        <div
+          className="skeleton-block"
+          style={{
+            height: '12px',
+            width: '40%',
+            borderRadius: '6px',
+            marginTop: '16px'
+          }}
+        />
+      </div>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .skeleton-card {
+            width: calc(50% - 0.75rem) !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .skeleton-card {
+            width: 100% !important;
+            max-width: 300px;
+          }
+          .skeleton-card > div:first-child {
+            height: 180px !important;
+          }
+        }
+      `}</style>
+    </div>
+  );
+};
+// ==================== END SKELETON CARD ====================
+
+
 const InnovationShowcase = () => {
   const navigate = useNavigate();
   const [filter, setFilter] = useState('all');
@@ -10,10 +117,10 @@ const InnovationShowcase = () => {
   const [selectedProject, setSelectedProject] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
-  const filteredProjects = filter === 'all' 
-    ? projects 
+  const filteredProjects = filter === 'all'
+    ? projects
     : projects.filter(p => p.cat === filter);
-  
+
   const displayedProjects = filteredProjects.slice(0, visibleCount);
   const hasMore = visibleCount < filteredProjects.length;
 
@@ -22,7 +129,7 @@ const InnovationShowcase = () => {
     setTimeout(() => {
       setVisibleCount(prev => Math.min(prev + 4, filteredProjects.length));
       setIsLoading(false);
-    }, 500);
+    }, 800);
   };
 
   useEffect(() => {
@@ -46,7 +153,7 @@ const InnovationShowcase = () => {
     navigate('/events/register', { state: { eventName: projectTitle } });
   };
 
-  // Extended project details
+  // Extended project details (unchanged)
   const getProjectDetails = (project) => {
     const details = {
       "Solar-Powered Water Pump": {
@@ -104,7 +211,7 @@ const InnovationShowcase = () => {
 
   return (
     <div style={{ padding: '2rem 0' }}>
-      <h2 
+      <h2
         className="section-title"
         style={{
           textAlign: 'center',
@@ -118,9 +225,9 @@ const InnovationShowcase = () => {
           padding: '0 1rem'
         }}
       >
-       What we have done ?  
+        What we have done ?
       </h2>
-      
+
       <div className="filter-buttons" style={{
         display: 'flex',
         justifyContent: 'center',
@@ -152,7 +259,7 @@ const InnovationShowcase = () => {
           </button>
         ))}
       </div>
-      
+
       <div className="masonry-grid" style={{
         display: 'flex',
         flexWrap: 'wrap',
@@ -161,27 +268,36 @@ const InnovationShowcase = () => {
         padding: '0 0.75rem'
       }}>
         {displayedProjects.map((project, idx) => (
-          <ProjectCard 
-            key={idx} 
-            project={project} 
-            index={idx} 
+          <ProjectCard
+            key={idx}
+            project={project}
+            index={idx}
             onCardClick={() => openModal(project)}
           />
         ))}
+
+        {/* ==================== SKELETON CARDS ==================== */}
+        {isLoading && (
+          <>
+            {Array.from({ length: Math.min(4, filteredProjects.length - visibleCount) }).map((_, i) => (
+              <SkeletonCard key={`skeleton-${i}`} index={i} />
+            ))}
+          </>
+        )}
+        {/* ==================== END SKELETON CARDS ==================== */}
       </div>
 
-      {/* Load More Button */}
-      {hasMore && (
+      {/* Load More Button (now no spinner) */}
+      {hasMore && !isLoading && (
         <div style={{
           textAlign: 'center',
           marginTop: '2.5rem',
           marginBottom: '1rem',
           padding: '0 1rem'
         }}>
-          <button 
+          <button
             className="btn-load-more"
             onClick={loadMore}
-            disabled={isLoading}
             style={{
               background: 'transparent',
               border: '2px solid #F9C74F',
@@ -189,7 +305,7 @@ const InnovationShowcase = () => {
               borderRadius: '60px',
               fontWeight: 700,
               margin: '0',
-              cursor: isLoading ? 'not-allowed' : 'pointer',
+              cursor: 'pointer',
               transition: 'all 0.3s ease',
               fontSize: 'clamp(0.85rem, 4vw, 1rem)',
               display: 'inline-flex',
@@ -198,16 +314,13 @@ const InnovationShowcase = () => {
               gap: '0.6rem',
               color: '#0B3B2F',
               backgroundColor: 'transparent',
-              opacity: isLoading ? 0.7 : 1,
               minWidth: '200px'
             }}
             onMouseEnter={(e) => {
-              if (!isLoading) {
-                e.currentTarget.style.transform = 'scale(1.05)';
-                e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)';
-                const arrow = e.currentTarget.querySelector('.load-more-arrow');
-                if (arrow) arrow.style.transform = 'translateX(5px)';
-              }
+              e.currentTarget.style.transform = 'scale(1.05)';
+              e.currentTarget.style.backgroundColor = 'rgba(249,199,79,0.1)';
+              const arrow = e.currentTarget.querySelector('.load-more-arrow');
+              if (arrow) arrow.style.transform = 'translateX(5px)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'scale(1)';
@@ -216,27 +329,11 @@ const InnovationShowcase = () => {
               if (arrow) arrow.style.transform = 'translateX(0)';
             }}
           >
-            {isLoading ? (
-              <>
-                <div style={{
-                  width: '18px',
-                  height: '18px',
-                  border: '2px solid rgba(11,59,47,0.3)',
-                  borderTop: '2px solid #0B3B2F',
-                  borderRadius: '50%',
-                  animation: 'spin 0.8s linear infinite'
-                }} />
-                <span>Loading...</span>
-              </>
-            ) : (
-              <>
-                <span>More Stories</span>
-                <i className="fas fa-arrow-right load-more-arrow" style={{
-                  transition: 'transform 0.3s ease',
-                  fontSize: 'clamp(0.8rem, 3.5vw, 0.9rem)'
-                }}></i>
-              </>
-            )}
+            <span>More Stories</span>
+            <i className="fas fa-arrow-right load-more-arrow" style={{
+              transition: 'transform 0.3s ease',
+              fontSize: 'clamp(0.8rem, 3.5vw, 0.9rem)'
+            }}></i>
           </button>
         </div>
       )}
@@ -261,7 +358,7 @@ const InnovationShowcase = () => {
         </div>
       )}
 
-      {/* Project Details Modal */}
+      {/* Project Details Modal (unchanged) */}
       {showModal && selectedProject && (
         <div className="modal-overlay" onClick={closeModal} style={{
           position: 'fixed',
@@ -288,7 +385,6 @@ const InnovationShowcase = () => {
             position: 'relative',
             animation: 'slideInUp 0.3s ease'
           }}>
-            {/* Close Button */}
             <button
               onClick={closeModal}
               style={{
@@ -315,11 +411,10 @@ const InnovationShowcase = () => {
               <i className="fas fa-times"></i>
             </button>
 
-            {/* Modal Header with Image */}
             <div style={{ position: 'relative', height: '220px', overflow: 'hidden' }}>
-              <img 
-                src={selectedProject.img} 
-                alt={selectedProject.title} 
+              <img
+                src={selectedProject.img}
+                alt={selectedProject.title}
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7))' }} />
@@ -340,9 +435,7 @@ const InnovationShowcase = () => {
               </div>
             </div>
 
-            {/* Modal Body */}
             <div style={{ padding: 'clamp(1.5rem, 5vw, 2rem)' }}>
-              {/* Description */}
               <div style={{ marginBottom: '1.5rem' }}>
                 <h3 style={{ color: '#0B3B2F', marginBottom: '0.8rem', fontSize: '1.1rem' }}>
                   <i className="fas fa-info-circle" style={{ marginRight: '0.5rem', color: '#F9C74F' }}></i>
@@ -353,7 +446,6 @@ const InnovationShowcase = () => {
                 </p>
               </div>
 
-              {/* Impact & Timeline */}
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
@@ -383,7 +475,6 @@ const InnovationShowcase = () => {
                 </div>
               </div>
 
-              {/* Partners */}
               <div style={{ marginBottom: '1.5rem' }}>
                 <h3 style={{ color: '#0B3B2F', marginBottom: '0.8rem', fontSize: '1.1rem' }}>
                   <i className="fas fa-handshake" style={{ marginRight: '0.5rem', color: '#F9C74F' }}></i>
@@ -404,7 +495,6 @@ const InnovationShowcase = () => {
                 </div>
               </div>
 
-              {/* SDG Goals */}
               <div style={{ marginBottom: '1.5rem' }}>
                 <h3 style={{ color: '#0B3B2F', marginBottom: '0.8rem', fontSize: '1.1rem' }}>
                   <i className="fas fa-globe" style={{ marginRight: '0.5rem', color: '#F9C74F' }}></i>
@@ -425,7 +515,6 @@ const InnovationShowcase = () => {
                 </div>
               </div>
 
-              {/* Action Buttons */}
               <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
                 <button
                   onClick={closeModal}
@@ -452,7 +541,6 @@ const InnovationShowcase = () => {
                   <i className="fas fa-times" style={{ marginRight: '0.5rem' }}></i>
                   Close
                 </button>
-               
               </div>
             </div>
           </div>
@@ -464,12 +552,12 @@ const InnovationShowcase = () => {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
         }
-        
+
         @keyframes fadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
         }
-        
+
         @keyframes slideInUp {
           from {
             opacity: 0;
@@ -480,51 +568,80 @@ const InnovationShowcase = () => {
             transform: translateY(0);
           }
         }
-        
+
+        /* ==================== SKELETON STYLES ==================== */
+        @keyframes skeletonFadeIn {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes skeletonShimmer {
+          0% {
+            background-position: -400px 0;
+          }
+          100% {
+            background-position: 400px 0;
+          }
+        }
+
+        .skeleton-block {
+          background: linear-gradient(
+            90deg,
+            #eef2f0 0%,
+            #e2e9e5 20%,
+            #f5f8f6 40%,
+            #eef2f0 60%,
+            #eef2f0 100%
+          );
+          background-size: 800px 100%;
+          animation: skeletonShimmer 1.6s infinite linear;
+        }
+        /* ==================== END SKELETON STYLES ==================== */
+
         .modal-content::-webkit-scrollbar {
           width: 6px;
         }
-        
+
         .modal-content::-webkit-scrollbar-track {
           background: #f1f1f1;
           border-radius: 3px;
         }
-        
+
         .modal-content::-webkit-scrollbar-thumb {
           background: #F9C74F;
           border-radius: 3px;
         }
-        
+
         @media (max-width: 768px) {
           .masonry-grid {
             gap: 0.75rem !important;
           }
-          
+
           .modal-content {
             max-height: 90vh;
           }
-          
+
           .modal-content > div:first-child {
             height: 180px;
           }
         }
-        
+
         @media (max-width: 480px) {
           .filter-buttons {
             gap: 0.4rem !important;
           }
-          
+
           .filter-btn {
             padding: 0.35rem 0.7rem !important;
             font-size: 0.7rem !important;
           }
-          
+
           .btn-load-more {
             min-width: 160px !important;
             padding: 0.6rem 1.2rem !important;
             font-size: 0.85rem !important;
           }
-          
+
           .modal-content {
             border-radius: 20px !important;
           }
@@ -639,7 +756,7 @@ const ProjectCard = ({ project, index, onCardClick }) => {
           className="project-image"
           loading="lazy"
         />
-        
+
         <div
           style={{
             position: 'absolute',
@@ -658,7 +775,7 @@ const ProjectCard = ({ project, index, onCardClick }) => {
           {project.cat === 'leadership' ? 'LEADERSHIP' : 'ENVIRONMENT'}
         </div>
       </div>
-      
+
       <div className="project-content" style={{ padding: '1rem' }}>
         <span
           style={{
@@ -689,7 +806,7 @@ const ProjectCard = ({ project, index, onCardClick }) => {
         >
           {project.description}
         </p>
-        
+
         <div
           style={{
             display: 'inline-flex',
@@ -711,51 +828,51 @@ const ProjectCard = ({ project, index, onCardClick }) => {
         .project-image {
           transition: transform 0.5s ease;
         }
-        
+
         .project-card:hover .project-image {
           transform: scale(1.1);
         }
-        
+
         @media (max-width: 768px) {
           .project-card {
             width: calc(50% - 0.75rem) !important;
             min-width: 150px;
             transition: all 0.4s ease !important;
           }
-          
+
           .project-card:hover {
             transform: translateY(-4px) !important;
           }
-          
+
           .project-content h4 {
             font-size: 0.9rem;
           }
-          
+
           .project-content p {
             font-size: 0.7rem;
           }
-          
+
           .project-content span {
             font-size: 0.65rem;
           }
-          
+
           .project-content {
             padding: 0.8rem !important;
           }
         }
-        
+
         @media (max-width: 480px) {
           .project-card {
             width: 100% !important;
             max-width: 300px;
             margin: 0 auto;
           }
-          
+
           .project-card > div:first-child {
             height: 180px;
           }
         }
-        
+
         @media (prefers-reduced-motion: no-preference) {
           .project-card {
             will-change: transform, opacity;

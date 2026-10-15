@@ -3,6 +3,117 @@ import { useNavigate } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
+// ==================== PARTNERS SKELETON ====================
+const PartnersSkeleton = ({ count = 6 }) => {
+  const items = Array.from({ length: count });
+
+  return (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+      gap: '2rem'
+    }}>
+      {items.map((_, idx) => (
+        <div
+          key={idx}
+          className="partner-skeleton-card"
+          style={{
+            background: 'white',
+            borderRadius: '20px',
+            overflow: 'hidden',
+            boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
+            animation: `skeletonFadeIn 0.5s ease ${idx * 0.08}s both`
+          }}
+        >
+          {/* Logo area */}
+          <div style={{
+            padding: '2rem',
+            textAlign: 'center',
+            background: '#f9fbf7',
+            borderBottom: '1px solid #f0f0f0'
+          }}>
+            <div
+              className="skeleton-block skeleton-circle"
+              style={{
+                width: '100px',
+                height: '100px',
+                margin: '0 auto'
+              }}
+            />
+          </div>
+
+          {/* Content */}
+          <div style={{ padding: '1.5rem' }}>
+            {/* Name + Type badge row */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '0.75rem',
+              gap: '0.5rem'
+            }}>
+              <div className="skeleton-block" style={{ height: '18px', width: '55%', borderRadius: '6px' }} />
+              <div className="skeleton-block" style={{ height: '18px', width: '85px', borderRadius: '20px' }} />
+            </div>
+
+            {/* "Partner since" line */}
+            <div className="skeleton-block" style={{ height: '10px', width: '50%', borderRadius: '5px', marginBottom: '0.75rem' }} />
+
+            {/* Description lines */}
+            <div className="skeleton-block" style={{ height: '9px', width: '100%', borderRadius: '5px', marginBottom: '6px' }} />
+            <div className="skeleton-block" style={{ height: '9px', width: '92%', borderRadius: '5px', marginBottom: '6px' }} />
+            <div className="skeleton-block" style={{ height: '9px', width: '60%', borderRadius: '5px', marginBottom: '1rem' }} />
+
+            {/* Status + Projects row */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="skeleton-block" style={{ height: '16px', width: '70px', borderRadius: '20px' }} />
+              <div className="skeleton-block" style={{ height: '10px', width: '80px', borderRadius: '5px' }} />
+            </div>
+
+            {/* "Click to view details" */}
+            <div style={{
+              marginTop: '1rem',
+              display: 'flex',
+              justifyContent: 'center'
+            }}>
+              <div className="skeleton-block" style={{ height: '10px', width: '120px', borderRadius: '5px' }} />
+            </div>
+          </div>
+        </div>
+      ))}
+
+      <style>{`
+        @keyframes skeletonFadeIn {
+          from { opacity: 0; transform: translateY(15px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes skeletonShimmer {
+          0% { background-position: -500px 0; }
+          100% { background-position: 500px 0; }
+        }
+        .skeleton-block {
+          background: linear-gradient(
+            90deg,
+            #eef2f0 0%,
+            #e2e9e5 20%,
+            #f5f8f6 40%,
+            #eef2f0 60%,
+            #eef2f0 100%
+          );
+          background-size: 1000px 100%;
+          animation: skeletonShimmer 1.6s infinite linear;
+          display: block;
+        }
+        .skeleton-circle {
+          border-radius: 50%;
+        }
+      `}</style>
+    </div>
+  );
+};
+// ==================== END PARTNERS SKELETON ====================
+
+
 const Partners = () => {
   const navigate = useNavigate();
   const [partners, setPartners] = useState([]);
@@ -90,16 +201,108 @@ const Partners = () => {
     }
   };
 
+  // ==================== LOADING STATE (SKELETON) ====================
   if (loading) {
     return (
-      <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f9fbf7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center' }}>
-          <i className="fas fa-spinner fa-spin" style={{ fontSize: '3rem', color: '#0B3B2F' }}></i>
-          <p style={{ marginTop: '1rem', color: '#666' }}>Loading partners...</p>
+      <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f9fbf7' }}>
+        {/* Hero section skeleton */}
+        <div style={{
+          background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)',
+          color: 'white',
+          padding: '4rem 2rem',
+          textAlign: 'center'
+        }}>
+          <div
+            className="skeleton-block skeleton-block--dark"
+            style={{
+              height: 'clamp(2rem, 5vw, 3rem)',
+              width: 'min(60%, 400px)',
+              margin: '0 auto 1rem',
+              borderRadius: '12px'
+            }}
+          />
+          <div
+            className="skeleton-block skeleton-block--dark"
+            style={{
+              height: 'clamp(1rem, 3vw, 1.2rem)',
+              width: 'min(80%, 600px)',
+              margin: '0 auto',
+              borderRadius: '8px'
+            }}
+          />
         </div>
+
+        {/* Filter buttons skeleton */}
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem 2rem 0 2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="skeleton-block skeleton-pill"
+                style={{
+                  height: '40px',
+                  width: '130px',
+                  animation: `skeletonFadeIn 0.5s ease ${i * 0.1}s both`
+                }}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Partners grid skeleton */}
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem 2rem 4rem 2rem' }}>
+          <PartnersSkeleton count={6} />
+        </div>
+
+        <style>{`
+          @keyframes skeletonFadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes skeletonShimmer {
+            0% { background-position: -500px 0; }
+            100% { background-position: 500px 0; }
+          }
+          @keyframes skeletonShimmerDark {
+            0% { background-position: -500px 0; }
+            100% { background-position: 500px 0; }
+          }
+          .skeleton-block {
+            background: linear-gradient(
+              90deg,
+              #eef2f0 0%,
+              #e2e9e5 20%,
+              #f5f8f6 40%,
+              #eef2f0 60%,
+              #eef2f0 100%
+            );
+            background-size: 1000px 100%;
+            animation: skeletonShimmer 1.6s infinite linear;
+            display: block;
+          }
+          .skeleton-block--dark {
+            background: linear-gradient(
+              90deg,
+              rgba(255,255,255,0.08) 0%,
+              rgba(255,255,255,0.18) 20%,
+              rgba(255,255,255,0.28) 40%,
+              rgba(255,255,255,0.18) 60%,
+              rgba(255,255,255,0.08) 100%
+            );
+            background-size: 1000px 100%;
+            animation: skeletonShimmerDark 1.6s infinite linear;
+          }
+          .skeleton-pill {
+            border-radius: 30px;
+          }
+          .skeleton-circle {
+            border-radius: 50%;
+          }
+        `}</style>
       </div>
     );
   }
+  // ==================== END LOADING STATE ====================
 
   if (error) {
     return (
@@ -165,9 +368,9 @@ const Partners = () => {
             <p style={{ marginTop: '1rem', color: '#666' }}>No partners found.</p>
           </div>
         ) : (
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', 
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
             gap: '2rem'
           }}>
             {partners.map((partner, idx) => (
@@ -190,8 +393,8 @@ const Partners = () => {
                   borderBottom: '1px solid #f0f0f0'
                 }}>
                   {partner.logo_base64 ? (
-                    <img 
-                      src={partner.logo_base64} 
+                    <img
+                      src={partner.logo_base64}
                       alt={partner.name}
                       style={{ maxWidth: '120px', maxHeight: '80px', objectFit: 'contain' }}
                     />
@@ -210,7 +413,7 @@ const Partners = () => {
                     </div>
                   )}
                 </div>
-                
+
                 {/* Content */}
                 <div style={{ padding: '1.5rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
@@ -226,16 +429,16 @@ const Partners = () => {
                       {getTypeLabel(partner.type)}
                     </span>
                   </div>
-                  
+
                   <p style={{ color: '#666', fontSize: '0.8rem', marginBottom: '0.5rem' }}>
                     <i className="fas fa-calendar-alt" style={{ marginRight: '0.3rem', color: '#F9C74F' }}></i>
                     Partner since {partner.since}
                   </p>
-                  
+
                   <p style={{ color: '#888', fontSize: '0.75rem', marginBottom: '0.8rem', lineHeight: '1.5' }}>
                     {partner.description ? partner.description.substring(0, 100) + '...' : 'No description available'}
                   </p>
-                  
+
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
                     <span style={{
                       background: `${getStatusColor(partner.status)}20`,
@@ -258,7 +461,7 @@ const Partners = () => {
                       {partner.projects_count} projects
                     </span>
                   </div>
-                  
+
                   <div style={{
                     marginTop: '1rem',
                     display: 'flex',
@@ -279,7 +482,7 @@ const Partners = () => {
         )}
       </div>
 
-      {/* Partner Modal */}
+      {/* Partner Modal — unchanged */}
       {showModal && selectedPartner && (
         <div className="modal-overlay" onClick={closeModal} style={{
           position: 'fixed',
@@ -306,7 +509,6 @@ const Partners = () => {
             position: 'relative',
             animation: 'slideInUp 0.3s ease'
           }}>
-            {/* Close Button */}
             <button
               onClick={closeModal}
               style={{
@@ -333,15 +535,14 @@ const Partners = () => {
               <i className="fas fa-times"></i>
             </button>
 
-            {/* Modal Header */}
             <div style={{
               background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)',
               padding: '2rem',
               textAlign: 'center'
             }}>
               {selectedPartner.logo_base64 ? (
-                <img 
-                  src={selectedPartner.logo_base64} 
+                <img
+                  src={selectedPartner.logo_base64}
                   alt={selectedPartner.name}
                   style={{ maxWidth: '120px', maxHeight: '80px', objectFit: 'contain', margin: '0 auto', background: 'white', padding: '0.5rem', borderRadius: '10px' }}
                 />
@@ -384,9 +585,7 @@ const Partners = () => {
               </div>
             </div>
 
-            {/* Modal Body */}
             <div style={{ padding: '1.5rem' }}>
-              {/* Basic Info */}
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
@@ -423,7 +622,6 @@ const Partners = () => {
                 )}
               </div>
 
-              {/* Description */}
               {selectedPartner.description && (
                 <div style={{ marginBottom: '1.5rem' }}>
                   <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem', fontSize: '1rem' }}>
@@ -434,7 +632,6 @@ const Partners = () => {
                 </div>
               )}
 
-              {/* Focus Areas */}
               {selectedPartner.focus_areas && selectedPartner.focus_areas.length > 0 && (
                 <div style={{ marginBottom: '1.5rem' }}>
                   <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem', fontSize: '1rem' }}>
@@ -457,7 +654,6 @@ const Partners = () => {
                 </div>
               )}
 
-              {/* Contact Information */}
               {(selectedPartner.contact_person || selectedPartner.email || selectedPartner.phone) && (
                 <div style={{ marginBottom: '1.5rem' }}>
                   <h3 style={{ color: '#0B3B2F', marginBottom: '0.5rem', fontSize: '1rem' }}>
@@ -487,7 +683,6 @@ const Partners = () => {
                 </div>
               )}
 
-              {/* Close Button */}
               <button
                 onClick={closeModal}
                 style={{
@@ -523,7 +718,7 @@ const Partners = () => {
           from { opacity: 0; }
           to { opacity: 1; }
         }
-        
+
         @keyframes slideInUp {
           from {
             opacity: 0;
@@ -534,21 +729,21 @@ const Partners = () => {
             transform: translateY(0);
           }
         }
-        
+
         .modal-content::-webkit-scrollbar {
           width: 6px;
         }
-        
+
         .modal-content::-webkit-scrollbar-track {
           background: #f1f1f1;
           border-radius: 3px;
         }
-        
+
         .modal-content::-webkit-scrollbar-thumb {
           background: #F9C74F;
           border-radius: 3px;
         }
-        
+
         @media (max-width: 768px) {
           .modal-content {
             max-height: 90vh;
