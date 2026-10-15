@@ -31,9 +31,268 @@ ChartJS.register(
   Filler
 );
 
+// ==================== DASHBOARD SKELETON ====================
+const DashboardSkeleton = () => {
+  // 16 stat cards (matching statsCards.length)
+  const statCards = Array.from({ length: 16 });
+  // 4 chart panels
+  const chartPanels = Array.from({ length: 4 });
+  // 16 admin cards
+  const adminCards = Array.from({ length: 16 });
+
+  return (
+    <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f9fbf7' }}>
+      {/* Header skeleton */}
+      <div style={{
+        background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)',
+        color: 'white',
+        padding: '3rem 2rem',
+        textAlign: 'center'
+      }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div
+            className="skeleton-block skeleton-block--dark"
+            style={{
+              height: 'clamp(1.8rem, 5vw, 2.5rem)',
+              width: 'min(60%, 400px)',
+              margin: '0 auto 0.75rem',
+              borderRadius: '12px'
+            }}
+          />
+          <div
+            className="skeleton-block skeleton-block--dark"
+            style={{
+              height: 'clamp(0.9rem, 3vw, 1rem)',
+              width: 'min(80%, 600px)',
+              margin: '0 auto',
+              borderRadius: '8px'
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Main content */}
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '3rem 2rem' }}>
+
+        {/* Stats cards skeleton */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: '1.5rem',
+          marginBottom: '3rem'
+        }}>
+          {statCards.map((_, idx) => (
+            <div
+              key={idx}
+              style={{
+                background: 'white',
+                borderRadius: '20px',
+                padding: '1.5rem',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
+                animation: `skeletonFadeIn 0.5s ease ${Math.min(idx * 0.03, 0.4)}s both`
+              }}
+            >
+              <div style={{ flex: 1 }}>
+                <div
+                  className="skeleton-block"
+                  style={{ height: '10px', width: '55%', borderRadius: '5px', marginBottom: '0.6rem' }}
+                />
+                <div
+                  className="skeleton-block"
+                  style={{ height: '28px', width: '40%', borderRadius: '6px', marginBottom: '0.5rem' }}
+                />
+                <div
+                  className="skeleton-block"
+                  style={{ height: '8px', width: '35%', borderRadius: '4px' }}
+                />
+              </div>
+              <div
+                className="skeleton-block"
+                style={{ width: '50px', height: '50px', borderRadius: '12px' }}
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Charts section */}
+        <div style={{ marginBottom: '3rem' }}>
+          <div
+            className="skeleton-block"
+            style={{
+              height: '24px',
+              width: '260px',
+              borderRadius: '8px',
+              marginBottom: '1.5rem'
+            }}
+          />
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))',
+            gap: '2rem'
+          }}>
+            {chartPanels.map((_, idx) => (
+              <div
+                key={idx}
+                style={{
+                  background: 'white',
+                  borderRadius: '20px',
+                  padding: '1.5rem',
+                  boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
+                  animation: `skeletonFadeIn 0.5s ease ${idx * 0.08}s both`
+                }}
+              >
+                {/* Chart title */}
+                <div
+                  className="skeleton-block"
+                  style={{ height: '14px', width: '60%', borderRadius: '6px', marginBottom: '1rem' }}
+                />
+                {/* Chart body */}
+                <div
+                  className="skeleton-block"
+                  style={{ height: '350px', width: '100%', borderRadius: '12px' }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Admin cards skeleton */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+          gap: '2rem'
+        }}>
+          {adminCards.map((_, idx) => (
+            <div
+              key={idx}
+              style={{
+                background: 'white',
+                borderRadius: '24px',
+                padding: '1.5rem',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+                animation: `skeletonFadeIn 0.5s ease ${Math.min(idx * 0.05, 0.5)}s both`
+              }}
+            >
+              {/* Header row: icon + title + description */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                <div
+                  className="skeleton-block"
+                  style={{ width: '60px', height: '60px', borderRadius: '16px', flexShrink: 0 }}
+                />
+                <div style={{ flex: 1 }}>
+                  <div
+                    className="skeleton-block"
+                    style={{ height: '16px', width: '60%', borderRadius: '6px', marginBottom: '6px' }}
+                  />
+                  <div
+                    className="skeleton-block"
+                    style={{ height: '10px', width: '90%', borderRadius: '5px' }}
+                  />
+                </div>
+              </div>
+
+              {/* Sub stats placeholder */}
+              <div style={{
+                display: 'flex',
+                gap: '1rem',
+                marginTop: '0.5rem',
+                marginBottom: '1rem',
+                padding: '0.5rem',
+                background: '#f9f9f9',
+                borderRadius: '12px'
+              }}>
+                {[0, 1, 2].map((s) => (
+                  <div key={s} style={{ flex: 1, textAlign: 'center' }}>
+                    <div
+                      className="skeleton-block"
+                      style={{ height: '8px', width: '60%', borderRadius: '4px', margin: '0 auto 6px' }}
+                    />
+                    <div
+                      className="skeleton-block"
+                      style={{ height: '16px', width: '40%', borderRadius: '5px', margin: '0 auto' }}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {/* Footer row: count + manage link */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '1rem' }}>
+                <div>
+                  <div
+                    className="skeleton-block"
+                    style={{ height: '8px', width: '80px', borderRadius: '4px', marginBottom: '6px' }}
+                  />
+                  <div
+                    className="skeleton-block"
+                    style={{ height: '24px', width: '70px', borderRadius: '6px' }}
+                  />
+                </div>
+                <div
+                  className="skeleton-block"
+                  style={{ height: '12px', width: '80px', borderRadius: '5px' }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes skeletonFadeIn {
+          from { opacity: 0; transform: translateY(15px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes skeletonShimmer {
+          0% { background-position: -500px 0; }
+          100% { background-position: 500px 0; }
+        }
+        @keyframes skeletonShimmerDark {
+          0% { background-position: -500px 0; }
+          100% { background-position: 500px 0; }
+        }
+        .skeleton-block {
+          background: linear-gradient(
+            90deg,
+            #eef2f0 0%,
+            #e2e9e5 20%,
+            #f5f8f6 40%,
+            #eef2f0 60%,
+            #eef2f0 100%
+          );
+          background-size: 1000px 100%;
+          animation: skeletonShimmer 1.6s infinite linear;
+          display: block;
+        }
+        .skeleton-block--dark {
+          background: linear-gradient(
+            90deg,
+            rgba(255,255,255,0.08) 0%,
+            rgba(255,255,255,0.18) 20%,
+            rgba(255,255,255,0.28) 40%,
+            rgba(255,255,255,0.18) 60%,
+            rgba(255,255,255,0.08) 100%
+          );
+          background-size: 1000px 100%;
+          animation: skeletonShimmerDark 1.6s infinite linear;
+        }
+        @media (max-width: 768px) {
+          div[style*="grid-template-columns"] {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
+    </div>
+  );
+};
+// ==================== END DASHBOARD SKELETON ====================
+
+
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  
+
   // Stats state
   const [stats, setStats] = useState({
     total_users: 0,
@@ -69,16 +328,23 @@ const AdminDashboard = () => {
     published_reports: 0,
     draft_reports: 0
   });
-  
+
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState({});
-  
+
   const API_BASE_URL = 'https://vuma.pythonanywhere.com/api';
 
   useEffect(() => {
     AOS.init({ duration: 800, once: false });
     fetchDashboardData();
   }, []);
+
+  // Refresh AOS after content loads
+  useEffect(() => {
+    if (!loading) {
+      setTimeout(() => AOS.refresh(), 100);
+    }
+  }, [loading]);
 
   const extractData = (response, isPaginated = false) => {
     if (!response) return [];
@@ -408,116 +674,53 @@ const AdminDashboard = () => {
 
   const hasAnyError = () => Object.values(errors).length > 0;
 
+  // ==================== LOADING STATE (SKELETON) ====================
+  if (loading) {
+    return <DashboardSkeleton />;
+  }
+  // ==================== END LOADING STATE ====================
+
   // Prepare data for charts
   const chartData = {
     labels: [
-      'Users',
-      'Projects',
-      'Events',
-      'Volunteers',
-      'Partners',
-      'News',
-      'Programs',
-      'Leaders',
-      'Missions',
-      'Testimonials',
-      'Blog Posts',
-      'Statistics',
-      'Publications',
-      'Annual Reports'
+      'Users', 'Projects', 'Events', 'Volunteers', 'Partners', 'News', 'Programs',
+      'Leaders', 'Missions', 'Testimonials', 'Blog Posts', 'Statistics', 'Publications', 'Annual Reports'
     ],
     datasets: [
       {
         label: 'Total Count',
         data: [
-          stats.total_users,
-          stats.total_projects,
-          stats.total_events,
-          stats.total_volunteers,
-          stats.total_partners,
-          stats.total_news,
-          stats.total_programs,
-          stats.total_leaders,
-          stats.total_missions,
-          stats.total_testimonials,
-          stats.total_blog_posts,
-          stats.total_statistics,
-          stats.total_publications,
-          stats.total_annual_reports
+          stats.total_users, stats.total_projects, stats.total_events, stats.total_volunteers,
+          stats.total_partners, stats.total_news, stats.total_programs, stats.total_leaders,
+          stats.total_missions, stats.total_testimonials, stats.total_blog_posts, stats.total_statistics,
+          stats.total_publications, stats.total_annual_reports
         ],
         backgroundColor: [
-          '#0B3B2F',
-          '#F9C74F',
-          '#2b7a5c',
-          '#4caf50',
-          '#0B3B2F',
-          '#FF9800',
-          '#9C27B0',
-          '#0B3B2F',
-          '#F9C74F',
-          '#FF9800',
-          '#2b7a5c',
-          '#9C27B0',
-          '#2196F3',
-          '#0B3B2F'
+          '#0B3B2F', '#F9C74F', '#2b7a5c', '#4caf50', '#0B3B2F', '#FF9800', '#9C27B0',
+          '#0B3B2F', '#F9C74F', '#FF9800', '#2b7a5c', '#9C27B0', '#2196F3', '#0B3B2F'
         ],
         borderColor: [
-          '#0B3B2F',
-          '#F9C74F',
-          '#2b7a5c',
-          '#4caf50',
-          '#0B3B2F',
-          '#FF9800',
-          '#9C27B0',
-          '#0B3B2F',
-          '#F9C74F',
-          '#FF9800',
-          '#2b7a5c',
-          '#9C27B0',
-          '#2196F3',
-          '#0B3B2F'
+          '#0B3B2F', '#F9C74F', '#2b7a5c', '#4caf50', '#0B3B2F', '#FF9800', '#9C27B0',
+          '#0B3B2F', '#F9C74F', '#FF9800', '#2b7a5c', '#9C27B0', '#2196F3', '#0B3B2F'
         ],
         borderWidth: 2
       }
     ]
   };
 
-  // Divergent bar chart data (showing positive/negative or high/low)
   const divergentData = {
     labels: [
-      'Users',
-      'Projects',
-      'Events',
-      'Volunteers',
-      'Partners',
-      'News',
-      'Programs',
-      'Leaders',
-      'Missions',
-      'Testimonials',
-      'Blog Posts',
-      'Statistics',
-      'Publications',
-      'Reports'
+      'Users', 'Projects', 'Events', 'Volunteers', 'Partners', 'News', 'Programs',
+      'Leaders', 'Missions', 'Testimonials', 'Blog Posts', 'Statistics', 'Publications', 'Reports'
     ],
     datasets: [
       {
         label: 'Active',
         data: [
-          stats.active_users,
-          stats.ongoing_projects,
-          stats.total_events,
-          stats.total_volunteers,
-          stats.active_partners,
-          stats.total_news,
-          stats.total_programs,
-          stats.total_leaders,
-          stats.total_missions,
-          stats.total_testimonials,
-          stats.total_blog_posts,
-          stats.total_statistics,
-          stats.published_publications,
-          stats.published_reports
+          stats.active_users, stats.ongoing_projects, stats.total_events, stats.total_volunteers,
+          stats.active_partners, stats.total_news, stats.total_programs, stats.total_leaders,
+          stats.total_missions, stats.total_testimonials, stats.total_blog_posts, stats.total_statistics,
+          stats.published_publications, stats.published_reports
         ],
         backgroundColor: '#4caf50',
         borderColor: '#4caf50',
@@ -528,16 +731,9 @@ const AdminDashboard = () => {
         data: [
           stats.total_users - stats.active_users,
           stats.total_projects - stats.ongoing_projects,
-          0,
-          0,
+          0, 0,
           stats.total_partners - stats.active_partners,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
+          0, 0, 0, 0, 0, 0, 0,
           stats.draft_publications + stats.archived_publications,
           stats.draft_reports
         ],
@@ -548,42 +744,20 @@ const AdminDashboard = () => {
     ]
   };
 
-  // Line chart data showing trends (simulated based on counts)
   const lineData = {
     labels: [
-      'Users',
-      'Projects',
-      'Events',
-      'Volunteers',
-      'Partners',
-      'News',
-      'Programs',
-      'Leaders',
-      'Missions',
-      'Testimonials',
-      'Blog Posts',
-      'Statistics',
-      'Publications',
-      'Reports'
+      'Users', 'Projects', 'Events', 'Volunteers', 'Partners', 'News', 'Programs',
+      'Leaders', 'Missions', 'Testimonials', 'Blog Posts', 'Statistics', 'Publications', 'Reports'
     ],
     datasets: [
       {
         label: 'Growth Trend',
         data: [
-          stats.total_users * 1.2,
-          stats.total_projects * 1.1,
-          stats.total_events * 0.9,
-          stats.total_volunteers * 1.3,
-          stats.total_partners * 1.15,
-          stats.total_news * 0.8,
-          stats.total_programs * 1.05,
-          stats.total_leaders * 0.95,
-          stats.total_missions * 1.1,
-          stats.total_testimonials * 1.25,
-          stats.total_blog_posts * 0.85,
-          stats.total_statistics * 1.0,
-          stats.total_publications * 1.1,
-          stats.total_annual_reports * 0.9
+          stats.total_users * 1.2, stats.total_projects * 1.1, stats.total_events * 0.9,
+          stats.total_volunteers * 1.3, stats.total_partners * 1.15, stats.total_news * 0.8,
+          stats.total_programs * 1.05, stats.total_leaders * 0.95, stats.total_missions * 1.1,
+          stats.total_testimonials * 1.25, stats.total_blog_posts * 0.85, stats.total_statistics * 1.0,
+          stats.total_publications * 1.1, stats.total_annual_reports * 0.9
         ],
         borderColor: '#F9C74F',
         backgroundColor: 'rgba(249, 199, 79, 0.1)',
@@ -597,20 +771,10 @@ const AdminDashboard = () => {
       {
         label: 'Current Count',
         data: [
-          stats.total_users,
-          stats.total_projects,
-          stats.total_events,
-          stats.total_volunteers,
-          stats.total_partners,
-          stats.total_news,
-          stats.total_programs,
-          stats.total_leaders,
-          stats.total_missions,
-          stats.total_testimonials,
-          stats.total_blog_posts,
-          stats.total_statistics,
-          stats.total_publications,
-          stats.total_annual_reports
+          stats.total_users, stats.total_projects, stats.total_events, stats.total_volunteers,
+          stats.total_partners, stats.total_news, stats.total_programs, stats.total_leaders,
+          stats.total_missions, stats.total_testimonials, stats.total_blog_posts, stats.total_statistics,
+          stats.total_publications, stats.total_annual_reports
         ],
         borderColor: '#0B3B2F',
         backgroundColor: 'rgba(11, 59, 47, 0.05)',
@@ -625,16 +789,11 @@ const AdminDashboard = () => {
     ]
   };
 
-  // Doughnut chart for publication status
   const publicationStatusData = {
     labels: ['Published', 'Draft', 'Archived'],
     datasets: [
       {
-        data: [
-          stats.published_publications,
-          stats.draft_publications,
-          stats.archived_publications
-        ],
+        data: [stats.published_publications, stats.draft_publications, stats.archived_publications],
         backgroundColor: ['#4caf50', '#f59e0b', '#ef4444'],
         borderColor: ['#4caf50', '#f59e0b', '#ef4444'],
         borderWidth: 2
@@ -642,7 +801,6 @@ const AdminDashboard = () => {
     ]
   };
 
-  // Stats Cards Data
   const statsCards = [
     { label: 'Total Users', value: stats.total_users, icon: 'fas fa-users', color: '#0B3B2F', error: errors.users },
     { label: 'Active Users', value: stats.active_users, icon: 'fas fa-user-check', color: '#4caf50', error: errors.users },
@@ -662,216 +820,24 @@ const AdminDashboard = () => {
     { label: 'Annual Reports', value: stats.total_annual_reports, icon: 'fas fa-file-alt', color: '#0B3B2F', error: errors.annual_reports },
   ];
 
-  // Admin Cards Data
   const adminCards = [
-    { 
-      id: 'users', 
-      title: 'Users Management', 
-      icon: 'fas fa-users', 
-      color: '#0B3B2F', 
-      description: 'Manage all registered users, their roles and permissions',
-      count: stats.total_users,
-      path: '/admin/users',
-      error: errors.users
-    },
-    { 
-      id: 'projects', 
-      title: 'Projects', 
-      icon: 'fas fa-project-diagram', 
-      color: '#F9C74F', 
-      description: 'Track and manage all ongoing and completed projects',
-      count: stats.total_projects,
-      path: '/admin/projects',
-      error: errors.projects
-    },
-    { 
-      id: 'events', 
-      title: 'Events', 
-      icon: 'fas fa-calendar-alt', 
-      color: '#2b7a5c', 
-      description: 'Organize and manage all events and activities',
-      count: stats.total_events,
-      path: '/admin/events',
-      error: errors.events
-    },
-    { 
-      id: 'event_requests', 
-      title: 'Event Requests', 
-      icon: 'fas fa-calendar-plus', 
-      color: '#f59e0b', 
-      description: 'Review and manage event registration requests',
-      count: stats.pending_event_requests,
-      path: '/events/requests',
-      error: errors.event_requests,
-      badge: stats.pending_event_requests > 0 ? stats.pending_event_requests : null
-    },
-    { 
-      id: 'applications', 
-      title: 'Volunteer Applications', 
-      icon: 'fas fa-file-alt', 
-      color: '#9C27B0', 
-      description: 'Review and process volunteer applications',
-      count: stats.pending_applications,
-      path: '/admin/volunteers',
-      error: errors.applications,
-      badge: stats.pending_applications > 0 ? stats.pending_applications : null,
-      subStats: [
-        { label: 'Pending', value: stats.pending_applications },
-        { label: 'Accepted', value: stats.accepted_applications },
-        { label: 'Rejected', value: stats.rejected_applications }
-      ]
-    },
-    { 
-      id: 'partners', 
-      title: 'Partners', 
-      icon: 'fas fa-handshake', 
-      color: '#0B3B2F', 
-      description: 'Manage organizational partners and collaborations',
-      count: stats.total_partners,
-      path: '/admin/partners',
-      error: errors.partners
-    },
-    { 
-      id: 'news', 
-      title: 'News & Stories', 
-      icon: 'fas fa-newspaper', 
-      color: '#FF9800', 
-      description: 'Manage news articles and stories',
-      count: stats.total_news,
-      path: '/admin/news',
-      error: errors.news
-    },
-    { 
-      id: 'testimonials', 
-      title: 'Testimonials', 
-      icon: 'fas fa-star', 
-      color: '#F9C74F', 
-      description: 'Manage community testimonials and reviews',
-      count: stats.total_testimonials,
-      path: '/admin/testimonials',
-      error: errors.testimonials,
-      subStats: [
-        { label: 'Avg Rating', value: stats.average_rating, suffix: '★' }
-      ]
-    },
-    { 
-      id: 'programs', 
-      title: 'Programs', 
-      icon: 'fas fa-chalkboard-user', 
-      color: '#9C27B0', 
-      description: 'Manage programs and initiatives',
-      count: stats.total_programs,
-      path: '/admin/programs',
-      error: errors.programs
-    },
-    { 
-      id: 'messages', 
-      title: 'Messages', 
-      icon: 'fas fa-envelope', 
-      color: '#2b7a5c', 
-      description: 'View and respond to contact messages',
-      count: 0,
-      path: '/admin/messages',
-      error: null
-    },
-    { 
-      id: 'leaders', 
-      title: 'Leadership Team', 
-      icon: 'fas fa-users-cog', 
-      color: '#0B3B2F', 
-      description: 'Manage leadership team members and their profiles',
-      count: stats.total_leaders,
-      path: '/admin/leadership',
-      error: errors.leaders,
-      tab: 'leaders'
-    },
-    { 
-      id: 'missions', 
-      title: 'Missions', 
-      icon: 'fas fa-rocket', 
-      color: '#F9C74F', 
-      description: 'Track and manage all missions by category',
-      count: stats.total_missions,
-      path: '/admin/leadership',
-      error: errors.missions,
-      tab: 'missions',
-      subStats: [
-        { label: 'Environment', value: stats.total_environment_missions },
-        { label: 'Leadership', value: stats.total_leadership_missions }
-      ]
-    },
-    { 
-      id: 'blog_posts', 
-      title: 'Blog Posts', 
-      icon: 'fas fa-blog', 
-      color: '#2b7a5c', 
-      description: 'Manage news, articles, and blog content',
-      count: stats.total_blog_posts,
-      path: '/admin/leadership',
-      error: errors.blog_posts,
-      tab: 'blog-posts'
-    },
-    { 
-      id: 'statistics', 
-      title: 'Statistics', 
-      icon: 'fas fa-chart-line', 
-      color: '#9C27B0', 
-      description: 'Manage key statistics and metrics',
-      count: stats.total_statistics,
-      path: '/admin/leadership',
-      error: errors.statistics,
-      tab: 'statistics'
-    },
-    { 
-      id: 'publications', 
-      title: 'Publications', 
-      icon: 'fas fa-book', 
-      color: '#2196F3', 
-      description: 'Manage research publications and scholarly contributions',
-      count: stats.total_publications,
-      path: '/admin/publications',
-      error: errors.publications,
-      subStats: [
-        { label: 'Published', value: stats.published_publications },
-        { label: 'Draft', value: stats.draft_publications },
-        { label: 'Archived', value: stats.archived_publications }
-      ]
-    },
-    { 
-      id: 'annual_reports', 
-      title: 'Annual Reports', 
-      icon: 'fas fa-file-alt', 
-      color: '#0B3B2F', 
-      description: 'Create and manage annual reports with full content',
-      count: stats.total_annual_reports,
-      path: '/admin/reports',
-      error: errors.annual_reports,
-      badge: stats.draft_reports > 0 ? stats.draft_reports : null,
-      subStats: [
-        { label: 'Published', value: stats.published_reports },
-        { label: 'Draft', value: stats.draft_reports }
-      ]
-    }
+    { id: 'users', title: 'Users Management', icon: 'fas fa-users', color: '#0B3B2F', description: 'Manage all registered users, their roles and permissions', count: stats.total_users, path: '/admin/users', error: errors.users },
+    { id: 'projects', title: 'Projects', icon: 'fas fa-project-diagram', color: '#F9C74F', description: 'Track and manage all ongoing and completed projects', count: stats.total_projects, path: '/admin/projects', error: errors.projects },
+    { id: 'events', title: 'Events', icon: 'fas fa-calendar-alt', color: '#2b7a5c', description: 'Organize and manage all events and activities', count: stats.total_events, path: '/admin/events', error: errors.events },
+    { id: 'event_requests', title: 'Event Requests', icon: 'fas fa-calendar-plus', color: '#f59e0b', description: 'Review and manage event registration requests', count: stats.pending_event_requests, path: '/events/requests', error: errors.event_requests, badge: stats.pending_event_requests > 0 ? stats.pending_event_requests : null },
+    { id: 'applications', title: 'Volunteer Applications', icon: 'fas fa-file-alt', color: '#9C27B0', description: 'Review and process volunteer applications', count: stats.pending_applications, path: '/admin/volunteers', error: errors.applications, badge: stats.pending_applications > 0 ? stats.pending_applications : null, subStats: [{ label: 'Pending', value: stats.pending_applications }, { label: 'Accepted', value: stats.accepted_applications }, { label: 'Rejected', value: stats.rejected_applications }] },
+    { id: 'partners', title: 'Partners', icon: 'fas fa-handshake', color: '#0B3B2F', description: 'Manage organizational partners and collaborations', count: stats.total_partners, path: '/admin/partners', error: errors.partners },
+    { id: 'news', title: 'News & Stories', icon: 'fas fa-newspaper', color: '#FF9800', description: 'Manage news articles and stories', count: stats.total_news, path: '/admin/news', error: errors.news },
+    { id: 'testimonials', title: 'Testimonials', icon: 'fas fa-star', color: '#F9C74F', description: 'Manage community testimonials and reviews', count: stats.total_testimonials, path: '/admin/testimonials', error: errors.testimonials, subStats: [{ label: 'Avg Rating', value: stats.average_rating, suffix: '★' }] },
+    { id: 'programs', title: 'Programs', icon: 'fas fa-chalkboard-user', color: '#9C27B0', description: 'Manage programs and initiatives', count: stats.total_programs, path: '/admin/programs', error: errors.programs },
+    { id: 'messages', title: 'Messages', icon: 'fas fa-envelope', color: '#2b7a5c', description: 'View and respond to contact messages', count: 0, path: '/admin/messages', error: null },
+    { id: 'leaders', title: 'Leadership Team', icon: 'fas fa-users-cog', color: '#0B3B2F', description: 'Manage leadership team members and their profiles', count: stats.total_leaders, path: '/admin/leadership', error: errors.leaders, tab: 'leaders' },
+    { id: 'missions', title: 'Missions', icon: 'fas fa-rocket', color: '#F9C74F', description: 'Track and manage all missions by category', count: stats.total_missions, path: '/admin/leadership', error: errors.missions, tab: 'missions', subStats: [{ label: 'Environment', value: stats.total_environment_missions }, { label: 'Leadership', value: stats.total_leadership_missions }] },
+    { id: 'blog_posts', title: 'Blog Posts', icon: 'fas fa-blog', color: '#2b7a5c', description: 'Manage news, articles, and blog content', count: stats.total_blog_posts, path: '/admin/leadership', error: errors.blog_posts, tab: 'blog-posts' },
+    { id: 'statistics', title: 'Statistics', icon: 'fas fa-chart-line', color: '#9C27B0', description: 'Manage key statistics and metrics', count: stats.total_statistics, path: '/admin/leadership', error: errors.statistics, tab: 'statistics' },
+    { id: 'publications', title: 'Publications', icon: 'fas fa-book', color: '#2196F3', description: 'Manage research publications and scholarly contributions', count: stats.total_publications, path: '/admin/publications', error: errors.publications, subStats: [{ label: 'Published', value: stats.published_publications }, { label: 'Draft', value: stats.draft_publications }, { label: 'Archived', value: stats.archived_publications }] },
+    { id: 'annual_reports', title: 'Annual Reports', icon: 'fas fa-file-alt', color: '#0B3B2F', description: 'Create and manage annual reports with full content', count: stats.total_annual_reports, path: '/admin/reports', error: errors.annual_reports, badge: stats.draft_reports > 0 ? stats.draft_reports : null, subStats: [{ label: 'Published', value: stats.published_reports }, { label: 'Draft', value: stats.draft_reports }] }
   ];
-
-  if (loading) {
-    return (
-      <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f9fbf7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{
-            width: '60px',
-            height: '60px',
-            border: '3px solid #F9C74F',
-            borderTopColor: '#0B3B2F',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-            margin: '0 auto 1rem'
-          }} />
-          <p style={{ marginTop: '1rem', color: '#666' }}>Loading dashboard...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f9fbf7' }}>
@@ -895,7 +861,7 @@ const AdminDashboard = () => {
 
       {/* Main Content */}
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '3rem 2rem' }}>
-        
+
         {/* Stats Cards Row */}
         <div style={{
           display: 'grid',
@@ -904,10 +870,10 @@ const AdminDashboard = () => {
           marginBottom: '3rem'
         }}>
           {statsCards.map((stat, idx) => (
-            <div 
-              key={idx} 
-              data-aos="fade-up" 
-              data-aos-delay={idx * 50} 
+            <div
+              key={idx}
+              data-aos="fade-up"
+              data-aos-delay={idx * 50}
               style={{
                 background: 'white',
                 borderRadius: '20px',
@@ -976,7 +942,7 @@ const AdminDashboard = () => {
             <i className="fas fa-chart-bar" style={{ color: '#F9C74F', marginRight: '0.5rem' }}></i>
             Analytics & Insights
           </h2>
-          
+
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))',
@@ -999,26 +965,8 @@ const AdminDashboard = () => {
                   options={{
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                      legend: {
-                        display: false
-                      },
-                      tooltip: {
-                        callbacks: {
-                          label: function(context) {
-                            return context.parsed.y + ' items';
-                          }
-                        }
-                      }
-                    },
-                    scales: {
-                      y: {
-                        beginAtZero: true,
-                        ticks: {
-                          stepSize: 1
-                        }
-                      }
-                    }
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
                   }}
                 />
               </div>
@@ -1042,32 +990,9 @@ const AdminDashboard = () => {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                      legend: {
-                        position: 'top',
-                        labels: {
-                          usePointStyle: true,
-                          padding: 20
-                        }
-                      },
-                      tooltip: {
-                        callbacks: {
-                          label: function(context) {
-                            return context.dataset.label + ': ' + context.parsed.y + ' items';
-                          }
-                        }
-                      }
+                      legend: { position: 'top', labels: { usePointStyle: true, padding: 20 } }
                     },
-                    scales: {
-                      x: {
-                        stacked: false
-                      },
-                      y: {
-                        beginAtZero: true,
-                        ticks: {
-                          stepSize: 1
-                        }
-                      }
-                    }
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
                   }}
                 />
               </div>
@@ -1091,35 +1016,15 @@ const AdminDashboard = () => {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                      legend: {
-                        position: 'top',
-                        labels: {
-                          usePointStyle: true,
-                          padding: 20
-                        }
-                      },
-                      tooltip: {
-                        callbacks: {
-                          label: function(context) {
-                            return context.dataset.label + ': ' + Math.round(context.parsed.y) + ' items';
-                          }
-                        }
-                      }
+                      legend: { position: 'top', labels: { usePointStyle: true, padding: 20 } }
                     },
-                    scales: {
-                      y: {
-                        beginAtZero: true,
-                        ticks: {
-                          stepSize: 1
-                        }
-                      }
-                    }
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
                   }}
                 />
               </div>
             </div>
 
-            {/* Doughnut Chart - Publication Status */}
+            {/* Doughnut Chart */}
             <div data-aos="fade-up" data-aos-delay="400" style={{
               background: 'white',
               borderRadius: '20px',
@@ -1137,20 +1042,7 @@ const AdminDashboard = () => {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                      legend: {
-                        position: 'bottom',
-                        labels: {
-                          usePointStyle: true,
-                          padding: 20
-                        }
-                      },
-                      tooltip: {
-                        callbacks: {
-                          label: function(context) {
-                            return context.label + ': ' + context.parsed + ' publications';
-                          }
-                        }
-                      }
+                      legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
                     },
                     cutout: '60%'
                   }}
@@ -1192,9 +1084,8 @@ const AdminDashboard = () => {
                 position: 'relative',
                 overflow: 'hidden',
                 opacity: card.error ? 0.7 : 1,
-                border: card.id === 'publications' ? '2px solid #2196F3' : 
-                       card.id === 'annual_reports' ? '2px solid #0B3B2F' : 
-                       'none'
+                border: card.id === 'publications' ? '2px solid #2196F3' :
+                       card.id === 'annual_reports' ? '2px solid #0B3B2F' : 'none'
               }}
               onMouseEnter={(e) => {
                 if (!card.error) {
@@ -1207,91 +1098,58 @@ const AdminDashboard = () => {
                 e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.08)';
               }}
             >
-              {/* Badge for pending requests or drafts */}
               {card.badge && card.badge > 0 && (
                 <div style={{
-                  position: 'absolute',
-                  top: '12px',
-                  right: '12px',
+                  position: 'absolute', top: '12px', right: '12px',
                   background: card.id === 'annual_reports' ? '#f59e0b' : '#ef4444',
-                  color: 'white',
-                  padding: '0.2rem 0.6rem',
-                  borderRadius: '20px',
-                  fontSize: '0.7rem',
-                  fontWeight: 'bold',
-                  zIndex: 10,
+                  color: 'white', padding: '0.2rem 0.6rem', borderRadius: '20px',
+                  fontSize: '0.7rem', fontWeight: 'bold', zIndex: 10,
                   animation: 'pulse 2s infinite'
                 }}>
                   {card.badge} {card.id === 'annual_reports' ? 'Drafts' : 'Pending'}
                 </div>
               )}
 
-              {/* Featured Badge for Publications */}
               {card.id === 'publications' && stats.featured_publications > 0 && (
                 <div style={{
-                  position: 'absolute',
-                  top: '12px',
-                  right: '12px',
-                  background: '#F9C74F',
-                  color: '#0B3B2F',
-                  padding: '0.2rem 0.6rem',
-                  borderRadius: '20px',
-                  fontSize: '0.7rem',
-                  fontWeight: 'bold',
-                  zIndex: 10
+                  position: 'absolute', top: '12px', right: '12px',
+                  background: '#F9C74F', color: '#0B3B2F',
+                  padding: '0.2rem 0.6rem', borderRadius: '20px',
+                  fontSize: '0.7rem', fontWeight: 'bold', zIndex: 10
                 }}>
                   <i className="fas fa-star" style={{ marginRight: '0.3rem' }}></i>
                   {stats.featured_publications} Featured
                 </div>
               )}
 
-              {/* Error Badge */}
               {card.error && (
                 <div style={{
-                  position: 'absolute',
-                  top: '12px',
-                  right: '12px',
-                  background: '#ffebee',
-                  color: '#d32f2f',
-                  padding: '0.2rem 0.5rem',
-                  borderRadius: '12px',
-                  fontSize: '0.65rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.3rem',
-                  zIndex: 10
+                  position: 'absolute', top: '12px', right: '12px',
+                  background: '#ffebee', color: '#d32f2f',
+                  padding: '0.2rem 0.5rem', borderRadius: '12px',
+                  fontSize: '0.65rem', display: 'flex', alignItems: 'center',
+                  gap: '0.3rem', zIndex: 10
                 }}>
                   <i className="fas fa-exclamation-circle"></i>
                   API Error
                 </div>
               )}
 
-              {/* Background Decoration */}
               <div style={{
-                position: 'absolute',
-                top: '-20px',
-                right: '-20px',
-                width: '100px',
-                height: '100px',
+                position: 'absolute', top: '-20px', right: '-20px',
+                width: '100px', height: '100px',
                 background: `radial-gradient(circle, ${card.color}10, transparent)`,
                 borderRadius: '50%'
               }} />
-              
-              {/* Card Header */}
+
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
                 <div style={{
-                  width: '60px',
-                  height: '60px',
-                  borderRadius: '16px',
-                  background: `${card.color}15`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  width: '60px', height: '60px', borderRadius: '16px',
+                  background: `${card.color}15`, display: 'flex',
+                  alignItems: 'center', justifyContent: 'center',
                   transition: 'transform 0.3s ease'
                 }}
-                onMouseEnter={(e) => {
-                  if (!card.error) e.currentTarget.style.transform = 'scale(1.1)';
-                }}
+                onMouseEnter={(e) => { if (!card.error) e.currentTarget.style.transform = 'scale(1.1)'; }}
                 onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
                   <i className={card.icon} style={{ fontSize: '1.8rem', color: card.color }}></i>
                 </div>
@@ -1300,18 +1158,11 @@ const AdminDashboard = () => {
                   <p style={{ fontSize: '0.75rem', color: '#888', margin: 0 }}>{card.description}</p>
                 </div>
               </div>
-              
-              {/* Sub Stats */}
+
               {card.subStats && !card.error && (
                 <div style={{
-                  display: 'flex',
-                  gap: '1rem',
-                  marginTop: '0.5rem',
-                  marginBottom: '1rem',
-                  padding: '0.5rem',
-                  background: '#f9f9f9',
-                  borderRadius: '12px',
-                  flexWrap: 'wrap'
+                  display: 'flex', gap: '1rem', marginTop: '0.5rem', marginBottom: '1rem',
+                  padding: '0.5rem', background: '#f9f9f9', borderRadius: '12px', flexWrap: 'wrap'
                 }}>
                   {card.subStats.map((sub, subIdx) => (
                     <div key={subIdx} style={{ flex: 1, textAlign: 'center', minWidth: '80px' }}>
@@ -1323,17 +1174,11 @@ const AdminDashboard = () => {
                   ))}
                 </div>
               )}
-              
-              {/* Card Footer */}
+
               {card.error ? (
                 <div style={{
-                  marginTop: '1rem',
-                  padding: '0.8rem',
-                  background: '#ffebee',
-                  borderRadius: '12px',
-                  color: '#d32f2f',
-                  fontSize: '0.75rem',
-                  textAlign: 'center'
+                  marginTop: '1rem', padding: '0.8rem', background: '#ffebee',
+                  borderRadius: '12px', color: '#d32f2f', fontSize: '0.75rem', textAlign: 'center'
                 }}>
                   <i className="fas fa-exclamation-triangle" style={{ marginRight: '0.3rem' }}></i>
                   {card.error}
@@ -1347,17 +1192,11 @@ const AdminDashboard = () => {
                     </div>
                   </div>
                   <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.3rem',
-                    color: card.color,
-                    fontSize: '0.8rem',
-                    fontWeight: 600
+                    display: 'flex', alignItems: 'center', gap: '0.3rem',
+                    color: card.color, fontSize: '0.8rem', fontWeight: 600
                   }}>
                     <span>Manage</span>
-                    <i className="fas fa-arrow-right" style={{ fontSize: '0.7rem', transition: 'transform 0.3s ease' }}
-                       onMouseEnter={(e) => e.currentTarget.style.transform = 'translateX(5px)'}
-                       onMouseLeave={(e) => e.currentTarget.style.transform = 'translateX(0)'} />
+                    <i className="fas fa-arrow-right" style={{ fontSize: '0.7rem', transition: 'transform 0.3s ease' }} />
                   </div>
                 </div>
               )}
@@ -1368,29 +1207,19 @@ const AdminDashboard = () => {
         {/* Error Summary Banner */}
         {hasAnyError() && (
           <div style={{
-            marginTop: '3rem',
-            padding: '1rem',
-            background: '#fff3cd',
-            border: '1px solid #ffeaa7',
-            borderRadius: '12px',
-            textAlign: 'center'
+            marginTop: '3rem', padding: '1rem', background: '#fff3cd',
+            border: '1px solid #ffeaa7', borderRadius: '12px', textAlign: 'center'
           }}>
             <i className="fas fa-info-circle" style={{ color: '#856404', marginRight: '0.5rem' }}></i>
             <span style={{ color: '#856404', fontSize: '0.85rem' }}>
               Some data could not be loaded. Please check your API connections and try again.
             </span>
-            <button 
+            <button
               onClick={fetchDashboardData}
               style={{
-                marginLeft: '1rem',
-                background: '#856404',
-                color: 'white',
-                border: 'none',
-                padding: '0.3rem 0.8rem',
-                borderRadius: '20px',
-                cursor: 'pointer',
-                fontSize: '0.75rem',
-                transition: 'transform 0.3s ease'
+                marginLeft: '1rem', background: '#856404', color: 'white',
+                border: 'none', padding: '0.3rem 0.8rem', borderRadius: '20px',
+                cursor: 'pointer', fontSize: '0.75rem', transition: 'transform 0.3s ease'
               }}
               onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
               onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
@@ -1403,16 +1232,12 @@ const AdminDashboard = () => {
       </div>
 
       <style>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
         @keyframes pulse {
           0% { transform: scale(1); }
           50% { transform: scale(1.05); }
           100% { transform: scale(1); }
         }
-        
+
         @media (max-width: 768px) {
           div[style*="grid-template-columns"] {
             grid-template-columns: 1fr !important;
