@@ -130,10 +130,12 @@ const Donate = () => {
   const API_BASE_URL = 'https://vuma.pythonanywhere.com/api';
 
   const mpesaNumber = "+255 759 913 433";
+
+  // ✅ UPDATED: Bank details now point to VUMA TANZANIA / 10490811918
   const bankDetails = {
     bankName: "CRDB Bank",
-    accountName: "VUMA Organization",
-    accountNumber: "01 52316455500",
+    accountName: "VUMA TANZANIA",
+    accountNumber: "10490811918",
     branch: "Mwanza Branch",
     swiftCode: "CORUTZTZ"
   };
@@ -1411,7 +1413,8 @@ VUMA Organization - www.vuma.org
                 </div>
                 <div>
                   <h3 style={{ color: '#0B3B2F', margin: 0 }}>CRDB Bank Transfer</h3>
-                  <p style={{ color: '#666', margin: 0, fontSize: '0.8rem' }}>You will see LABAN ABAS MAPABHA as the account holder</p>
+                  {/* ✅ UPDATED: account holder now VUMA TANZANIA */}
+                  <p style={{ color: '#666', margin: 0, fontSize: '0.8rem' }}>You will see VUMA TANZANIA as the account holder</p>
                 </div>
               </div>
               <div style={{
