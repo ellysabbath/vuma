@@ -3,6 +3,7 @@ import eventa from '../assets/imageb.png';
 import eventb from '../assets/image.jpg';
 import eventc from '../assets/imagea.jpg';
 import eventd from '../assets/eventd.jpg';
+import mwaka from '../assets/mwaka.jpeg';
 
 import eventf from '../assets/imagee.jpg';
 import eventg from '../assets/eventg.jpg';
@@ -30,6 +31,12 @@ export const projects = [
     cat: "leadership", 
     img: kaku,
     description: "VUMA team collaborate, engage and sponsor local and national events with the discussion aligning organizational vision and mission. Also this has been a chance to showcasing our initiatives and visibility"
+  },
+    { 
+    title: "From Soil to Harvest: VUMA's Green Agriculture Project in Rural Areas", 
+    cat: "enviromental", 
+    img: mwaka,
+    description: "Our team is in the rural areas demonstrating how drip irrigation can help local communities in food security and livelihood. Green agriculture is the most valuable project that we truly embrace at VUMA. Soil education, types of plants and the best practices are empowered to the local communities."
   },
     { 
     title: "Mazingira day event", 
