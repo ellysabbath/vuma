@@ -148,7 +148,7 @@ const Home = ({ onLoginClick }) => {
         <ImpactCounters />
 
         {/* Stats Component - Detailed Metrics */}
-        <StatsComponent />
+        {/* <StatsComponent /> */}
 
         {/* Innovation Showcase - Featured Projects */}
         <InnovationShowcase />
