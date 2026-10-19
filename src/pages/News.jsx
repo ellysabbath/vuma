@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
-// ==================== NEWS SKELETON ====================
+// ==================== NEWS SKELETON (DATA ONLY) ====================
 const NewsSkeleton = ({ count = 6 }) => {
   const items = Array.from({ length: count });
 
@@ -31,11 +31,7 @@ const NewsSkeleton = ({ count = 6 }) => {
           {/* Image placeholder */}
           <div
             className="skeleton-block"
-            style={{
-              height: '240px',
-              width: '100%',
-              borderRadius: 0
-            }}
+            style={{ height: '240px', width: '100%', borderRadius: 0 }}
           />
 
           {/* Content */}
@@ -292,43 +288,7 @@ const News = () => {
     window.open(shareUrl, '_blank', 'width=600,height=400');
   };
 
-  // ==================== LOADING STATE (SKELETON) ====================
-  if (loading) {
-    return (
-      <div style={{ paddingTop: '70px', background: '#f8fafc', minHeight: '100vh' }}>
-        {/* Thin Header skeleton */}
-        <div style={{
-          background: 'white',
-          borderBottom: '1px solid #e2e8f0',
-          padding: '1rem 2rem',
-          position: 'sticky',
-          top: '70px',
-          zIndex: 100,
-          boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-        }}>
-          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-              <div>
-                <div className="skeleton-block" style={{ height: '18px', width: '180px', borderRadius: '8px', marginBottom: '6px' }} />
-                <div className="skeleton-block" style={{ height: '10px', width: '120px', borderRadius: '5px' }} />
-              </div>
-              <div style={{ display: 'flex', gap: '1rem' }}>
-                <div className="skeleton-block" style={{ height: '12px', width: '60px', borderRadius: '5px' }} />
-                <div className="skeleton-block" style={{ height: '12px', width: '60px', borderRadius: '5px' }} />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Skeleton grid */}
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
-          <NewsSkeleton count={6} />
-        </div>
-      </div>
-    );
-  }
-  // ==================== END LOADING STATE ====================
-
+  // ==================== ERROR STATE ====================
   if (error) {
     return (
       <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -345,7 +305,7 @@ const News = () => {
 
   return (
     <div style={{ paddingTop: '70px', background: '#f8fafc' }}>
-      {/* Thin Header */}
+      {/* ==================== THIN HEADER (ALWAYS VISIBLE) ==================== */}
       <div style={{
         background: 'white',
         borderBottom: '1px solid #e2e8f0',
@@ -363,7 +323,7 @@ const News = () => {
                 News & Stories
               </h1>
               <p style={{ fontSize: '0.75rem', color: '#64748b', margin: '0.25rem 0 0 0' }}>
-                {news.length} article{news.length !== 1 ? 's' : ''} available
+                {loading ? 'Loading articles...' : `${news.length} article${news.length !== 1 ? 's' : ''} available`}
               </p>
             </div>
             <div style={{ display: 'flex', gap: '1rem' }}>
@@ -380,9 +340,11 @@ const News = () => {
         </div>
       </div>
 
-      {/* Blog Cards Grid */}
+      {/* ==================== NEWS GRID (SKELETON OR DATA) ==================== */}
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
-        {news.length === 0 ? (
+        {loading ? (
+          <NewsSkeleton count={6} />
+        ) : news.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '4rem', background: 'white', borderRadius: '20px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
             <i className="fas fa-newspaper" style={{ fontSize: '3rem', color: '#cbd5e1' }}></i>
             <p style={{ marginTop: '1rem', color: '#64748b' }}>No news articles available at the moment.</p>
@@ -551,14 +513,11 @@ const News = () => {
         )}
       </div>
 
-      {/* Modal — unchanged, but the like spinner inside is fine (button-level) */}
+      {/* Modal — unchanged */}
       {showModal && selectedPost && (
         <div className="modal-overlay" onClick={closeModal} style={{
           position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
+          top: 0, left: 0, right: 0, bottom: 0,
           background: 'rgba(0,0,0,0.9)',
           backdropFilter: 'blur(12px)',
           zIndex: 2000,
@@ -807,35 +766,17 @@ const News = () => {
           to { opacity: 1; }
         }
         @keyframes slideInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
         }
 
-        .modal-content::-webkit-scrollbar {
-          width: 5px;
-        }
-        .modal-content::-webkit-scrollbar-track {
-          background: #f1f1f1;
-          border-radius: 3px;
-        }
-        .modal-content::-webkit-scrollbar-thumb {
-          background: #F9C74F;
-          border-radius: 3px;
-        }
+        .modal-content::-webkit-scrollbar { width: 5px; }
+        .modal-content::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
+        .modal-content::-webkit-scrollbar-thumb { background: #F9C74F; border-radius: 3px; }
 
         @media (max-width: 768px) {
-          .modal-content {
-            max-height: 90vh;
-          }
-          .modal-content > div:first-child {
-            height: 220px;
-          }
+          .modal-content { max-height: 90vh; }
+          .modal-content > div:first-child { height: 220px; }
         }
       `}</style>
     </div>
