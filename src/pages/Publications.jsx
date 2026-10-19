@@ -297,6 +297,64 @@ const Publications = () => {
             color: #F9C74F !important;
           }
 
+          /* Full title — no truncation, always wraps */
+          .pub-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #0B3B2F;
+            margin-bottom: 6px;
+            line-height: 1.4;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+          }
+
+          /* Short description — fully visible (no truncation) */
+          .pub-short-desc {
+            font-size: 0.85rem;
+            color: #334155;
+            margin-bottom: 8px;
+            line-height: 1.55;
+            white-space: normal;
+          }
+
+          /* Long description — partial preview (3 lines + fade) */
+          .pub-long-desc {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-bottom: 8px;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            position: relative;
+          }
+
+          /* Optional: fade-out gradient on the 3rd line */
+          .pub-long-desc::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 40px;
+            height: 1.5em;
+            background: linear-gradient(to right, transparent, #ffffff 70%);
+            pointer-events: none;
+          }
+
+          /* "Read more" hint */
+          .read-more-hint {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.75rem;
+            color: #F9C74F;
+            font-weight: 600;
+            margin-bottom: 8px;
+          }
+
           @media (min-width: 768px) {
             .controls-row {
               flex-direction: row !important;
@@ -318,6 +376,9 @@ const Publications = () => {
           @media (max-width: 480px) {
             .filter-group { justify-content: center !important; }
             .filter-btn { font-size: 0.7rem !important; padding: 4px 12px !important; }
+            .pub-title { font-size: 0.98rem !important; }
+            .pub-short-desc { font-size: 0.8rem !important; }
+            .pub-long-desc { font-size: 0.75rem !important; }
           }
         `}
       </style>
@@ -337,7 +398,9 @@ const Publications = () => {
             </div>
 
             <h1 style={styles.title}>
-              <span style={styles.titleIcon}>📚</span>
+              <span style={styles.titleIcon}>
+                <i className="fas fa-book-open" style={{ color: '#F9C74F' }}></i>
+              </span>
               <span className="title-glow" style={styles.titleText}>
                 VUMA Publications
               </span>
@@ -366,7 +429,7 @@ const Publications = () => {
           <div className="search-wrapper" style={styles.searchWrapper}>
             <input
               type="text"
-              placeholder="🔍 Search by title, author, or description..."
+              placeholder="Search by title, author, or description..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input"
@@ -377,8 +440,9 @@ const Publications = () => {
                 onClick={() => setSearchTerm('')}
                 className="clear-btn"
                 style={styles.clearBtn}
+                aria-label="Clear search"
               >
-                ✕
+                <i className="fas fa-times"></i>
               </button>
             )}
           </div>
@@ -456,7 +520,9 @@ const Publications = () => {
           <PublicationsSkeleton count={5} />
         ) : filteredPublications.length === 0 ? (
           <div style={styles.noResults}>
-            <div style={styles.noResultsIcon}>🔍</div>
+            <div style={styles.noResultsIcon}>
+              <i className="fas fa-search" style={{ color: '#94a3b8' }}></i>
+            </div>
             <h3 style={styles.noResultsTitle}>No publications found</h3>
             <p style={styles.noResultsText}>
               Try adjusting your search or filter criteria.
@@ -464,60 +530,94 @@ const Publications = () => {
           </div>
         ) : (
           <div style={styles.list}>
-            {filteredPublications.map((pub, idx) => (
-              <div
-                key={pub.id}
-                data-aos="fade-up"
-                data-aos-delay={idx * 50}
-                className="publication-card"
-                style={styles.card}
-                onClick={() => handleViewPublication(pub.id)}
-              >
-                <div className="card-layout" style={styles.cardLayout}>
-                  <div style={styles.cardLeft}>
-                    <h2 style={styles.pubTitle}>{pub.title}</h2>
-                    {pub.author_publisher && (
-                      <p style={styles.pubAuthors}>
-                        <span style={styles.label}>By:</span> {pub.author_publisher}
-                      </p>
-                    )}
-                    {pub.short_description && (
-                      <p style={styles.pubDescription}>
-                        {pub.short_description.length > 150
-                          ? pub.short_description.substring(0, 150) + '...'
-                          : pub.short_description}
-                      </p>
-                    )}
-                    <div style={styles.pubMeta}>
-                      <span style={{
-                        background: `${getTypeColor(pub.type)}15`,
-                        color: getTypeColor(pub.type),
-                        padding: '0.125rem 0.5rem',
-                        borderRadius: '12px',
-                        fontSize: '0.688rem',
-                        fontWeight: 500,
-                        display: 'inline-block',
-                        marginRight: '0.5rem'
-                      }}>{getTypeLabel(pub.type)}</span>
-                      {pub.published_date && (
-                        <span style={{ fontSize: '0.7rem', color: '#64748b' }}>
-                          {new Date(pub.published_date).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                          })}
-                        </span>
+            {filteredPublications.map((pub, idx) => {
+              // Determine if we have a long description
+              const hasLongDesc =
+                pub.long_description &&
+                pub.long_description.trim().length > 0;
+
+              return (
+                <div
+                  key={pub.id}
+                  data-aos="fade-up"
+                  data-aos-delay={idx * 50}
+                  className="publication-card"
+                  style={styles.card}
+                  onClick={() => handleViewPublication(pub.id)}
+                >
+                  <div className="card-layout" style={styles.cardLayout}>
+                    <div style={styles.cardLeft}>
+                      {/* ============ FULL TITLE (no truncation) ============ */}
+                      <h2 className="pub-title">{pub.title}</h2>
+
+                      {/* ============ AUTHOR ============ */}
+                      {pub.author_publisher && (
+                        <p style={styles.pubAuthors}>
+                          <span style={styles.label}>
+                            <i className="fas fa-user-edit" style={{ marginRight: 4, color: '#F9C74F' }}></i>
+                            By:
+                          </span>{' '}
+                          {pub.author_publisher}
+                        </p>
                       )}
+
+                      {/* ============ SHORT DESCRIPTION (fully visible) ============ */}
+                      {pub.short_description && (
+                        <p className="pub-short-desc">
+                          {pub.short_description}
+                        </p>
+                      )}
+
+                      {/* ============ PARTIAL LONG DESCRIPTION (3 lines) ============ */}
+                      {hasLongDesc && (
+                        <>
+                          <p className="pub-long-desc">
+                            {pub.long_description}
+                          </p>
+                          <span className="read-more-hint">
+                            <i className="fas fa-arrow-right"></i>
+                            Read full details
+                          </span>
+                        </>
+                      )}
+
+                      {/* ============ META ============ */}
+                      <div style={styles.pubMeta}>
+                        <span style={{
+                          background: `${getTypeColor(pub.type)}15`,
+                          color: getTypeColor(pub.type),
+                          padding: '0.125rem 0.5rem',
+                          borderRadius: '12px',
+                          fontSize: '0.688rem',
+                          fontWeight: 500,
+                          display: 'inline-block',
+                          marginRight: '0.5rem'
+                        }}>
+                          {getTypeLabel(pub.type)}
+                        </span>
+                        {pub.published_date && (
+                          <span style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                            <i className="far fa-calendar-alt" style={{ marginRight: 4 }}></i>
+                            {new Date(pub.published_date).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            })}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="card-actions" style={styles.cardRight}>
+                      <span className="view-link" style={styles.viewLink}>
+                        View Details{' '}
+                        <i className="fas fa-arrow-right view-arrow" style={styles.viewArrow}></i>
+                      </span>
                     </div>
                   </div>
-                  <div className="card-actions" style={styles.cardRight}>
-                    <span className="view-link" style={styles.viewLink}>
-                      View Details <i className="fas fa-arrow-right view-arrow" style={styles.viewArrow}></i>
-                    </span>
-                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
@@ -664,7 +764,7 @@ const styles = {
     transform: 'translateY(-50%)',
     background: 'none',
     border: 'none',
-    fontSize: '1rem',
+    fontSize: '0.9rem',
     color: '#94a3b8',
     cursor: 'pointer',
     padding: '2px 6px',
@@ -721,7 +821,7 @@ const styles = {
     cursor: 'pointer',
   },
   cardLayout: { display: 'flex', flexDirection: 'column' },
-  cardLeft: { flex: 1 },
+  cardLeft: { flex: 1, minWidth: 0 },
   cardRight: {
     marginTop: '10px',
     display: 'flex',
@@ -731,16 +831,8 @@ const styles = {
     flexWrap: 'wrap',
   },
 
-  pubTitle: {
-    fontSize: '1.05rem',
-    fontWeight: '700',
-    color: '#0B3B2F',
-    marginBottom: '4px',
-    lineHeight: 1.3,
-  },
-  pubAuthors: { fontSize: '0.8rem', color: '#475569', marginBottom: '2px' },
-  pubDescription: { fontSize: '0.8rem', color: '#64748b', marginBottom: '6px', lineHeight: 1.4 },
-  pubMeta: { display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4px' },
+  pubAuthors: { fontSize: '0.8rem', color: '#475569', marginBottom: '6px' },
+  pubMeta: { display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4px', marginTop: '4px' },
   label: { fontWeight: '600', color: '#0B3B2F' },
 
   viewLink: {
