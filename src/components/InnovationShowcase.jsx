@@ -184,13 +184,7 @@ const InnovationShowcase = () => {
         partners: ["Policy Forum", "UNDP", "Government Agencies"],
         sdg: ["SDG 16: Peace & Justice", "SDG 13: Climate Action", "SDG 17: Partnerships"]
       },
-      "Urban Vertical Farming": {
-        fullDescription: "This innovative project brings agriculture to urban spaces through vertical farming techniques. Using hydroponic systems, we grow fresh vegetables in limited spaces, providing food security and reducing transportation emissions. The project also offers training to urban youth on sustainable farming.",
-        impact: "20 vertical farms established, 1000+ kg of produce monthly",
-        timeline: "January 2025 - Ongoing",
-        partners: ["FAO", "Ministry of Agriculture", "Local Universities"],
-        sdg: ["SDG 2: Zero Hunger", "SDG 11: Sustainable Cities", "SDG 12: Consumption"]
-      },
+    
       "Climate Tech Bootcamp": {
         fullDescription: "The Climate Tech Bootcamp is an intensive 8-week program that trains youth in technology solutions for climate challenges. Participants learn coding, data analysis, and hardware development to create innovative climate solutions. The program includes mentorship from industry experts and a demo day with potential investors.",
         impact: "100+ graduates, 20+ climate tech prototypes developed",
