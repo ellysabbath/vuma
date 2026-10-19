@@ -31,213 +31,125 @@ ChartJS.register(
   Filler
 );
 
-// ==================== DASHBOARD SKELETON ====================
+// ==================== DASHBOARD SKELETON (DATA ONLY) ====================
 const DashboardSkeleton = () => {
-  // 16 stat cards (matching statsCards.length)
   const statCards = Array.from({ length: 16 });
-  // 4 chart panels
   const chartPanels = Array.from({ length: 4 });
-  // 16 admin cards
   const adminCards = Array.from({ length: 16 });
 
   return (
-    <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f9fbf7' }}>
-      {/* Header skeleton */}
+    <>
+      {/* Stats cards skeleton */}
       <div style={{
-        background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)',
-        color: 'white',
-        padding: '3rem 2rem',
-        textAlign: 'center'
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+        gap: '1.5rem',
+        marginBottom: '3rem'
       }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        {statCards.map((_, idx) => (
           <div
-            className="skeleton-block skeleton-block--dark"
+            key={idx}
             style={{
-              height: 'clamp(1.8rem, 5vw, 2.5rem)',
-              width: 'min(60%, 400px)',
-              margin: '0 auto 0.75rem',
-              borderRadius: '12px'
+              background: 'white',
+              borderRadius: '20px',
+              padding: '1.5rem',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
+              animation: `skeletonFadeIn 0.5s ease ${Math.min(idx * 0.03, 0.4)}s both`
             }}
-          />
-          <div
-            className="skeleton-block skeleton-block--dark"
-            style={{
-              height: 'clamp(0.9rem, 3vw, 1rem)',
-              width: 'min(80%, 600px)',
-              margin: '0 auto',
-              borderRadius: '8px'
-            }}
-          />
-        </div>
+          >
+            <div style={{ flex: 1 }}>
+              <div className="skeleton-block" style={{ height: '10px', width: '55%', borderRadius: '5px', marginBottom: '0.6rem' }} />
+              <div className="skeleton-block" style={{ height: '28px', width: '40%', borderRadius: '6px', marginBottom: '0.5rem' }} />
+              <div className="skeleton-block" style={{ height: '8px', width: '35%', borderRadius: '4px' }} />
+            </div>
+            <div className="skeleton-block" style={{ width: '50px', height: '50px', borderRadius: '12px' }} />
+          </div>
+        ))}
       </div>
 
-      {/* Main content */}
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '3rem 2rem' }}>
-
-        {/* Stats cards skeleton */}
+      {/* Charts section skeleton */}
+      <div style={{ marginBottom: '3rem' }}>
+        <div
+          className="skeleton-block"
+          style={{ height: '24px', width: '260px', borderRadius: '8px', marginBottom: '1.5rem' }}
+        />
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: '1.5rem',
-          marginBottom: '3rem'
+          gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))',
+          gap: '2rem'
         }}>
-          {statCards.map((_, idx) => (
+          {chartPanels.map((_, idx) => (
             <div
               key={idx}
               style={{
                 background: 'white',
                 borderRadius: '20px',
                 padding: '1.5rem',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
                 boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
-                animation: `skeletonFadeIn 0.5s ease ${Math.min(idx * 0.03, 0.4)}s both`
+                animation: `skeletonFadeIn 0.5s ease ${idx * 0.08}s both`
               }}
             >
-              <div style={{ flex: 1 }}>
-                <div
-                  className="skeleton-block"
-                  style={{ height: '10px', width: '55%', borderRadius: '5px', marginBottom: '0.6rem' }}
-                />
-                <div
-                  className="skeleton-block"
-                  style={{ height: '28px', width: '40%', borderRadius: '6px', marginBottom: '0.5rem' }}
-                />
-                <div
-                  className="skeleton-block"
-                  style={{ height: '8px', width: '35%', borderRadius: '4px' }}
-                />
-              </div>
-              <div
-                className="skeleton-block"
-                style={{ width: '50px', height: '50px', borderRadius: '12px' }}
-              />
+              <div className="skeleton-block" style={{ height: '14px', width: '60%', borderRadius: '6px', marginBottom: '1rem' }} />
+              <div className="skeleton-block" style={{ height: '350px', width: '100%', borderRadius: '12px' }} />
             </div>
           ))}
         </div>
+      </div>
 
-        {/* Charts section */}
-        <div style={{ marginBottom: '3rem' }}>
+      {/* Admin cards skeleton */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+        gap: '2rem'
+      }}>
+        {adminCards.map((_, idx) => (
           <div
-            className="skeleton-block"
+            key={idx}
             style={{
-              height: '24px',
-              width: '260px',
-              borderRadius: '8px',
-              marginBottom: '1.5rem'
+              background: 'white',
+              borderRadius: '24px',
+              padding: '1.5rem',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+              animation: `skeletonFadeIn 0.5s ease ${Math.min(idx * 0.05, 0.5)}s both`
             }}
-          />
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))',
-            gap: '2rem'
-          }}>
-            {chartPanels.map((_, idx) => (
-              <div
-                key={idx}
-                style={{
-                  background: 'white',
-                  borderRadius: '20px',
-                  padding: '1.5rem',
-                  boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
-                  animation: `skeletonFadeIn 0.5s ease ${idx * 0.08}s both`
-                }}
-              >
-                {/* Chart title */}
-                <div
-                  className="skeleton-block"
-                  style={{ height: '14px', width: '60%', borderRadius: '6px', marginBottom: '1rem' }}
-                />
-                {/* Chart body */}
-                <div
-                  className="skeleton-block"
-                  style={{ height: '350px', width: '100%', borderRadius: '12px' }}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Admin cards skeleton */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-          gap: '2rem'
-        }}>
-          {adminCards.map((_, idx) => (
-            <div
-              key={idx}
-              style={{
-                background: 'white',
-                borderRadius: '24px',
-                padding: '1.5rem',
-                boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
-                animation: `skeletonFadeIn 0.5s ease ${Math.min(idx * 0.05, 0.5)}s both`
-              }}
-            >
-              {/* Header row: icon + title + description */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                <div
-                  className="skeleton-block"
-                  style={{ width: '60px', height: '60px', borderRadius: '16px', flexShrink: 0 }}
-                />
-                <div style={{ flex: 1 }}>
-                  <div
-                    className="skeleton-block"
-                    style={{ height: '16px', width: '60%', borderRadius: '6px', marginBottom: '6px' }}
-                  />
-                  <div
-                    className="skeleton-block"
-                    style={{ height: '10px', width: '90%', borderRadius: '5px' }}
-                  />
-                </div>
-              </div>
-
-              {/* Sub stats placeholder */}
-              <div style={{
-                display: 'flex',
-                gap: '1rem',
-                marginTop: '0.5rem',
-                marginBottom: '1rem',
-                padding: '0.5rem',
-                background: '#f9f9f9',
-                borderRadius: '12px'
-              }}>
-                {[0, 1, 2].map((s) => (
-                  <div key={s} style={{ flex: 1, textAlign: 'center' }}>
-                    <div
-                      className="skeleton-block"
-                      style={{ height: '8px', width: '60%', borderRadius: '4px', margin: '0 auto 6px' }}
-                    />
-                    <div
-                      className="skeleton-block"
-                      style={{ height: '16px', width: '40%', borderRadius: '5px', margin: '0 auto' }}
-                    />
-                  </div>
-                ))}
-              </div>
-
-              {/* Footer row: count + manage link */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '1rem' }}>
-                <div>
-                  <div
-                    className="skeleton-block"
-                    style={{ height: '8px', width: '80px', borderRadius: '4px', marginBottom: '6px' }}
-                  />
-                  <div
-                    className="skeleton-block"
-                    style={{ height: '24px', width: '70px', borderRadius: '6px' }}
-                  />
-                </div>
-                <div
-                  className="skeleton-block"
-                  style={{ height: '12px', width: '80px', borderRadius: '5px' }}
-                />
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+              <div className="skeleton-block" style={{ width: '60px', height: '60px', borderRadius: '16px', flexShrink: 0 }} />
+              <div style={{ flex: 1 }}>
+                <div className="skeleton-block" style={{ height: '16px', width: '60%', borderRadius: '6px', marginBottom: '6px' }} />
+                <div className="skeleton-block" style={{ height: '10px', width: '90%', borderRadius: '5px' }} />
               </div>
             </div>
-          ))}
-        </div>
+
+            <div style={{
+              display: 'flex',
+              gap: '1rem',
+              marginTop: '0.5rem',
+              marginBottom: '1rem',
+              padding: '0.5rem',
+              background: '#f9f9f9',
+              borderRadius: '12px'
+            }}>
+              {[0, 1, 2].map((s) => (
+                <div key={s} style={{ flex: 1, textAlign: 'center' }}>
+                  <div className="skeleton-block" style={{ height: '8px', width: '60%', borderRadius: '4px', margin: '0 auto 6px' }} />
+                  <div className="skeleton-block" style={{ height: '16px', width: '40%', borderRadius: '5px', margin: '0 auto' }} />
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '1rem' }}>
+              <div>
+                <div className="skeleton-block" style={{ height: '8px', width: '80px', borderRadius: '4px', marginBottom: '6px' }} />
+                <div className="skeleton-block" style={{ height: '24px', width: '70px', borderRadius: '6px' }} />
+              </div>
+              <div className="skeleton-block" style={{ height: '12px', width: '80px', borderRadius: '5px' }} />
+            </div>
+          </div>
+        ))}
       </div>
 
       <style>{`
@@ -246,10 +158,6 @@ const DashboardSkeleton = () => {
           to { opacity: 1; transform: translateY(0); }
         }
         @keyframes skeletonShimmer {
-          0% { background-position: -500px 0; }
-          100% { background-position: 500px 0; }
-        }
-        @keyframes skeletonShimmerDark {
           0% { background-position: -500px 0; }
           100% { background-position: 500px 0; }
         }
@@ -266,25 +174,13 @@ const DashboardSkeleton = () => {
           animation: skeletonShimmer 1.6s infinite linear;
           display: block;
         }
-        .skeleton-block--dark {
-          background: linear-gradient(
-            90deg,
-            rgba(255,255,255,0.08) 0%,
-            rgba(255,255,255,0.18) 20%,
-            rgba(255,255,255,0.28) 40%,
-            rgba(255,255,255,0.18) 60%,
-            rgba(255,255,255,0.08) 100%
-          );
-          background-size: 1000px 100%;
-          animation: skeletonShimmerDark 1.6s infinite linear;
-        }
         @media (max-width: 768px) {
           div[style*="grid-template-columns"] {
             grid-template-columns: 1fr !important;
           }
         }
       `}</style>
-    </div>
+    </>
   );
 };
 // ==================== END DASHBOARD SKELETON ====================
@@ -293,7 +189,6 @@ const DashboardSkeleton = () => {
 const AdminDashboard = () => {
   const navigate = useNavigate();
 
-  // Stats state
   const [stats, setStats] = useState({
     total_users: 0,
     active_users: 0,
@@ -339,7 +234,6 @@ const AdminDashboard = () => {
     fetchDashboardData();
   }, []);
 
-  // Refresh AOS after content loads
   useEffect(() => {
     if (!loading) {
       setTimeout(() => AOS.refresh(), 100);
@@ -626,7 +520,6 @@ const AdminDashboard = () => {
         setErrors(prev => ({ ...prev, annual_reports: 'Network error' }));
       }
 
-      // Calculate derived stats
       const environmentMissions = missionsData.filter(m => m.category === 'environment' || m.category === 'environmental').length;
       const leadershipMissions = missionsData.filter(m => m.category === 'leadership').length;
 
@@ -673,12 +566,6 @@ const AdminDashboard = () => {
   };
 
   const hasAnyError = () => Object.values(errors).length > 0;
-
-  // ==================== LOADING STATE (SKELETON) ====================
-  if (loading) {
-    return <DashboardSkeleton />;
-  }
-  // ==================== END LOADING STATE ====================
 
   // Prepare data for charts
   const chartData = {
@@ -841,7 +728,7 @@ const AdminDashboard = () => {
 
   return (
     <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f9fbf7' }}>
-      {/* Header Section */}
+      {/* ==================== HEADER (ALWAYS VISIBLE) ==================== */}
       <div style={{
         background: 'linear-gradient(135deg, #0B3B2F, #1a5c48)',
         color: 'white',
@@ -854,380 +741,387 @@ const AdminDashboard = () => {
             Admin Dashboard
           </h1>
           <p data-aos="fade-up" data-aos-delay="200" style={{ fontSize: 'clamp(0.9rem, 3vw, 1rem)', opacity: 0.9 }}>
-            Welcome back, Administrator. Here's what's happening with your platform today.
+            {loading
+              ? 'Loading dashboard data...'
+              : "Welcome back, Administrator. Here's what's happening with your platform today."}
           </p>
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* ==================== MAIN CONTENT ==================== */}
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '3rem 2rem' }}>
-
-        {/* Stats Cards Row */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: '1.5rem',
-          marginBottom: '3rem'
-        }}>
-          {statsCards.map((stat, idx) => (
-            <div
-              key={idx}
-              data-aos="fade-up"
-              data-aos-delay={idx * 50}
-              style={{
-                background: 'white',
-                borderRadius: '20px',
-                padding: '1.5rem',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
-                transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                border: stat.error ? '1px solid #ffebee' : 'none',
-                cursor: 'default'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-5px)';
-                e.currentTarget.style.boxShadow = '0 15px 30px rgba(0,0,0,0.1)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 5px 15px rgba(0,0,0,0.05)';
-              }}
-            >
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                  <div style={{ fontSize: '0.85rem', color: '#888' }}>{stat.label}</div>
-                  {stat.error && (
-                    <div style={{ fontSize: '0.65rem', color: '#d32f2f', background: '#ffebee', padding: '0.2rem 0.4rem', borderRadius: '4px' }}>
-                      <i className="fas fa-exclamation-circle" style={{ marginRight: '0.2rem' }}></i>
-                      Error
+        {loading ? (
+          <DashboardSkeleton />
+        ) : (
+          <>
+            {/* Stats Cards Row */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: '1.5rem',
+              marginBottom: '3rem'
+            }}>
+              {statsCards.map((stat, idx) => (
+                <div
+                  key={idx}
+                  data-aos="fade-up"
+                  data-aos-delay={idx * 50}
+                  style={{
+                    background: 'white',
+                    borderRadius: '20px',
+                    padding: '1.5rem',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
+                    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                    border: stat.error ? '1px solid #ffebee' : 'none',
+                    cursor: 'default'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-5px)';
+                    e.currentTarget.style.boxShadow = '0 15px 30px rgba(0,0,0,0.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 5px 15px rgba(0,0,0,0.05)';
+                  }}
+                >
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                      <div style={{ fontSize: '0.85rem', color: '#888' }}>{stat.label}</div>
+                      {stat.error && (
+                        <div style={{ fontSize: '0.65rem', color: '#d32f2f', background: '#ffebee', padding: '0.2rem 0.4rem', borderRadius: '4px' }}>
+                          <i className="fas fa-exclamation-circle" style={{ marginRight: '0.2rem' }}></i>
+                          Error
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-                {stat.error ? (
-                  <div style={{ fontSize: '0.8rem', color: '#d32f2f', marginBottom: '0.5rem' }}>
-                    {stat.error}
-                  </div>
-                ) : (
-                  <>
-                    <div style={{ fontSize: '2rem', fontWeight: 800, color: '#0B3B2F' }}>
-                      {typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}{stat.suffix || ''}
-                    </div>
-                    <div style={{ fontSize: '0.7rem', color: '#4caf50', marginTop: '0.5rem' }}>Current data</div>
-                  </>
-                )}
-              </div>
-              <div style={{
-                width: '50px',
-                height: '50px',
-                borderRadius: '12px',
-                background: `${stat.color}10`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'transform 0.3s ease'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
-                <i className={stat.icon} style={{ fontSize: '1.5rem', color: stat.color }}></i>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Charts Section */}
-        <div style={{ marginBottom: '3rem' }}>
-          <h2 data-aos="fade-up" style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0B3B2F', marginBottom: '1.5rem' }}>
-            <i className="fas fa-chart-bar" style={{ color: '#F9C74F', marginRight: '0.5rem' }}></i>
-            Analytics & Insights
-          </h2>
-
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))',
-            gap: '2rem'
-          }}>
-            {/* Bar Chart */}
-            <div data-aos="fade-up" data-aos-delay="100" style={{
-              background: 'white',
-              borderRadius: '20px',
-              padding: '1.5rem',
-              boxShadow: '0 5px 15px rgba(0,0,0,0.05)'
-            }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#0B3B2F', marginBottom: '1rem' }}>
-                <i className="fas fa-chart-bar" style={{ color: '#F9C74F', marginRight: '0.5rem' }}></i>
-                Total Count by Category (Bar Chart)
-              </h3>
-              <div style={{ height: '350px' }}>
-                <Bar
-                  data={chartData}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Divergent Bar Chart */}
-            <div data-aos="fade-up" data-aos-delay="200" style={{
-              background: 'white',
-              borderRadius: '20px',
-              padding: '1.5rem',
-              boxShadow: '0 5px 15px rgba(0,0,0,0.05)'
-            }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#0B3B2F', marginBottom: '1rem' }}>
-                <i className="fas fa-arrows-left-right" style={{ color: '#F9C74F', marginRight: '0.5rem' }}></i>
-                Active vs Inactive (Divergent Bar Chart)
-              </h3>
-              <div style={{ height: '350px' }}>
-                <Bar
-                  data={divergentData}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                      legend: { position: 'top', labels: { usePointStyle: true, padding: 20 } }
-                    },
-                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Line Chart */}
-            <div data-aos="fade-up" data-aos-delay="300" style={{
-              background: 'white',
-              borderRadius: '20px',
-              padding: '1.5rem',
-              boxShadow: '0 5px 15px rgba(0,0,0,0.05)'
-            }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#0B3B2F', marginBottom: '1rem' }}>
-                <i className="fas fa-chart-line" style={{ color: '#F9C74F', marginRight: '0.5rem' }}></i>
-                Growth Trend vs Current (Line Chart)
-              </h3>
-              <div style={{ height: '350px' }}>
-                <Line
-                  data={lineData}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                      legend: { position: 'top', labels: { usePointStyle: true, padding: 20 } }
-                    },
-                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Doughnut Chart */}
-            <div data-aos="fade-up" data-aos-delay="400" style={{
-              background: 'white',
-              borderRadius: '20px',
-              padding: '1.5rem',
-              boxShadow: '0 5px 15px rgba(0,0,0,0.05)'
-            }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#0B3B2F', marginBottom: '1rem' }}>
-                <i className="fas fa-chart-pie" style={{ color: '#F9C74F', marginRight: '0.5rem' }}></i>
-                Publication Status Distribution
-              </h3>
-              <div style={{ height: '350px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Doughnut
-                  data={publicationStatusData}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                      legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
-                    },
-                    cutout: '60%'
-                  }}
-                />
-              </div>
-              <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
-                <p style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                  Total: <strong>{stats.total_publications}</strong> publications
-                  {stats.featured_publications > 0 && (
-                    <span style={{ marginLeft: '0.5rem' }}>
-                      • <i className="fas fa-star" style={{ color: '#F9C74F' }}></i> {stats.featured_publications} featured
-                    </span>
-                  )}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Admin Cards Grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-          gap: '2rem'
-        }}>
-          {adminCards.map((card, idx) => (
-            <div
-              key={card.id}
-              data-aos="zoom-in"
-              data-aos-delay={idx * 100}
-              onClick={() => !card.error && card.path && navigate(card.path, { state: { activeTab: card.tab } })}
-              style={{
-                background: 'white',
-                borderRadius: '24px',
-                padding: '1.5rem',
-                boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
-                transition: 'all 0.3s ease',
-                cursor: card.error ? 'not-allowed' : 'pointer',
-                position: 'relative',
-                overflow: 'hidden',
-                opacity: card.error ? 0.7 : 1,
-                border: card.id === 'publications' ? '2px solid #2196F3' :
-                       card.id === 'annual_reports' ? '2px solid #0B3B2F' : 'none'
-              }}
-              onMouseEnter={(e) => {
-                if (!card.error) {
-                  e.currentTarget.style.transform = 'translateY(-8px)';
-                  e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.15)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.08)';
-              }}
-            >
-              {card.badge && card.badge > 0 && (
-                <div style={{
-                  position: 'absolute', top: '12px', right: '12px',
-                  background: card.id === 'annual_reports' ? '#f59e0b' : '#ef4444',
-                  color: 'white', padding: '0.2rem 0.6rem', borderRadius: '20px',
-                  fontSize: '0.7rem', fontWeight: 'bold', zIndex: 10,
-                  animation: 'pulse 2s infinite'
-                }}>
-                  {card.badge} {card.id === 'annual_reports' ? 'Drafts' : 'Pending'}
-                </div>
-              )}
-
-              {card.id === 'publications' && stats.featured_publications > 0 && (
-                <div style={{
-                  position: 'absolute', top: '12px', right: '12px',
-                  background: '#F9C74F', color: '#0B3B2F',
-                  padding: '0.2rem 0.6rem', borderRadius: '20px',
-                  fontSize: '0.7rem', fontWeight: 'bold', zIndex: 10
-                }}>
-                  <i className="fas fa-star" style={{ marginRight: '0.3rem' }}></i>
-                  {stats.featured_publications} Featured
-                </div>
-              )}
-
-              {card.error && (
-                <div style={{
-                  position: 'absolute', top: '12px', right: '12px',
-                  background: '#ffebee', color: '#d32f2f',
-                  padding: '0.2rem 0.5rem', borderRadius: '12px',
-                  fontSize: '0.65rem', display: 'flex', alignItems: 'center',
-                  gap: '0.3rem', zIndex: 10
-                }}>
-                  <i className="fas fa-exclamation-circle"></i>
-                  API Error
-                </div>
-              )}
-
-              <div style={{
-                position: 'absolute', top: '-20px', right: '-20px',
-                width: '100px', height: '100px',
-                background: `radial-gradient(circle, ${card.color}10, transparent)`,
-                borderRadius: '50%'
-              }} />
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                <div style={{
-                  width: '60px', height: '60px', borderRadius: '16px',
-                  background: `${card.color}15`, display: 'flex',
-                  alignItems: 'center', justifyContent: 'center',
-                  transition: 'transform 0.3s ease'
-                }}
-                onMouseEnter={(e) => { if (!card.error) e.currentTarget.style.transform = 'scale(1.1)'; }}
-                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
-                  <i className={card.icon} style={{ fontSize: '1.8rem', color: card.color }}></i>
-                </div>
-                <div>
-                  <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0B3B2F', margin: 0 }}>{card.title}</h3>
-                  <p style={{ fontSize: '0.75rem', color: '#888', margin: 0 }}>{card.description}</p>
-                </div>
-              </div>
-
-              {card.subStats && !card.error && (
-                <div style={{
-                  display: 'flex', gap: '1rem', marginTop: '0.5rem', marginBottom: '1rem',
-                  padding: '0.5rem', background: '#f9f9f9', borderRadius: '12px', flexWrap: 'wrap'
-                }}>
-                  {card.subStats.map((sub, subIdx) => (
-                    <div key={subIdx} style={{ flex: 1, textAlign: 'center', minWidth: '80px' }}>
-                      <div style={{ fontSize: '0.7rem', color: '#888' }}>{sub.label}</div>
-                      <div style={{ fontSize: '1.1rem', fontWeight: 700, color: card.color }}>
-                        {sub.value}{sub.suffix || ''}
+                    {stat.error ? (
+                      <div style={{ fontSize: '0.8rem', color: '#d32f2f', marginBottom: '0.5rem' }}>
+                        {stat.error}
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {card.error ? (
-                <div style={{
-                  marginTop: '1rem', padding: '0.8rem', background: '#ffebee',
-                  borderRadius: '12px', color: '#d32f2f', fontSize: '0.75rem', textAlign: 'center'
-                }}>
-                  <i className="fas fa-exclamation-triangle" style={{ marginRight: '0.3rem' }}></i>
-                  {card.error}
-                </div>
-              ) : (
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '1rem' }}>
-                  <div>
-                    <span style={{ fontSize: '0.7rem', color: '#999' }}>Total Items</span>
-                    <div style={{ fontSize: '1.8rem', fontWeight: 800, color: card.color }}>
-                      {typeof card.count === 'number' ? card.count.toLocaleString() : card.count}
-                    </div>
+                    ) : (
+                      <>
+                        <div style={{ fontSize: '2rem', fontWeight: 800, color: '#0B3B2F' }}>
+                          {typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}{stat.suffix || ''}
+                        </div>
+                        <div style={{ fontSize: '0.7rem', color: '#4caf50', marginTop: '0.5rem' }}>Current data</div>
+                      </>
+                    )}
                   </div>
                   <div style={{
-                    display: 'flex', alignItems: 'center', gap: '0.3rem',
-                    color: card.color, fontSize: '0.8rem', fontWeight: 600
-                  }}>
-                    <span>Manage</span>
-                    <i className="fas fa-arrow-right" style={{ fontSize: '0.7rem', transition: 'transform 0.3s ease' }} />
+                    width: '50px',
+                    height: '50px',
+                    borderRadius: '12px',
+                    background: `${stat.color}10`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'transform 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
+                    <i className={stat.icon} style={{ fontSize: '1.5rem', color: stat.color }}></i>
                   </div>
                 </div>
-              )}
+              ))}
             </div>
-          ))}
-        </div>
 
-        {/* Error Summary Banner */}
-        {hasAnyError() && (
-          <div style={{
-            marginTop: '3rem', padding: '1rem', background: '#fff3cd',
-            border: '1px solid #ffeaa7', borderRadius: '12px', textAlign: 'center'
-          }}>
-            <i className="fas fa-info-circle" style={{ color: '#856404', marginRight: '0.5rem' }}></i>
-            <span style={{ color: '#856404', fontSize: '0.85rem' }}>
-              Some data could not be loaded. Please check your API connections and try again.
-            </span>
-            <button
-              onClick={fetchDashboardData}
-              style={{
-                marginLeft: '1rem', background: '#856404', color: 'white',
-                border: 'none', padding: '0.3rem 0.8rem', borderRadius: '20px',
-                cursor: 'pointer', fontSize: '0.75rem', transition: 'transform 0.3s ease'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-            >
-              <i className="fas fa-sync-alt" style={{ marginRight: '0.3rem' }}></i>
-              Retry
-            </button>
-          </div>
+            {/* Charts Section */}
+            <div style={{ marginBottom: '3rem' }}>
+              <h2 data-aos="fade-up" style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0B3B2F', marginBottom: '1.5rem' }}>
+                <i className="fas fa-chart-bar" style={{ color: '#F9C74F', marginRight: '0.5rem' }}></i>
+                Analytics & Insights
+              </h2>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))',
+                gap: '2rem'
+              }}>
+                {/* Bar Chart */}
+                <div data-aos="fade-up" data-aos-delay="100" style={{
+                  background: 'white',
+                  borderRadius: '20px',
+                  padding: '1.5rem',
+                  boxShadow: '0 5px 15px rgba(0,0,0,0.05)'
+                }}>
+                  <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#0B3B2F', marginBottom: '1rem' }}>
+                    <i className="fas fa-chart-bar" style={{ color: '#F9C74F', marginRight: '0.5rem' }}></i>
+                    Total Count by Category (Bar Chart)
+                  </h3>
+                  <div style={{ height: '350px' }}>
+                    <Bar
+                      data={chartData}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Divergent Bar Chart */}
+                <div data-aos="fade-up" data-aos-delay="200" style={{
+                  background: 'white',
+                  borderRadius: '20px',
+                  padding: '1.5rem',
+                  boxShadow: '0 5px 15px rgba(0,0,0,0.05)'
+                }}>
+                  <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#0B3B2F', marginBottom: '1rem' }}>
+                    <i className="fas fa-arrows-left-right" style={{ color: '#F9C74F', marginRight: '0.5rem' }}></i>
+                    Active vs Inactive (Divergent Bar Chart)
+                  </h3>
+                  <div style={{ height: '350px' }}>
+                    <Bar
+                      data={divergentData}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: { position: 'top', labels: { usePointStyle: true, padding: 20 } }
+                        },
+                        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Line Chart */}
+                <div data-aos="fade-up" data-aos-delay="300" style={{
+                  background: 'white',
+                  borderRadius: '20px',
+                  padding: '1.5rem',
+                  boxShadow: '0 5px 15px rgba(0,0,0,0.05)'
+                }}>
+                  <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#0B3B2F', marginBottom: '1rem' }}>
+                    <i className="fas fa-chart-line" style={{ color: '#F9C74F', marginRight: '0.5rem' }}></i>
+                    Growth Trend vs Current (Line Chart)
+                  </h3>
+                  <div style={{ height: '350px' }}>
+                    <Line
+                      data={lineData}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: { position: 'top', labels: { usePointStyle: true, padding: 20 } }
+                        },
+                        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Doughnut Chart */}
+                <div data-aos="fade-up" data-aos-delay="400" style={{
+                  background: 'white',
+                  borderRadius: '20px',
+                  padding: '1.5rem',
+                  boxShadow: '0 5px 15px rgba(0,0,0,0.05)'
+                }}>
+                  <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#0B3B2F', marginBottom: '1rem' }}>
+                    <i className="fas fa-chart-pie" style={{ color: '#F9C74F', marginRight: '0.5rem' }}></i>
+                    Publication Status Distribution
+                  </h3>
+                  <div style={{ height: '350px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Doughnut
+                      data={publicationStatusData}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
+                        },
+                        cutout: '60%'
+                      }}
+                    />
+                  </div>
+                  <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
+                    <p style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                      Total: <strong>{stats.total_publications}</strong> publications
+                      {stats.featured_publications > 0 && (
+                        <span style={{ marginLeft: '0.5rem' }}>
+                          • <i className="fas fa-star" style={{ color: '#F9C74F' }}></i> {stats.featured_publications} featured
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Admin Cards Grid */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+              gap: '2rem'
+            }}>
+              {adminCards.map((card, idx) => (
+                <div
+                  key={card.id}
+                  data-aos="zoom-in"
+                  data-aos-delay={idx * 100}
+                  onClick={() => !card.error && card.path && navigate(card.path, { state: { activeTab: card.tab } })}
+                  style={{
+                    background: 'white',
+                    borderRadius: '24px',
+                    padding: '1.5rem',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+                    transition: 'all 0.3s ease',
+                    cursor: card.error ? 'not-allowed' : 'pointer',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    opacity: card.error ? 0.7 : 1,
+                    border: card.id === 'publications' ? '2px solid #2196F3' :
+                           card.id === 'annual_reports' ? '2px solid #0B3B2F' : 'none'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!card.error) {
+                      e.currentTarget.style.transform = 'translateY(-8px)';
+                      e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.15)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.08)';
+                  }}
+                >
+                  {card.badge && card.badge > 0 && (
+                    <div style={{
+                      position: 'absolute', top: '12px', right: '12px',
+                      background: card.id === 'annual_reports' ? '#f59e0b' : '#ef4444',
+                      color: 'white', padding: '0.2rem 0.6rem', borderRadius: '20px',
+                      fontSize: '0.7rem', fontWeight: 'bold', zIndex: 10,
+                      animation: 'pulse 2s infinite'
+                    }}>
+                      {card.badge} {card.id === 'annual_reports' ? 'Drafts' : 'Pending'}
+                    </div>
+                  )}
+
+                  {card.id === 'publications' && stats.featured_publications > 0 && (
+                    <div style={{
+                      position: 'absolute', top: '12px', right: '12px',
+                      background: '#F9C74F', color: '#0B3B2F',
+                      padding: '0.2rem 0.6rem', borderRadius: '20px',
+                      fontSize: '0.7rem', fontWeight: 'bold', zIndex: 10
+                    }}>
+                      <i className="fas fa-star" style={{ marginRight: '0.3rem' }}></i>
+                      {stats.featured_publications} Featured
+                    </div>
+                  )}
+
+                  {card.error && (
+                    <div style={{
+                      position: 'absolute', top: '12px', right: '12px',
+                      background: '#ffebee', color: '#d32f2f',
+                      padding: '0.2rem 0.5rem', borderRadius: '12px',
+                      fontSize: '0.65rem', display: 'flex', alignItems: 'center',
+                      gap: '0.3rem', zIndex: 10
+                    }}>
+                      <i className="fas fa-exclamation-circle"></i>
+                      API Error
+                    </div>
+                  )}
+
+                  <div style={{
+                    position: 'absolute', top: '-20px', right: '-20px',
+                    width: '100px', height: '100px',
+                    background: `radial-gradient(circle, ${card.color}10, transparent)`,
+                    borderRadius: '50%'
+                  }} />
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                    <div style={{
+                      width: '60px', height: '60px', borderRadius: '16px',
+                      background: `${card.color}15`, display: 'flex',
+                      alignItems: 'center', justifyContent: 'center',
+                      transition: 'transform 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => { if (!card.error) e.currentTarget.style.transform = 'scale(1.1)'; }}
+                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
+                      <i className={card.icon} style={{ fontSize: '1.8rem', color: card.color }}></i>
+                    </div>
+                    <div>
+                      <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0B3B2F', margin: 0 }}>{card.title}</h3>
+                      <p style={{ fontSize: '0.75rem', color: '#888', margin: 0 }}>{card.description}</p>
+                    </div>
+                  </div>
+
+                  {card.subStats && !card.error && (
+                    <div style={{
+                      display: 'flex', gap: '1rem', marginTop: '0.5rem', marginBottom: '1rem',
+                      padding: '0.5rem', background: '#f9f9f9', borderRadius: '12px', flexWrap: 'wrap'
+                    }}>
+                      {card.subStats.map((sub, subIdx) => (
+                        <div key={subIdx} style={{ flex: 1, textAlign: 'center', minWidth: '80px' }}>
+                          <div style={{ fontSize: '0.7rem', color: '#888' }}>{sub.label}</div>
+                          <div style={{ fontSize: '1.1rem', fontWeight: 700, color: card.color }}>
+                            {sub.value}{sub.suffix || ''}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {card.error ? (
+                    <div style={{
+                      marginTop: '1rem', padding: '0.8rem', background: '#ffebee',
+                      borderRadius: '12px', color: '#d32f2f', fontSize: '0.75rem', textAlign: 'center'
+                    }}>
+                      <i className="fas fa-exclamation-triangle" style={{ marginRight: '0.3rem' }}></i>
+                      {card.error}
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '1rem' }}>
+                      <div>
+                        <span style={{ fontSize: '0.7rem', color: '#999' }}>Total Items</span>
+                        <div style={{ fontSize: '1.8rem', fontWeight: 800, color: card.color }}>
+                          {typeof card.count === 'number' ? card.count.toLocaleString() : card.count}
+                        </div>
+                      </div>
+                      <div style={{
+                        display: 'flex', alignItems: 'center', gap: '0.3rem',
+                        color: card.color, fontSize: '0.8rem', fontWeight: 600
+                      }}>
+                        <span>Manage</span>
+                        <i className="fas fa-arrow-right" style={{ fontSize: '0.7rem', transition: 'transform 0.3s ease' }} />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Error Summary Banner */}
+            {hasAnyError() && (
+              <div style={{
+                marginTop: '3rem', padding: '1rem', background: '#fff3cd',
+                border: '1px solid #ffeaa7', borderRadius: '12px', textAlign: 'center'
+              }}>
+                <i className="fas fa-info-circle" style={{ color: '#856404', marginRight: '0.5rem' }}></i>
+                <span style={{ color: '#856404', fontSize: '0.85rem' }}>
+                  Some data could not be loaded. Please check your API connections and try again.
+                </span>
+                <button
+                  onClick={fetchDashboardData}
+                  style={{
+                    marginLeft: '1rem', background: '#856404', color: 'white',
+                    border: 'none', padding: '0.3rem 0.8rem', borderRadius: '20px',
+                    cursor: 'pointer', fontSize: '0.75rem', transition: 'transform 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                >
+                  <i className="fas fa-sync-alt" style={{ marginRight: '0.3rem' }}></i>
+                  Retry
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
 
