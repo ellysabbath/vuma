@@ -3,7 +3,7 @@ import eventa from '../assets/imageb.png';
 import eventb from '../assets/image.jpg';
 import eventc from '../assets/imagea.jpg';
 import eventd from '../assets/eventd.jpg';
-import evente from '../assets/imaged.jpg';
+
 import eventf from '../assets/imagee.jpg';
 import eventg from '../assets/eventg.jpg';
 import eventh from '../assets/imagef.jpg';
@@ -49,12 +49,7 @@ export const projects = [
     img: eventd,
     description: "Shaping tomorrow's environmental policies"
   },
-  { 
-    title: "Urban Vertical Farming", 
-    cat: "environment", 
-    img: evente,
-    description: "Innovative food production in city spaces"
-  },
+
   { 
     title: "VUMA Team with Climate Tech Bootcamp and projects", 
     cat: "leadership", 
