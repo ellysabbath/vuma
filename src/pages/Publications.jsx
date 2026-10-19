@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
-// ==================== PUBLICATIONS SKELETON ====================
+// ==================== PUBLICATIONS SKELETON (DATA ONLY) ====================
 const PublicationsSkeleton = ({ count = 5 }) => {
   const items = Array.from({ length: count });
 
@@ -201,180 +201,7 @@ const Publications = () => {
     return labels[type] || type;
   };
 
-  // ==================== LOADING STATE (SKELETON) ====================
-  if (loading) {
-    return (
-      <div style={styles.page}>
-        {/* Header skeleton */}
-        <header style={styles.header}>
-          <div style={styles.headerContent}>
-            <div style={{ position: 'relative' }}>
-              {/* Back arrow placeholder */}
-              <div
-                className="skeleton-block skeleton-block--dark"
-                style={{
-                  position: 'absolute',
-                  left: 0,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  width: '42px',
-                  height: '38px',
-                  borderRadius: '8px'
-                }}
-              />
-
-              {/* Title */}
-              <div
-                className="skeleton-block skeleton-block--dark"
-                style={{
-                  height: '2rem',
-                  width: 'min(60%, 340px)',
-                  margin: '0 auto 6px',
-                  borderRadius: '10px'
-                }}
-              />
-
-              {/* Underline */}
-              <div
-                className="skeleton-block skeleton-block--dark"
-                style={{
-                  height: '3px',
-                  width: '60px',
-                  margin: '4px auto 0',
-                  borderRadius: '2px'
-                }}
-              />
-            </div>
-
-            {/* Subtitle */}
-            <div
-              className="skeleton-block skeleton-block--dark"
-              style={{
-                height: '14px',
-                width: 'min(80%, 420px)',
-                margin: '10px auto 0',
-                borderRadius: '6px'
-              }}
-            />
-
-            {/* Stats badge */}
-            <div
-              className="skeleton-block skeleton-block--dark skeleton-pill"
-              style={{
-                height: '26px',
-                width: '180px',
-                margin: '12px auto 0'
-              }}
-            />
-          </div>
-
-          <style>{`
-            @keyframes skeletonShimmerDark {
-              0% { background-position: -500px 0; }
-              100% { background-position: 500px 0; }
-            }
-            .skeleton-block--dark {
-              background: linear-gradient(
-                90deg,
-                rgba(255,255,255,0.08) 0%,
-                rgba(255,255,255,0.18) 20%,
-                rgba(255,255,255,0.28) 40%,
-                rgba(255,255,255,0.18) 60%,
-                rgba(255,255,255,0.08) 100%
-              );
-              background-size: 1000px 100%;
-              animation: skeletonShimmerDark 1.6s infinite linear;
-              display: block;
-            }
-          `}</style>
-        </header>
-
-        <div style={styles.container}>
-          {/* Controls skeleton: search bar + filter pills */}
-          <div className="controls-row" style={styles.controls}>
-            <div className="search-wrapper" style={{ ...styles.searchWrapper, flex: '1 1 100%' }}>
-              <div
-                className="skeleton-block"
-                style={{
-                  height: '42px',
-                  width: '100%',
-                  borderRadius: '10px'
-                }}
-              />
-            </div>
-
-            <div className="filter-group" style={styles.filterGroup}>
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div
-                  key={i}
-                  className="skeleton-block skeleton-pill"
-                  style={{
-                    height: '32px',
-                    width: i === 1 ? '60px' : i === 2 ? '80px' : i === 3 ? '100px' : i === 4 ? '70px' : '70px'
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Results stats bar skeleton */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '8px 14px',
-            backgroundColor: '#f1f5f9',
-            borderRadius: '8px',
-            marginBottom: '16px'
-          }}>
-            <div className="skeleton-block" style={{ height: '16px', width: '24px', borderRadius: '4px' }} />
-            <div className="skeleton-block" style={{ height: '12px', width: '120px', borderRadius: '5px' }} />
-          </div>
-
-          {/* Publication cards skeleton */}
-          <PublicationsSkeleton count={5} />
-
-          {/* Footer skeleton */}
-          <div style={styles.footer}>
-            <div style={styles.footerContent}>
-              <div className="skeleton-block" style={{ height: '10px', width: '180px', borderRadius: '5px' }} />
-              <div className="skeleton-block" style={{ height: '10px', width: '6px', borderRadius: '50%' }} />
-              <div className="skeleton-block" style={{ height: '10px', width: '100px', borderRadius: '5px' }} />
-            </div>
-          </div>
-        </div>
-
-        <style>{`
-          @keyframes skeletonFadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-          @keyframes skeletonShimmer {
-            0% { background-position: -500px 0; }
-            100% { background-position: 500px 0; }
-          }
-          .skeleton-block {
-            background: linear-gradient(
-              90deg,
-              #eef2f0 0%,
-              #e2e9e5 20%,
-              #f5f8f6 40%,
-              #eef2f0 60%,
-              #eef2f0 100%
-            );
-            background-size: 1000px 100%;
-            animation: skeletonShimmer 1.6s infinite linear;
-            display: block;
-          }
-          .skeleton-pill {
-            border-radius: 60px;
-          }
-        `}</style>
-      </div>
-    );
-  }
-  // ==================== END LOADING STATE ====================
-
+  // ==================== ERROR STATE ====================
   if (error) {
     return (
       <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -495,6 +322,7 @@ const Publications = () => {
         `}
       </style>
 
+      {/* ==================== HEADER (ALWAYS VISIBLE) ==================== */}
       <header style={styles.header}>
         <div style={styles.headerContent}>
           <div className="title-animate" style={styles.titleWrapper}>
@@ -525,7 +353,7 @@ const Publications = () => {
 
           <div style={styles.statsBadge}>
             <span style={styles.statsBadgeNumber}>
-              {publications.length}
+              {loading ? '—' : publications.length}
             </span>
             <span style={styles.statsBadgeText}>Published Publications</span>
           </div>
@@ -533,6 +361,7 @@ const Publications = () => {
       </header>
 
       <div style={styles.container}>
+        {/* ==================== CONTROLS (ALWAYS VISIBLE) ==================== */}
         <div className="controls-row" style={styles.controls}>
           <div className="search-wrapper" style={styles.searchWrapper}>
             <input
@@ -593,26 +422,39 @@ const Publications = () => {
           </div>
         </div>
 
+        {/* ==================== RESULTS STATS (ALWAYS VISIBLE) ==================== */}
         <div style={styles.resultsStats}>
-          <span style={styles.resultsCount}>
-            {filteredPublications.length}
-          </span>
-          <span style={styles.resultsLabel}>
-            {filteredPublications.length === 1 ? 'publication' : 'publications'} found
-          </span>
-          {filter !== 'all' && (
-            <span style={styles.resultsFilter}>
-              • Filter: <strong>{getTypeLabel(filter)}</strong>
-            </span>
-          )}
-          {searchTerm && (
-            <span style={styles.resultsFilter}>
-              • Search: <strong>"{searchTerm}"</strong>
-            </span>
+          {loading ? (
+            <>
+              <span style={styles.resultsCount}>—</span>
+              <span style={styles.resultsLabel}>loading publications...</span>
+            </>
+          ) : (
+            <>
+              <span style={styles.resultsCount}>
+                {filteredPublications.length}
+              </span>
+              <span style={styles.resultsLabel}>
+                {filteredPublications.length === 1 ? 'publication' : 'publications'} found
+              </span>
+              {filter !== 'all' && (
+                <span style={styles.resultsFilter}>
+                  • Filter: <strong>{getTypeLabel(filter)}</strong>
+                </span>
+              )}
+              {searchTerm && (
+                <span style={styles.resultsFilter}>
+                  • Search: <strong>"{searchTerm}"</strong>
+                </span>
+              )}
+            </>
           )}
         </div>
 
-        {filteredPublications.length === 0 ? (
+        {/* ==================== DATA: SKELETON OR CONTENT ==================== */}
+        {loading ? (
+          <PublicationsSkeleton count={5} />
+        ) : filteredPublications.length === 0 ? (
           <div style={styles.noResults}>
             <div style={styles.noResultsIcon}>🔍</div>
             <h3 style={styles.noResultsTitle}>No publications found</h3>
@@ -683,7 +525,7 @@ const Publications = () => {
           <div style={styles.footerContent}>
             <span>© {new Date().getFullYear()} — Vuma org Publications</span>
             <span style={styles.footerDot}>•</span>
-            <span>{publications.length} publications</span>
+            <span>{loading ? '—' : publications.length} publications</span>
           </div>
         </footer>
       </div>
