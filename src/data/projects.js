@@ -20,22 +20,22 @@ import kaku from '../assets/kaku.jpeg';
 
 export const projects = [
   { 
-    title: "VUMA team with environmental analysts", 
+    title: "VUMA Restoration Project", 
     cat: "environment", 
     img: kaki,
-    description: "Sustainable environment for future generation"
+    description: "This is an initiative that addresses critical challenges in environmental sustainability. Youth, indigenous communities, local leaders and the community are mobilized to creating lasting impacts. Our focus area is on degraded land, rangelands, lost indigenous plant species and biodiversity restoration (Mikoko)"
   },
   { 
-    title: "VUMA Leader describing about an Organization", 
+    title: "VUMA Leader describing about an Organization & collaborations", 
     cat: "leadership", 
     img: kaku,
-    description: "Empowering next generation of African leaders"
+    description: "VUMA team collaborate, engage and sponsor local and national events with the discussion aligning organizational vision and mission. Also this has been a chance to showcasing our initiatives and visibility"
   },
     { 
     title: "Mazingira day event", 
     cat: "green", 
     img: keke,
-    description: "Here    we  ensure that  our  environments   becomes safe  for  all livings"
+    description: "We celebrate environmental days and other related commemorations by planting trees, capacity building, cleaning in the hospitals, roads and wastes areas."
   },
   { 
     title: "Plastic Upcycling Hub", 
@@ -61,7 +61,7 @@ export const projects = [
     title: "VUMA team for ensuring Zero Waste Initiative", 
     cat: "environment", 
     img: kako,
-    description: "Promoting waste reduction and recycling"
+    description: "VUMA, project Manager demonstrating how drip irrigation is conducted during the small holder farmers demonstration in Sengerema District, Mwanza Region. 2026"
   },
   // { 
   //   title: "Green Energy Solutions", 
@@ -82,9 +82,9 @@ export const projects = [
     description: "Training youth climate advocates"
   },
   { 
-    title: "Community Recycling Project", 
+    title: "VUMA team collaborating with Government Organizations to protect environment", 
     cat: "environment", 
     img: eventl,
-    description: "Community-based recycling initiatives"
+    description: "VUMA team in Collaboration with Luchelele Primary School in Nyamagana District in Mwanza, planted 500 seedlings in February, 2025."
   }
 ];
